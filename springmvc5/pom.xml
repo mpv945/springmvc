@@ -231,11 +231,11 @@
         </dependency>
 
         <!--CXF 核心包-->
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
             <version>3.2.4</version>
-        </dependency>
+        </dependency>-->
 <!--        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
@@ -248,11 +248,11 @@
             <version>3.2.4</version>
         </dependency>-->
         <!--jetty 依赖-->
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http-jetty</artifactId>
             <version>3.2.4</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>junit</groupId>
