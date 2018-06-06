@@ -1,6 +1,11 @@
 package org.haijun.study.config;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.cxf.Bus;
+import org.apache.cxf.bus.spring.SpringBus;
+import org.apache.cxf.jaxws.EndpointImpl;
+import org.apache.cxf.jaxws.support.JaxWsServiceFactoryBean;
+import org.haijun.study.cxf.impl.BaeldungImpl;
 import org.haijun.study.tools.interceptor.MyHandlerInterceptor;
 import org.haijun.study.tools.springFormatter.MyDateFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +41,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.xml.ws.Endpoint;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -320,17 +326,4 @@ public class ThymeleafConfig implements WebMvcConfigurer { // implements WebMvcC
         return flg.equalsIgnoreCase("on");
     }
 
-/*    // cxf 配置 (没有成功)
-    // 它为Apache CXF提供了与Spring Framework一起工作的扩展
-    @Bean(name = Bus.DEFAULT_BUS_ID)
-    public SpringBus springBus() {
-        return new SpringBus();
-    }
-    // 一个EnpointImpl bean也需要使用SpringBus bean和一个Web服务实现者来创建。这个bean用来在给定的HTTP地址发布端点：
-    @Bean
-    public Endpoint endpoint() {
-        EndpointImpl endpoint = new EndpointImpl(springBus(), new BaeldungImpl());
-        endpoint.publish("/baeldung");////接口发布在 /NetbarServices 目录下;http://localhost:8080/services/baeldung
-        return endpoint;
-    }*/
 }

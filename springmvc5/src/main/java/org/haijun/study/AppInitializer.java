@@ -1,10 +1,13 @@
 package org.haijun.study;
 
 import com.alibaba.druid.support.http.StatViewServlet;
+import org.apache.cxf.transport.servlet.CXFServlet;
 import org.haijun.study.config.*;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 import javax.servlet.ServletContext;
@@ -28,6 +31,7 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
                 ,TaskSchedulerConfig.class
                 ,AspectJConfig.class
                 //,SwaggerConfig.class
+                //,WebServiceConfig.class
                 ,AsyncConfig.class};
     }
 
@@ -37,7 +41,9 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
      */
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{ThymeleafConfig.class
+        return new Class[]{
+                ThymeleafConfig.class
+                ,WebServiceConfig.class
                 };
     }
 
@@ -90,15 +96,15 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
         dynamic.setInitParameter("loginPassword","12345");
 
         // cxf 配置
-/*
-        AnnotationConfigWebApplicationContext rootCtx = new AnnotationConfigWebApplicationContext();
+
+/*        AnnotationConfigWebApplicationContext rootCtx = new AnnotationConfigWebApplicationContext();
         rootCtx.register(WebServiceConfig.class);
         ContextLoaderListener loaderListener = new ContextLoaderListener(rootCtx);
-        servletContext.addListener(loaderListener);
-*/
+        servletContext.addListener(loaderListener);*/
 
-        /*ServletRegistration.Dynamic cxfynamicD = servletContext.addServlet("cxfDispatcher",new CXFServlet());
-        cxfynamicD.addMapping("/services/*");*/
+
+        ServletRegistration.Dynamic cxfynamicD = servletContext.addServlet("cxfDispatcher",new CXFServlet());
+        cxfynamicD.addMapping("/services/*");
 
         super.onStartup(servletContext);
     }
