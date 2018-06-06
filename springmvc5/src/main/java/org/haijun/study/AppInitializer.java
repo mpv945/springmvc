@@ -99,7 +99,6 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
         ContextLoaderListener loaderListener = new ContextLoaderListener(rootCtx);
         servletContext.addListener(loaderListener);*/
 
-
        /* ServletRegistration.Dynamic cxfynamicD = servletContext.addServlet("cxfDispatcher",new CXFServlet());
         cxfynamicD.addMapping("/services/*");*/
 
