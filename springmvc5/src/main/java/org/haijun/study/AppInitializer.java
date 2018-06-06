@@ -1,13 +1,10 @@
 package org.haijun.study;
 
 import com.alibaba.druid.support.http.StatViewServlet;
-import org.apache.cxf.transport.servlet.CXFServlet;
 import org.haijun.study.config.*;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 import javax.servlet.ServletContext;
@@ -43,7 +40,7 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
     protected Class<?>[] getServletConfigClasses() {
         return new Class[]{
                 ThymeleafConfig.class
-                ,WebServiceConfig.class
+//                ,WebServiceConfig.class
                 };
     }
 
@@ -103,8 +100,8 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
         servletContext.addListener(loaderListener);*/
 
 
-        ServletRegistration.Dynamic cxfynamicD = servletContext.addServlet("cxfDispatcher",new CXFServlet());
-        cxfynamicD.addMapping("/services/*");
+       /* ServletRegistration.Dynamic cxfynamicD = servletContext.addServlet("cxfDispatcher",new CXFServlet());
+        cxfynamicD.addMapping("/services/*");*/
 
         super.onStartup(servletContext);
     }
