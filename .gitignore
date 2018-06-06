@@ -27,7 +27,6 @@ Thumbs.db
 *.sw?
 .#*
 *#
-*~
 *.sublime-*
 
 # Build Artifacts
