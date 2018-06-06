@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${'Spring Thymeleaf'}">Title</title>
+</head>
+<body background="/images/bg_img.png">
+<h1 th:text="${'Hello World.谢海军测试'}"></h1>
+<!--国际化-->
+<p th:text="${msagessJava}">后台取得国际化资源消息</p>
+<span th:text="#{index.welcome(${date})}" />前台页面获取资源
+<!--<span th:text="${#strings.arrayJoin(
+                   #messages.arrayMsg(
+                       #strings.arrayPrepend(sb.features,'seedstarter.feature.')),
+                   ', ')}">函数使用</span>-->
+参考：https://blog.csdn.net/zrk1000/article/details/72667478
+https://blog.csdn.net/qq_32923745/article/details/78257686
+<!--<td th:text="#{|seedstarter.type.${sb.type}|}">动态获取i18n的key</td>-->
+
+<!--<table>
+    <tbody>
+    <tr th:each="row,rowStat : ${sb.rows}">
+        <td th:text="${rowStat.count}">1</td>
+        <td th:text="${row.variety.name}">Thymus Thymi</td>
+        <td th:text="${row.seedsPerCell}">12</td>
+    </tr>
+    </tbody>
+</table>-->
+
+<p th:text="${now}"></p>
+<p th:text="${{userInfo.birthday}}">对象获取，${{}}会使用MyDateFormatter格式化返回</p>
+<h1>Login page</h1>
+<p th:if="${loginError}" class="error">Wrong user or password</p>
+</body>
+</html>

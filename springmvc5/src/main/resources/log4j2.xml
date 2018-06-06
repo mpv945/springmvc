@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--        status="INFO" monitorInterval="120" monitorInterval，博客配置的为120，单位为秒。
+        即在服务运行过程中发生了log4j2配置文件的修改，log4j2能够在monitorInterval时间范围重新加载配置，无需重启应用。-->
+<Configuration>
+  <properties>
+    <!--<property name="LOG_HOME">${sys:catalina.home}/logs</property>-->
+    <property name="LOG_HOME">d:/log</property>
+    <property name="PROJECT_NAME">springmvc5</property>
+  </properties>
+  <Appenders>
+    <!-- Console Appender -->
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n" />
+    </Console>
+
+    <!-- File Appender -->
+    <File name="File" fileName="${LOG_HOME}/${PROJECT_NAME}_file.log">
+      <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n" />
+      <Policies>
+        <TimeBasedTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+      </Policies>
+      <!--最多保留20个日志文件-->
+      <DefaultRolloverStrategy max="20" min="0" />
+    </File>
+    <!--fileName：日志存储路径
+    filePattern：历史日志封存路径。其中%d{yyyyMMddHH}表示了封存历史日志的时间单位（目前单位为小时，
+    yyyy表示年，MM表示月，dd表示天，HH表示小时，mmS表示分钟，ss表示秒，SS表示毫秒）。注意后缀，log4j2自动识别zip等后缀，表示历史日志需要压缩。-->
+    <RollingRandomAccessFile name="FastSynchro" fileName="${LOG_HOME}/${PROJECT_NAME}.log" filePattern="${LOG_HOME}/backup/${PROJECT_NAME}.log.%d{yyyyMMddHH}.zip">
+      <Filters>
+        <!--level，表示最低接受的日志级别，博客配置的为INFO，即我们期望打印INFO级别以上的日志。
+        onMatch，表示当日志事件的日志级别与level一致时，应怎么做。一般为ACCEPT，表示接受。
+        onMismatch，表示日志事件的日志级别与level不一致时，应怎么做。一般为DENY，表示拒绝。也可以为NEUTRAL表示中立。-->
+        <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+      <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n" />
+      <Policies>
+        <!--一般与 filePattern联用 以日志的命名精度来确定单位 这里我用yyyy-MM-dd来记录 所以1 表示是以天为周期存储文件-->
+        <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+      </Policies>
+      <!--备份策略-->
+      <DefaultRolloverStrategy max="24"> <!-- 表示日志文件.gz的压缩包最大保留数 -->
+        <Delete basePath="${LOG_HOME}" maxDepth="2">
+          <IfFileName glob="*/${PROJECT_NAME}.*.zip" />
+          <IfLastModified age="24H" />
+        </Delete>
+      </DefaultRolloverStrategy>
+    </RollingRandomAccessFile>
+
+    <!--AsyncAppender采用了ArrayBlockingQueue来保存需要异步输出的日志事件，会启用单独的线程记录日志-->
+    <!--下面Loggers配置就好了<AppenderRef ref="Async"/>-->
+    <Async name="Async"> <!--Async Appender的名字。-->
+      <!--异步调用的Appender的名字，可以配置多个。-->
+      <AppenderRef ref="File"/>
+    </Async>
+
+  </Appenders>
+  <Loggers>
+ <!--   sync	同步打印日志，日志输出与业务逻辑在同一线程内，当日志输出完毕，才能进行后续业务逻辑操作
+    Async Appender	异步打印日志，内部采用ArrayBlockingQueue，对每个AsyncAppender创建一个线程用于处理日志输出。
+    Async Logger	异步打印日志，采用了高性能并发框架Disruptor，创建一个线程用于处理日志输出。-->
+    <!-- Log everything in hibernate -->
+    <Logger name="org.hibernate" level="info" additivity="false">
+      <AppenderRef ref="Console" />
+    </Logger>
+
+    <!-- Log SQL statements -->
+    <Logger name="org.hibernate.SQL" level="debug" additivity="false">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="File" />
+    </Logger>
+
+    <!-- Log JDBC bind parameters -->
+    <Logger name="org.hibernate.type.descriptor.sql" level="trace" additivity="false">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="File" />
+    </Logger>
+
+<!--     Log custom packages
+    <Logger name="com.boraji.tutorial.hibernate" level="debug" additivity="false">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="File" />
+    </Logger> -->
+    <!--若是additivity设为false，则子Logger只会在自己的appender里输出，而不会在父Logger的appender里输出。-->
+	<Logger name="org.haijun.student" level="info" additivity="false">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="File" />
+    </Logger>
+
+    <!--AsyncLogger则使用了Disruptor框架来实现高吞吐。-->
+    <!--在加载log4j2.xml的启动阶段，如果检测到配置了AsyncRoot或AsyncLogger，将启动一个disruptor实例。-->
+    <AsyncLogger name="org.haijun.student" level="info" additivity="false">
+      <AppenderRef ref="FastSynchro" />
+    </AsyncLogger>
+      <!--AsyncRoot 和 Root 只能配置一个-->
+    <AsyncRoot level="debug">
+        <AppenderRef ref="FastSynchro" />
+    </AsyncRoot>
+<!--    <Root level="info">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="File" />
+    </Root>-->
+  </Loggers>
+</Configuration>

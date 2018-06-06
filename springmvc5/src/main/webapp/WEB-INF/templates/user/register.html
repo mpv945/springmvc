@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册页面</title>
+</head>
+<body>
+<form action="#" th:action="@{/user/add}" th:object="${user}" method="post">
+    <!--http://www.baeldung.com/thymeleaf-in-spring-mvc-->
+    <table border="1">
+        <tr>
+            <!--国际化显示-->
+            <td><label th:text="#{uname}" /></td>
+            <td><input type="text" th:field="${user.name}" /></td>
+        </tr>
+        <tr>
+            <td><label th:text="#{age}" /></td>
+            <td><input type="number" th:field="*{age}" /></td>
+        </tr>
+        <tr>
+            <td><label th:text="#{birthday}" /></td>
+            <td><input type="date" th:field="*{birthday}" /></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Submit" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

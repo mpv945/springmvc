@@ -1,0 +1,4 @@
+#对被认为是攻击的SQL抛出SQLException
+throwException=true
+#对被认为是攻击的SQL进行LOG.error输出
+logViolation=true
