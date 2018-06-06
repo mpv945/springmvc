@@ -16,13 +16,11 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.thymeleaf.spring5.ISpringTemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -42,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 // @EnableConfigurationProperties//开启对@ConfigurationProperties注解配置Bean的支持。把bena当作Properties来访问
 @Configuration
@@ -322,4 +319,18 @@ public class ThymeleafConfig implements WebMvcConfigurer { // implements WebMvcC
         }
         return flg.equalsIgnoreCase("on");
     }
+
+/*    // cxf 配置 (没有成功)
+    // 它为Apache CXF提供了与Spring Framework一起工作的扩展
+    @Bean(name = Bus.DEFAULT_BUS_ID)
+    public SpringBus springBus() {
+        return new SpringBus();
+    }
+    // 一个EnpointImpl bean也需要使用SpringBus bean和一个Web服务实现者来创建。这个bean用来在给定的HTTP地址发布端点：
+    @Bean
+    public Endpoint endpoint() {
+        EndpointImpl endpoint = new EndpointImpl(springBus(), new BaeldungImpl());
+        endpoint.publish("/baeldung");////接口发布在 /NetbarServices 目录下;http://localhost:8080/services/baeldung
+        return endpoint;
+    }*/
 }

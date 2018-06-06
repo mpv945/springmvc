@@ -2,7 +2,6 @@ package org.haijun.study;
 
 import com.alibaba.druid.support.http.StatViewServlet;
 import org.haijun.study.config.*;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -11,7 +10,10 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -86,6 +88,17 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
         dynamic.addMapping("/druid/*");// index.html 为主页面
         dynamic.setInitParameter("loginUsername","xiehaijun");
         dynamic.setInitParameter("loginPassword","12345");
+
+        // cxf 配置
+/*
+        AnnotationConfigWebApplicationContext rootCtx = new AnnotationConfigWebApplicationContext();
+        rootCtx.register(WebServiceConfig.class);
+        ContextLoaderListener loaderListener = new ContextLoaderListener(rootCtx);
+        servletContext.addListener(loaderListener);
+*/
+
+        /*ServletRegistration.Dynamic cxfynamicD = servletContext.addServlet("cxfDispatcher",new CXFServlet());
+        cxfynamicD.addMapping("/services/*");*/
 
         super.onStartup(servletContext);
     }
