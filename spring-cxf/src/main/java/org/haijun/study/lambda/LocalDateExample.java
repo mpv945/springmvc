@@ -7,7 +7,7 @@ import java.util.Locale;
 
 public class LocalDateExample {
 
-    // https://my.oschina.net/lizaizhong/blog/1814267
+    // https://my.oschina.net/lizaizhong/blog/1814267 和 https://www.jianshu.com/p/19bd58b30660
     public static void main(String[] args) {
 
         LocalDate today4 = LocalDate.now();
