@@ -10,6 +10,13 @@ public class LocalDateExample {
     // https://my.oschina.net/lizaizhong/blog/1814267 和 https://www.jianshu.com/p/19bd58b30660
     public static void main(String[] args) {
 
+
+        // 本月第几周和本年第几周
+        /*Calendar cal = Calendar.getInstance();
+        System.out.println("Current week of month: " + cal.get(Calendar.WEEK_OF_MONTH));
+        System.out.println("Current week of year: " + cal.get(Calendar.WEEK_OF_YEAR));*/
+
+
         LocalDate today4 = LocalDate.now();
         //本月多少天
         int days = today4.lengthOfMonth();
