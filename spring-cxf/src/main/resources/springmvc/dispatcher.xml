@@ -2,9 +2,20 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+">
+
+    <!-- 但是在实际开发中建议使用组件扫描 ,可以扫描controller、service-->
+    <context:component-scan base-package="controller" ></context:component-scan>
+
+    <!-- 使用mvc：annotation-driven 代替的注解映射器和注解适配器
+mvc：annotation-driven默认加载很多的参数绑定方法，比如json转换解析器就默认加载了，如果使用mvc：annotation-driven不用配置上边的RequestMappingHandlerMapping和RequestMappingHandlerAdapter
+实际开发使用的也是这个mvc：annotation-driven -->
+    <mvc:annotation-driven></mvc:annotation-driven>
 
     <!--http://babywolf.tk/2017/03/%E4%BD%A0%E8%BF%98%E5%9C%A8%E4%BD%BF%E7%94%A8jsp%E5%90%97,%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%B0%9D%E8%AF%95%E4%B8%80%E4%B8%8Bfreemarker%E5%91%A2/-->
     <bean id="viewResolver"

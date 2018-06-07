@@ -11,7 +11,7 @@
     <packaging>war</packaging>
 
     <artifactId>spring-cxf</artifactId>
-
+    <!--maven 标签大全参考https://www.cnblogs.com/sharpest/p/7738444.html-->
     <name>spring-cxf</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
@@ -26,6 +26,8 @@
 
         <!-- cxf 版本号 -->
         <cxf.version>3.2.4</cxf.version>
+
+        <jackson.version>1.9.13</jackson.version>
 
     </properties>
 
@@ -61,13 +63,13 @@
             <version>${spring.version}</version>
         </dependency>
 
-        <!-- 添加cxf支持 -->
         <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-core</artifactId>
-            <version>${cxf.version}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
         </dependency>
 
+        <!-- 添加cxf支持 -->
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
@@ -78,6 +80,32 @@
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
             <version>${cxf.version}</version>
+        </dependency>
+
+        <!--cxf-rt-frontend-jaxrs支持rest服务 -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+
+        <!--用于跨域的jar包 -->
+        <dependency>
+            <groupId>com.thetransactioncompany</groupId>
+            <artifactId>java-property-utils</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.thetransactioncompany</groupId>
+            <artifactId>cors-filter</artifactId>
+            <version>1.7</version>
+        </dependency>
+
+        <!-- 用于序列化json服务 -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>

@@ -13,12 +13,22 @@
 
 	<!-- Spring配置文件 -->
 	<!--默认加载上下文的 路径在 public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.xml";-->
-	<!--可以自定义在 例如 classpath:applicationContext.xml 或者classpath:spring/spring-*.xml-->
+	<!--可以自定义在 例如 classpath:applicationContext.xml 或者classpath:spring/spring-*.xml，多个用,号隔开，如果*能扫进来，不需要在文件导入关联的xml-->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:applicationContext.xml</param-value>
 
 	</context-param>
+
+	<!--java 配置-->
+<!--	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>com.aws.demo.config.AppConfig</param-value>
+	</context-param>-->
 
 	<!-- Spring监听器， 加载上下文配置-->
 	<listener>
