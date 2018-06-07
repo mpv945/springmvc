@@ -1,19 +1,11 @@
 package org.haijun.study.config;
 
-import org.apache.cxf.Bus;
-import org.apache.cxf.bus.spring.SpringBus;
-import org.apache.cxf.jaxws.EndpointImpl;
-import org.apache.cxf.jaxws.support.JaxWsServiceFactoryBean;
-import org.haijun.study.cxf.impl.BaeldungImpl;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.xml.ws.Endpoint;
 
 @Configuration
 public class WebServiceConfig {
 
-    // cxf 配置 (没有成功)
+/*    // cxf 配置 (没有成功)
     // 它为Apache CXF提供了与Spring Framework一起工作的扩展
     @Bean(name = Bus.DEFAULT_BUS_ID, destroyMethod = "shutdown")
     public SpringBus cxf() {
@@ -33,5 +25,5 @@ public class WebServiceConfig {
         //endpoint.setServiceFactory(jaxWsServiceFactoryBean());
         endpoint.publish("/baeldung");////接口发布在 /NetbarServices 目录下;http://localhost:8080/services/baeldung
         return endpoint;
-    }
+    }*/
 }

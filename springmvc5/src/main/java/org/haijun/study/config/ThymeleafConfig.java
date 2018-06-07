@@ -1,11 +1,6 @@
 package org.haijun.study.config;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.cxf.Bus;
-import org.apache.cxf.bus.spring.SpringBus;
-import org.apache.cxf.jaxws.EndpointImpl;
-import org.apache.cxf.jaxws.support.JaxWsServiceFactoryBean;
-import org.haijun.study.cxf.impl.BaeldungImpl;
 import org.haijun.study.tools.interceptor.MyHandlerInterceptor;
 import org.haijun.study.tools.springFormatter.MyDateFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +36,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import javax.xml.ws.Endpoint;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collections;

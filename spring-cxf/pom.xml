@@ -110,6 +110,42 @@
 
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
+
+                <!--运行插件 jetty:run-war jetty:run-war -Dfile.encoding=UTF-8 -P dev/product 或者直接在【下面输入框】输入对应的环境变量值-->
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>9.4.10.v20180503</version>
+                    <configuration>
+                        <httpConnector>
+                            <port>8865</port>
+                        </httpConnector>
+                        <scanIntervalSeconds>0</scanIntervalSeconds>
+                        <reload>manual</reload>
+                        <dumpOnStart>true</dumpOnStart>
+                        <!-- 支持命令停止jetty:stop -->
+                        <stopPort>8866</stopPort>
+                        <stopKey>stop</stopKey>
+                        <stopWait>3</stopWait>
+                        <war>${basedir}/target/${project.name}.war</war>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <configuration>
+                        <!--如果时servelt3.1使用bean配置，可以忽略web.xml加上下面一行-->
+                        <failOnMissingWebXml>false</failOnMissingWebXml>
+                        <archive>
+                            <!-- 打包后不包括pom的描述文件 -->
+                            <addMavenDescriptor>false</addMavenDescriptor>
+                        </archive>
+                        <warName>${project.name}</warName>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.7.0</version>
