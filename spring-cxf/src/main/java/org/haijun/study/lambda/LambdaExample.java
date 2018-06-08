@@ -17,7 +17,7 @@ public class LambdaExample {
         Map<Long, String> result1 = classifies.stream()
                 //.sorted(Comparator.comparingLong(Classify::getId).reversed()) // 倒序
                 .collect(Collectors.toMap(
-                        Classify::getId, Classify::getName
+                        Classify::getId, Classify::getName //Function.identity()可以作为实体对象
                         //,(oldValue, newValue) -> oldValue// 重复的键，将以先出现的，(oldValue, newValue) -> newvalue 最后出现的
                         //,LinkedHashMap::new// 有序的map
                 ));
