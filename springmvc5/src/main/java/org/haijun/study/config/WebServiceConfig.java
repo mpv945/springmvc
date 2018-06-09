@@ -1,8 +1,10 @@
 package org.haijun.study.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 @Configuration
+@ImportResource({"classpath:META-INF/cxf/cxf.xml","classpath:META-INF/cxf/cxf-servlet.xml"})
 public class WebServiceConfig {
 
 /*    // cxf 配置 (没有成功)
