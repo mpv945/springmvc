@@ -17,11 +17,12 @@
 
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+	<!--<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />-->
 
 	<context:component-scan base-package="org.haijun.study.cxf" />
 
 	<!-- 定义服务提供者 http://localhost:8865/webservice 访问-->
-	<jaxws:endpoint implementor="#baeldung" address="/HelloWorld"></jaxws:endpoint>
+	<jaxws:endpoint implementor="#baeldung" address="/baeldungsever"></jaxws:endpoint>
 
 	<!-- id:当前服务的唯一标识 address:当前服务对应的请求url serviceClass:接口类型 -->
 	<jaxws:server id="soapuser" address="/user"
