@@ -189,7 +189,7 @@
         </dependency>
 
         <!--aop 切面编程支持-->
-<!--        <dependency>
+        <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
             <version>1.8.13</version>
@@ -203,7 +203,7 @@
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
             <version>3.2.6</version>
-        </dependency>-->
+        </dependency>
 
         <!--swagger 支持；集成 swagger 的时候，jackson-databind包是必须依赖的，本项目其他依赖过了-->
         <dependency>

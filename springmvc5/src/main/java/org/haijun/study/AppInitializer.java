@@ -15,7 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
+// 获取spring上下文https://www.jianshu.com/p/fa5db63a12e5
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     /**

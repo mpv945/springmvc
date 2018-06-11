@@ -2,9 +2,8 @@ package org.haijun.study.config;
 
 import com.alibaba.druid.support.spring.stat.DruidStatInterceptor;
 import lombok.extern.log4j.Log4j2;
-import org.haijun.study.aop.DruidStatAop;
+import org.haijun.study.aop.ConvertRequestDataAop;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
 import org.springframework.context.annotation.Bean;
@@ -69,7 +68,7 @@ public class AspectJConfig {
     }*/
 
     @Bean
-    public DruidStatAop druidStatAop(){
-        return new DruidStatAop();
+    public ConvertRequestDataAop convertRequestDataAop(){
+        return new ConvertRequestDataAop();
     }
 }

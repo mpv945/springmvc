@@ -3,6 +3,7 @@ package org.haijun.study.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
+import org.haijun.study.annotation.ConvertRequestData;
 import org.haijun.study.model.entity.User;
 import org.haijun.study.model.vo.UserVO;
 import org.haijun.study.service.IUserService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import java.lang.annotation.Inherited;
 
 @Controller
 @Log4j2
@@ -41,7 +43,8 @@ public class UserController {
     }
 
     @PostMapping("/addUser")
-    public String saveUser(@ModelAttribute("user") @Valid UserVO userVo,
+    @ConvertRequestData
+    public String saveUser(@ModelAttribute("user") UserVO userVo,//@Valid
                            BindingResult result, Model model) {
 
         if (result.hasErrors()) {
