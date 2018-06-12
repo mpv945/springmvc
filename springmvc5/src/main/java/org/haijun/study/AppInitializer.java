@@ -26,9 +26,10 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
     protected Class<?>[] getRootConfigClasses() {
         return new Class[]{JpaRepositoriesConfig.class
                 ,TaskSchedulerConfig.class
-                ,AspectJConfig.class
+                //,AspectJConfig.class
                 //,SwaggerConfig.class
                 //,WebServiceConfig.class
+                ,ExtPropertyConfig.class
                 ,AsyncConfig.class};
     }
 
@@ -40,6 +41,7 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
     protected Class<?>[] getServletConfigClasses() {
         return new Class[]{
                 ThymeleafConfig.class
+                ,AspectJConfig.class
 //                ,WebServiceConfig.class
                 };
     }

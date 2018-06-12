@@ -46,7 +46,7 @@ import java.util.List;
 @EnableWebMvc//<mvc:annotation-driven>
 @ComponentScan(basePackages = { "org.haijun.study.controller"})
 // extends WebMvcConfigurationSupport； 去掉@EnableWebMvc注解
-@PropertySource("classpath:common.properties")
+@PropertySource({"classpath:common.properties"})// ,号隔开，可以配置多个，然后通@value获取
 @EnableSwagger2
 @Log4j2
 public class ThymeleafConfig implements WebMvcConfigurer { // implements WebMvcConfigurer

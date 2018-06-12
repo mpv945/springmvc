@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 
 // @Target：PACKAGE 注解作用于包，TYPE 注解作用于类型（类，接口，注解，枚举）；ANNOTATION_TYPE 注解作用于注解；CONSTRUCTOR 注解作用于构造方法
 // METHOD 注解作用于方法；PARAMETER 注解作用于方法参数；FIELD 注解作用于属性；LOCAL_VARIABLE 注解作用于局部变量。默认可以作用于以上任何目标。
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE})
 // @Retention:描述注解的生命周期;RUNTIME 运行时保留，运行中可以处理;SOURCE 源码中保留，编译期可以处理;
 // CLASS Class文件中保留，Class加载时可以处理 (默认RetentionPolicy.CLASS 值)
 @Retention(RetentionPolicy.RUNTIME)

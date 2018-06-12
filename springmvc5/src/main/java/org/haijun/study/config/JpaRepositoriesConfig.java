@@ -58,7 +58,7 @@ public class JpaRepositoriesConfig {
 	 * @return
 	 */
     @Profile("product")//环境变量，可以通过在类上注释，或者搞两套初始方法
-	@Bean
+	@Bean(name = "dataSource")
     public DataSource dataSource_product() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(env.getProperty("mysql.driver"));
@@ -105,7 +105,7 @@ public class JpaRepositoriesConfig {
     // https://github.com/alibaba/druid/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98
     // 数据库配置https://github.com/alibaba/druid/wiki/%E9%85%8D%E7%BD%AE_DruidDataSource%E5%8F%82%E8%80%83%E9%85%8D%E7%BD%AE，右边有其他更多配置
     @Profile("dev")//环境变量，可以通过在类上注释，或者搞两套初始方法,在集成测试类上，使用@ActiveProfiles注解设置
-    @Bean
+    @Bean(name = "dataSource")
     // 读配置和加密数据库 https://github.com/alibaba/druid/wiki/%E4%BD%BF%E7%94%A8ConfigFilter
     public DataSource dataSource_dev() {
         final com.alibaba.druid.pool.DruidDataSource dataSource = new com.alibaba.druid.pool.DruidDataSource();
@@ -196,5 +196,11 @@ public class JpaRepositoriesConfig {
 
 	    return txManager;
 	  }
+
+	  @Bean
+    @DependsOn("dataSource")
+    public ExtPropertyConfig extPropertyConfig(){
+        return new ExtPropertyConfig();
+    }
 
 }

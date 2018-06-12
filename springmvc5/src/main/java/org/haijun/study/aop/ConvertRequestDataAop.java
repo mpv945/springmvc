@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -12,15 +13,17 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 
 @Aspect
-@Component
 @Log4j2
 public class ConvertRequestDataAop {
 
     //切入点 @Pointcut("execution(public * *(..)) && @annotation(demo.APM)")
     @Pointcut("@annotation(org.haijun.study.annotation.ConvertRequestData)")
-    public void myPoint() {
-    }
+    public void myPoint() {}
 
+    @Before("myPoint()")
+    public void secondAdvice(){
+        System.out.println("Executing secondAdvice on getName()");
+    }
     // @Around表示包围一个函数，也就是可以在函数执行前做一些事情，也可以在函数执行后做一些事情
     @Around("myPoint()")//@Around("execution(* me.laiyijie.demo.service.UserServiceImpl.sayHello(..))")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {// ProceedingJoinPoint，在使用了@Around之后可以带入这个参数，代表的其实就是sayHello这个函数，不过做了一些封装
