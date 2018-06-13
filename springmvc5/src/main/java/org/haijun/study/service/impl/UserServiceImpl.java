@@ -1,9 +1,13 @@
 package org.haijun.study.service.impl;
 
+import lombok.extern.log4j.Log4j2;
 import org.haijun.study.model.entity.User;
+import org.haijun.study.model.vo.UserVO;
 import org.haijun.study.repository.UserRepository;
 import org.haijun.study.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,9 @@ import java.util.List;
 
 @Service
 @Transactional
+// 有时候一个类中可能会有多个缓存操作，而这些缓存操作可能是重复的。这个时候可以使用@CacheConfig
+@CacheConfig(cacheNames = {"user"})
+@Log4j2
 public class UserServiceImpl implements IUserService {
 
     @Autowired
@@ -154,4 +161,29 @@ public class UserServiceImpl implements IUserService {
 
         return null;
     }
+
+    @Override
+    // 不指定key，使用默认的key，使用“#参数名”或者“#p参数index”。
+    @Cacheable(key = "#userVO")//cacheNames="books" 可以指定缓存名称，sync="true"  sync 可以指示底层将缓存锁住，使只有一个线程可以进入计算
+    // condition="#name.length < 32" 属性condition支持这种功能，通过SpEL 表达式来指定可求值的boolean值，为true才会缓存（在方法执行之前进行评估）。
+    public String queryCacheObj(UserVO userVO) {
+        log.info("进入缓存获取缓存信息");
+        return "缓存信息queryCacheObj(UserVO userVO)";
+    }
+
+    @Override
+    @Cacheable(key = "#p1", condition="p1%2==0", unless="#result.length()>64")//p1表示第二个参数的值作为key,#result返回值
+    // unless表达式是在方法调用之后进行评估的。如果返回false，才放入缓存（与condition相反）。 #result指返回值
+    public String queryCache(String name, long uid) {
+        log.info("进入缓存获取缓存信息");
+        return "缓存信息queryCache(String name, long uid)";
+    }
+    // 应该避免@CachePut 和 @Cacheable同时使用的情况。
+    // @CachePut标注的方法在执行前不会去检查缓存中是否存在之前执行过的结果，而是每次都会执行该方法，并将执行结果以键值对的形式存入指定的缓存中。
+    /*@CachePut(cacheNames="book", key="#isbn")
+    public Book updateBook(ISBN isbn, BookDescriptor descriptor)*/
+
+    // 当指定了allEntries为true时，Spring Cache将忽略指定的key。有的时候我们需要Cache一下清除所有的元素。
+    /*@CacheEvict(cacheNames="books", allEntries=true)
+    public void loadBooks(InputStream batch)*/
 }

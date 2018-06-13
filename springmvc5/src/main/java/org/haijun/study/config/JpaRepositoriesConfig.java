@@ -5,10 +5,17 @@ import com.alibaba.druid.wall.WallFilter;
 import com.google.common.collect.Lists;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.Database;
@@ -17,6 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -38,6 +46,16 @@ public class JpaRepositoriesConfig {
 
 	@Autowired
 	private Environment env;
+
+	// @Value("#{systemProperties['os.name']}") // 注入操作系统属性
+    // @Value("#{ T(java.lang.Math).random() * 100.0 }") //注入表达式结果
+    // @Value("#{beanInject.another}")// // 注入其他Bean属性：注入beanInject对象的属性another，
+	// @Value("http://www.baidu.com")注入URL资源,下面为注入文件资源
+    @Value("classpath:import.sql")
+    private Resource importTables;
+
+    @Value("classpath:data.sql")
+    private Resource addData;
 	
 	/**
 	 * 这是一种快速配置，可以创建HSQL嵌入式数据库实例并使用简单的SQL脚本预填充该实例；依赖hsqldb
@@ -155,7 +173,32 @@ public class JpaRepositoriesConfig {
         log.info("**************************************************************************dataSource_dev 执行");
         return dataSource;
     }
-	
+
+    // 数据库初始化脚本
+    @Bean
+    public DataSourceInitializer dataSourceInitializer(DataSource dataSource){
+        String createSql = "DROP TABLE IF EXISTS `t_property_config`;";
+        createSql+="CREATE TABLE `t_property_config`  (";
+        createSql+="`property_key` varchar(25) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'key值',";
+        createSql+="`property_value` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'vlaue值',";
+        createSql+="`deleted` int(1) NULL DEFAULT NULL COMMENT '0:表示删除状态为false，1:表示删除状态为true',";
+        createSql+="PRIMARY KEY (`property_key`) USING BTREE";
+        createSql+=") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;";
+        createSql+="DELETE FROM `t_property_config`;";
+        Resource scripts = new ByteArrayResource(createSql.getBytes());
+        //ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(new ClassPathResource("classpath:data.sql"));
+        ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();//new FileSystemResource()
+        databasePopulator.addScript(scripts);
+        //databasePopulator.addScript(addData);
+        databasePopulator.setIgnoreFailedDrops(true);
+
+        DataSourceInitializer initializer = new DataSourceInitializer();
+        initializer.setDataSource(dataSource);
+        initializer.setDatabasePopulator(databasePopulator);
+
+        return initializer;
+    }
+
 	  @Bean
 	  public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 		final HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();

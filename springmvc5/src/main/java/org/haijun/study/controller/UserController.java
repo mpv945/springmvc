@@ -84,6 +84,11 @@ public class UserController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        // 缓存调用Cache
+        UserVO cacheUser = new UserVO();
+        cacheUser.setName("张三");
+        log.info(userService.queryCacheObj(cacheUser));
+        log.info(userService.queryCache(null,12));
         return "user/register"; // 返回页面时，最前面不能加/
     }
 

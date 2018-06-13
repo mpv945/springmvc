@@ -1,6 +1,7 @@
 package org.haijun.study.service;
 
 import org.haijun.study.model.entity.User;
+import org.haijun.study.model.vo.UserVO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -26,6 +27,11 @@ public interface IUserService {
     Page<User> listPage();
 
     List<User> specification1();
+
+
+    String queryCacheObj(UserVO userVO);
+
+    String queryCache(String name,long uid);
 
 
 }
