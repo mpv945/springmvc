@@ -11,6 +11,7 @@
   <modules>
     <module>springmvc5</module>
     <module>spring-cxf</module>
+      <module>springmvcxml</module>
   </modules>
 
   <name>springmvc</name>

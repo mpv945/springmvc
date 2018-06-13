@@ -1,0 +1,43 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xsi:schemaLocation="    
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+        http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+">
+
+	<context:component-scan base-package="org.haijun.study.cxf" />
+
+	<!-- 定义服务提供者 http://localhost:8865/webservice 访问-->
+	<jaxws:endpoint implementor="#baeldung" address="/baeldungsever"></jaxws:endpoint>
+
+	<!-- id:当前服务的唯一标识 address:当前服务对应的请求url serviceClass:接口类型 -->
+	<jaxws:server id="soapuser" address="/user"
+				  serviceClass="org.haijun.study.cxf.UserService">
+		<jaxws:serviceBean>
+			<bean class="org.haijun.study.cxf.impl.UserServiceImpl" />
+		</jaxws:serviceBean>
+	</jaxws:server>
+
+	<!-- 发布一个Restful方式的WebService服务 -->
+	<bean id="personServiceImpl" class="org.haijun.study.cxf.impl.PersonServiceImpl"></bean>
+	<jaxrs:server id="personService" address="/rest">
+		<jaxrs:serviceBeans>
+			<ref bean="personServiceImpl" />
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<!--提供序列化为json数据的实现类 -->
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"></bean>
+		</jaxrs:providers>
+	</jaxrs:server>
+
+</beans>
