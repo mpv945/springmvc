@@ -1,5 +1,6 @@
 package org.haijun.study.config;
 
+import org.haijun.study.tools.SpringContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -16,15 +17,15 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 @Configuration
-public class ExtPropertyConfig extends PropertyPlaceholderConfigurer {
+public class DatabasePropertyConfig extends PropertyPlaceholderConfigurer {
 
     private DataSource ds;
 
     private String sql = "select property_key,property_value from t_property_config where deleted = ? ";
 
-    public ExtPropertyConfig() {
+    public DatabasePropertyConfig() {
     }
-    public ExtPropertyConfig(DataSource ds) {
+    public DatabasePropertyConfig(DataSource ds) {
         this.ds = ds;
     }
 
@@ -32,6 +33,8 @@ public class ExtPropertyConfig extends PropertyPlaceholderConfigurer {
     protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
         //获取父类配置文件
         Properties location_props = null;
+
+        ds = SpringContext.getBean(DataSource.class);
 
         try {
             //获取父类配置文件

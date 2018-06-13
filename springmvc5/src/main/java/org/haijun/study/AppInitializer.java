@@ -29,7 +29,7 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
                 //,AspectJConfig.class
                 //,SwaggerConfig.class
                 //,WebServiceConfig.class
-                ,ExtPropertyConfig.class
+                , DatabasePropertyConfig.class
                 ,AsyncConfig.class};
     }
 
