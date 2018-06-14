@@ -188,8 +188,9 @@ public class JpaRepositoriesConfig {
         Resource scripts = new ByteArrayResource(createSql.getBytes());
         //ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(new ClassPathResource("classpath:data.sql"));
         ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();//new FileSystemResource()
-        databasePopulator.addScript(scripts);
-        //databasePopulator.addScript(addData);
+        //databasePopulator.addScript(scripts);importTables
+        databasePopulator.addScript(importTables);
+        databasePopulator.addScript(addData);
         databasePopulator.setIgnoreFailedDrops(true);
 
         DataSourceInitializer initializer = new DataSourceInitializer();
