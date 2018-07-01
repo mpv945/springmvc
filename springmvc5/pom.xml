@@ -255,6 +255,20 @@
             <version>3.2.4</version>
         </dependency>-->
 
+        <!--spring 批处理-->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <version>4.0.1.RELEASE</version>
+        </dependency>
+
+       <!-- object转xml-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>5.0.4.RELEASE</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

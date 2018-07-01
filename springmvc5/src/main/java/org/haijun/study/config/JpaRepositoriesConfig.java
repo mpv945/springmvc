@@ -4,6 +4,11 @@ import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallFilter;
 import com.google.common.collect.Lists;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
@@ -41,6 +46,7 @@ import java.util.Properties;
 @EnableJpaRepositories(basePackages= {"org.haijun.study.repository"})
 @EnableTransactionManagement
 //@EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")//开启审计功能，类似要注释监听
+@EnableBatchProcessing//开启spring batch
 @Log4j2
 public class JpaRepositoriesConfig {
 
@@ -56,6 +62,12 @@ public class JpaRepositoriesConfig {
 
     @Value("classpath:data.sql")
     private Resource addData;
+
+    // spring batch 创建表，每个数据库类型都有对应的sql
+    @Value("classpath:org/springframework/batch/core/schema-drop-mysql.sql")
+    private Resource dropReopsitoryTables;
+    @Value("classpath:org/springframework/batch/core/schema-mysql.sql")
+    private Resource dataReopsitorySchema;
 	
 	/**
 	 * 这是一种快速配置，可以创建HSQL嵌入式数据库实例并使用简单的SQL脚本预填充该实例；依赖hsqldb
@@ -191,6 +203,10 @@ public class JpaRepositoriesConfig {
         //databasePopulator.addScript(scripts);importTables
         databasePopulator.addScript(importTables);
         databasePopulator.addScript(addData);
+        // spring batch 创建表，每个数据库类型都有对应的sql
+        databasePopulator.addScript(dropReopsitoryTables);
+        databasePopulator.addScript(dataReopsitorySchema);
+
         databasePopulator.setIgnoreFailedDrops(true);
 
         DataSourceInitializer initializer = new DataSourceInitializer();
@@ -231,11 +247,10 @@ public class JpaRepositoriesConfig {
         return hibernateProperties;
     }
 
-	  @Bean
+	  @Bean("platformTransactionManager")
 	  public PlatformTransactionManager transactionManager(LocalContainerEntityManagerFactoryBean entityManagerFactory) {
 	    JpaTransactionManager txManager = new JpaTransactionManager();
 	    txManager.setEntityManagerFactory(entityManagerFactory.getObject());
-
 	    return txManager;
 	  }
 
@@ -245,5 +260,24 @@ public class JpaRepositoriesConfig {
     public DatabasePropertyConfig extPropertyConfig(){
         return new DatabasePropertyConfig();
     }*/
+
+
+    // spring batch
+    @Bean
+    @DependsOn("platformTransactionManager")
+    public JobRepository getJobRepository(DataSource dataSource, PlatformTransactionManager platformTransactionManager) throws Exception {
+        JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
+        factory.setDataSource(dataSource);
+        factory.setTransactionManager(platformTransactionManager);
+        factory.afterPropertiesSet();
+        return factory.getObject();
+    }
+    @Bean
+    public JobLauncher getJobLauncher(JobRepository jobRepository) throws Exception {
+        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+        jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.afterPropertiesSet();
+        return jobLauncher;
+    }
 
 }
