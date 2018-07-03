@@ -47,9 +47,10 @@
       </DefaultRolloverStrategy>
     </RollingRandomAccessFile>
 
+      <!--log4j2中， 共有8个级别，按照从低到高为：ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF-->
     <!--AsyncAppender采用了ArrayBlockingQueue来保存需要异步输出的日志事件，会启用单独的线程记录日志-->
     <!--下面Loggers配置就好了<AppenderRef ref="Async"/>-->
-    <Async name="Async"> <!--Async Appender的名字。-->
+    <Async name="Async" level="ERROR"> <!--Async Appender的名字。-->
       <!--异步调用的Appender的名字，可以配置多个。-->
       <AppenderRef ref="File"/>
     </Async>
@@ -60,7 +61,7 @@
     Async Appender	异步打印日志，内部采用ArrayBlockingQueue，对每个AsyncAppender创建一个线程用于处理日志输出。
     Async Logger	异步打印日志，采用了高性能并发框架Disruptor，创建一个线程用于处理日志输出。-->
     <!-- Log everything in hibernate -->
-    <Logger name="org.hibernate" level="info" additivity="false">
+    <Logger name="org.hibernate" level="info" additivity="false"><!--Logger的additivity设置为false，那么这个日志不会再继续向父Logger进行传递-->
       <AppenderRef ref="Console" />
     </Logger>
 
