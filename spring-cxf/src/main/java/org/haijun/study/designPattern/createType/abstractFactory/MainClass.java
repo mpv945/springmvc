@@ -1,6 +1,12 @@
 package org.haijun.study.designPattern.createType.abstractFactory;
 
+/**
+ * 全部的设计模式说明：http://www.runoob.com/design-pattern/builder-pattern.html
+ * 抽象工厂
+ * 在工厂方法下进行产品增强，对产品进行抽象化，方便产品族通过各个族的抽象工厂生产
+ */
 public class MainClass {
+
 	public static void main(String[] args) {
 		FruitFactory ff = new NorthFruitFactory();
 		Fruit apple = ff.getApple();

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 原型模式
+ * 原型模式 设计模式参考http://www.runoob.com/design-pattern/design-pattern-tutorial.html
  */
 public class Person implements Cloneable{
 	// 姓名

@@ -22,6 +22,8 @@ public class MainClass {
 //		System.out.println(person2.getAge());
 //		System.out.println(person2.getSex());
 
+		// 意图：用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象。
+		// 主要解决：在运行期建立和删除原型。
 		Person person1 = new Person();
 		List<String> friends = new ArrayList<String>();
 		friends.add("James");

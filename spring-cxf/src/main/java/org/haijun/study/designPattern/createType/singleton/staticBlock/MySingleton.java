@@ -4,7 +4,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /**
- * 使用静态内置类实现单例模式
+ * 使用静态内置类实现单例模式（推介）
  */
 public class MySingleton implements Serializable {//实现Serializable接口，解决反序列化后得到的实例和序列化前的是同一个实例
 
