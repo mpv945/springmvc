@@ -2,6 +2,7 @@ package org.haijun.study.designPattern.createType.abstractFactory;
 
 /**
  * 全部的设计模式说明：http://www.runoob.com/design-pattern/builder-pattern.html
+ * https://www.cnblogs.com/tongkey/p/7170826.html
  * 抽象工厂
  * 在工厂方法下进行产品增强，对产品进行抽象化，方便产品族通过各个族的抽象工厂生产
  */
