@@ -43,12 +43,12 @@
         <!--runntime表示被依赖项目无需参与项目的编译，不过后期的测试和运行周期需要其参与。与compile相比，跳过编译而已，oracle jdbc驱动架包-->
         <!--provided意味着打包的时候可以不用包进去，别的设施(Web Container)会提供。-->
         <!--system 从参与度来说，也provided相同，不过被依赖项不会从maven仓库抓，而是从本地文件系统拿，-->
-<!--        <dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
             <scope>provided</scope>
-        </dependency>-->
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -60,6 +60,18 @@
 
     <build>
         <!--跳过测试-Dmaven.test.skip=true-->
+        <plugins>
+            <!--https://artifacts.alfresco.com/nexus/content/repositories/public/org/apache/tomcat/maven/-->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat8-maven-plugin</artifactId>
+                <version>3.0-r1756463</version>
+                <configuration>
+
+                </configuration>
+            </plugin>
+        </plugins>
+
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
                 <plugin>

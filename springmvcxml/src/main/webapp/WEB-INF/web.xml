@@ -18,8 +18,8 @@
 	<!--可以自定义在 例如 classpath:applicationContext.xml 或者classpath:spring/spring-*.xml，多个用,号隔开，如果*能扫进来，不需要在文件导入关联的xml-->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:applicationContext.xml</param-value>
-
+		<!--<param-value>classpath:spring-root.xml,classpath:springmvc/spring-*.xml</param-value>-->
+		<param-value>classpath:spring-root.xml</param-value>
 	</context-param>
 
 	<!--java 配置-->
@@ -45,7 +45,7 @@
 		<!--Spring MVC中DispatcherServlet默认使用WebApplicationContext作为上下文，Spring默认配置文件为“/WEB-INF/[servlet名字]-servlet.xml”。-->
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:springmvc/dispatcher.xml</param-value>
+			<param-value>classpath:springmvc/spring-*.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
