@@ -4,6 +4,9 @@
 		 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
 		 version="4.0">
 
+	<!--微服务网关https://springcloud.cc/spring-cloud-config.html#_encryption_and_decryption 和http://www.baeldung.com/spring-cloud-configuration
+	https://blog.csdn.net/hry2015/article/details/78245149 和https://www.cnblogs.com/liferecord/p/6880883.html
+	https://www.cnblogs.com/andyfengzp/p/6835969.html -->
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>
@@ -53,17 +56,17 @@
 	</servlet-mapping>
 
 	<filter>
-		//过滤器使用spring类CharacterEncodingFilter
+		<!--//过滤器使用spring类CharacterEncodingFilter-->
 		<filter-name>encodingFilter</filter-name>
 		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
 		<init-param>
 			<param-name>encoding</param-name>
-			//过滤器过滤后的编码为utf-8
+			<!--//过滤器过滤后的编码为utf-8-->
 			<param-value>utf-8</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>
-		//过滤所有的路径：/*代表所有的路径
+		<!--//过滤所有的路径：/*代表所有的路径-->
 		<filter-name>encodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
