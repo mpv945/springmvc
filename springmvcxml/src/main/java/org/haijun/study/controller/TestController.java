@@ -4,6 +4,7 @@ import org.haijun.study.vo.AccountVO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,10 +13,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/test")//修饰类（表示路径）
-//@SessionAttributes//该注解用来绑定HttpSession中的attribute对象的值，便于在方法中的参数里使用。该注解有value、types两个属性，可以通过名字和类型指定要使用的attribute 对象；
+// 只能用在类上，可以把请求域Madel对象的值和对象类型存放到session
+//@SessionAttributes(value = {"user"},types = {String.class})//该注解用来绑定HttpSession中的attribute对象的值，便于在方法中的参数里使用。该注解有value、types两个属性，可以通过名字和类型指定要使用的attribute 对象；
 public class TestController {
 
    /* A、处理requet uri 部分（这里指uri template中variable，不含queryString部分）的注解：   @PathVariable;
@@ -25,14 +30,16 @@ public class TestController {
 
     // 这种方式实际的效果就是在调用@RequestMapping的方法之前，为request对象的model里put（“account”， Account）；
     @ModelAttribute
-    public AccountVO addAccount(@ModelAttribute AccountVO accountVO) {
+    //public AccountVO addAccount(@ModelAttribute AccountVO accountVO) {
+    public void addAccount(@RequestParam(value = "id", required = false) Integer id, Model model ) {
         //return accountManager.findAccount(number);
         System.out.println("调用@RequestMapping的方法之前被调用了");
-        if(accountVO != null){
-            System.out.println("accountVO 在回话中不为空");
-            return accountVO;
+        if(id != null){
+            System.out.println("有id表示是修改");
+            model.addAttribute("user",new AccountVO());// 这步配合@SessionAttributes可以存session，如果新增时。POJO 参数对象会根据这个对象填充（key和参数一样）
+        }else {
+            System.out.println("没有id表示新增");
         }
-        return new AccountVO();
     }
 
     /**
@@ -122,7 +129,7 @@ public class TestController {
     public void testServletAPI(HttpServletRequest request,
                                  HttpServletResponse response, HttpSession session,
                                  Writer out) throws IOException{
-        System.out.println(request);
+        System.out.println(request);// 打断点，debug查看以前执行代码端点
         System.out.println(response);
         System.out.println(session);
         response.setContentType("text/html;charset=utf-8");
@@ -134,4 +141,18 @@ public class TestController {
         }
     }
 
+    @RequestMapping("/modelAndView")
+    public ModelAndView pageView(){
+        Map<String,Object> data = new HashMap<>();
+        data.put("names", Arrays.asList("zhangshan","lisi"));
+       return new ModelAndView("view",data);
+    }
+    @RequestMapping("/modelAndView2")
+    public String pageView(Model model){ //模型对象最后都是BindingAwareModelMap extends ExtendedModelMap类型
+        Map<String,Object> data = new HashMap<>();
+        data.put("names", Arrays.asList("zhangshan","lisi"));
+        //model.addAllAttributes(data);
+        model.addAttribute("data",data);
+        return "view";
+    }
 }

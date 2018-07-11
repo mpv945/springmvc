@@ -59,12 +59,12 @@
     </dependencies>
 
     <!--解决tomcat8-maven-plugin下载失败的办法-->
-    <pluginRepositories>
+<!--    <pluginRepositories>
         <pluginRepository>
             <id>alfresco</id>
             <url>>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
         </pluginRepository>
-    </pluginRepositories>
+    </pluginRepositories>-->
 
     <build>
         <!--构建Maven项目的时候，如果没有进行特殊的配置，Maven会按照标准的目录结构查找和处理各种类型文件。-->
