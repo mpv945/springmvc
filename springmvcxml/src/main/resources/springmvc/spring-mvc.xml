@@ -14,7 +14,7 @@
     <context:component-scan base-package="org.haijun.study.controller" />
     <context:component-scan base-package="org.haijun.study.coreTools" />
 
-    <!--配置视图解析器 https://www.ibm.com/developerworks/cn/java/j-lo-springview/-->
+    <!--把逻辑视图转换成物理视图，配置视图解析器 https://www.ibm.com/developerworks/cn/java/j-lo-springview/ -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
           p:prefix="/WEB-INF/views/" p:suffix=".jsp" />
 
@@ -29,6 +29,8 @@
     <mvc:view-controller path="/my/success" view-name="success" />
     <!--如果加上上面的mvc:view-controller ,正常的handle处理会出现不能访问，所以要添加下面这个标签-->
     <mvc:annotation-driven />
+    <!--如果请求不在资源映射时，会使用容量的默认servlet去处理，dispatcher处理的时/*所有资源，解决静态资源访问的处理对策 -->
+    <mvc:default-servlet-handler/>
 
     <!--根据视图名字来解析视图,由于配置上面也定义了一个视图解析器，一般自定义的优先级要比常用解析优先级高。
     数字越小优先，InternalResourceViewResolver为Interger最大值127-->

@@ -47,7 +47,8 @@ import java.util.Map;
 // BSD 协议：如果再发布的产品中包含源代码，则在源代码中必须带有原来代码中的BSD协议。
 @Controller
 @RequestMapping("/test")//修饰类（表示路径）
-// 只能用在类上，可以把请求域Madel对象的值和对象类型存放到session
+// 只能用在类上，可以把请求域Madel对象的值和对象类型存放到session(1.必须有@ModelAttribute方法，不然保持，使用
+// @ModelAttribute作为参数注解参数POJO时，和value对象的名字不一致也不会报错)
 //@SessionAttributes(value = {"user"},types = {String.class})//该注解用来绑定HttpSession中的attribute对象的值，便于在方法中的参数里使用。该注解有value、types两个属性，可以通过名字和类型指定要使用的attribute 对象；
 public class TestController {
 
@@ -60,6 +61,7 @@ public class TestController {
     D、处理attribute类型是注解： @SessionAttributes, @ModelAttribute;*/
 
     // 这种方式实际的效果就是在调用@RequestMapping的方法之前，为request对象的model里put（“account”， Account）；
+    // 这样用POJO参数是，会先把对应model参数填充，然后把请求到POJO请求参数不为空的填充到最后的POJO对象
     @ModelAttribute
     //public AccountVO addAccount(@ModelAttribute AccountVO accountVO) {
     public void addAccount(@RequestParam(value = "id", required = false) Integer id, Model model ) {
@@ -219,6 +221,13 @@ public class TestController {
         data.put("name", "谢海军测试导出pdf");
         // 自定义视图
         return new ModelAndView(myPdfView,data);
+    }
+
+    // 转发和重定向（UrlBasedViewResolver
+    // 有控制if (viewName.startsWith("redirect:")) 和else if (viewName.startsWith("forward:"))
+    public String testRedirect(){// 转发类似forward
+        System.out.println("转发请求处理器");
+        return "redirect:/index.jsp";
     }
 
     /**
