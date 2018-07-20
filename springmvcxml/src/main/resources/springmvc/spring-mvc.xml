@@ -13,6 +13,13 @@
 
     <context:component-scan base-package="org.haijun.study.controller" />
     <context:component-scan base-package="org.haijun.study.coreTools" />
+    <!--spring 集成spring mvc方式，spring mvc配置，spring mvc的bean 可以引用spring IOC容器中的Bena-->
+    <context:component-scan base-package="org.haijun.study" use-default-filters="false"><!-- use-default-filters="false"不使用默认的filters-->
+        <!--<context:exclude-filter type="annotation" expression="" />--><!--排除-->
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" /><!--引入,上面不用默认，这表示只引入......-->
+    </context:component-scan>
+
+    <!--<import resource="spring-mvc.xml" />-->
 
     <!--把逻辑视图转换成物理视图，配置视图解析器 https://www.ibm.com/developerworks/cn/java/j-lo-springview/ -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
@@ -77,4 +84,15 @@
     </bean>-->
     <!--第二种文件上传限制放到web.xml,第二个不需要第三方 jar 包支持，它使用 servlet 内置的上传功能，但是只能在 Servlet 3 以上的版本使用。-->
     <bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
+
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <!--设置异常的属性名，放在model对象页面读取的key名字，默认为exception-->
+        <property name="exceptionAttribute" value="ex"></property>
+        <property name="exceptionMappings">
+            <props>
+                <!--如果捕获到数组越界异常，跳转到error.jsp 页面-->
+                <prop key="java.lang.ArrayIndexOutOfBoundsException">error</prop>
+            </props>
+        </property>
+    </bean>
 </beans>

@@ -19,6 +19,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<!--<param-value>classpath:spring-root.xml,classpath:springmvc/spring-*.xml</param-value>-->
+		<!--该配置用来存放数据源，事物，整合其他框架，service和dao等配置-->
 		<param-value>classpath:spring-root.xml</param-value>
 	</context-param>
 
@@ -45,6 +46,7 @@
 		<!--Spring MVC中DispatcherServlet默认使用WebApplicationContext作为上下文，Spring默认配置文件为“/WEB-INF/[servlet名字]-servlet.xml”。-->
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
+			<!--用来配置handle相关处理的配置-->
 			<param-value>classpath:springmvc/spring-*.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>

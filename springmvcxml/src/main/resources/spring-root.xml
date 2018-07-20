@@ -10,5 +10,10 @@
     <!--配置自定义扫描的包-->
     <context:component-scan base-package="org.haijun.study.service" />
 
+    <!--spring 集成spring mvc方式，spring Ioc 容器配置，spring IOC 容器的Bean 不能引用spring mvc的bean-->
+    <context:component-scan base-package="org.haijun.study" >
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" /><!--除了该注解都支持，排除spring mvc配置扫描的-->
+    </context:component-scan>
+
 
 </beans>
