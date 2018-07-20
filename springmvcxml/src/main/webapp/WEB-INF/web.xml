@@ -48,6 +48,16 @@
 			<param-value>classpath:springmvc/spring-*.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
+		<multipart-config>
+			<!--location：本地资源路径，必须是webapp根目录下的路径-->
+			<!--<location>/tmp/spittr/uploads</location>-->
+			<!-- 上传文件的大小限制，比如下面表示 5 M -->
+			<max-file-size>5242880</max-file-size>
+			<!-- 一次表单提交中文件的大小限制，必须下面代表 10 M -->
+			<max-request-size>10485760</max-request-size>
+			<!-- 多大的文件会被自动保存到硬盘上。0 代表所有 -->
+			<file-size-threshold>0</file-size-threshold>
+		</multipart-config>
 	</servlet>
 
 	<servlet-mapping>

@@ -24,16 +24,57 @@
     <util:list id="resourceList">
         <value>i18n/fmt_resource</value>
     </util:list>
+    <!--配置SessionLocaleResolver 来代替默认的AcceptHandleLocaleResolver-->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+    <!--配置.LocaleChange拦截器,然后再页面<a href="i18n?locale=zh_CH或者en_US"> ,进行切换语言状态-->
+    <mvc:interceptors>
+        <!--也可以ref 配置bean的id<ref，interceptors顺序自上而下-->
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"></bean>
+        <mvc:interceptor>
+            <!--定义该拦截器作用路径,exclude-mapping 来指定拦截器不作用的路径，-->
+            <mvc:mapping path="/login"/>
+            <bean class="org.haijun.study.coreTools.interceptor.MyTestInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
     <!--直接访问转发的页面，无需再经过handle的方法，例如在WEB-INF/下的静态资源-->
     <mvc:view-controller path="/my/success" view-name="success" />
-    <!--如果加上上面的mvc:view-controller ,正常的handle处理会出现不能访问，所以要添加下面这个标签-->
-    <mvc:annotation-driven />
-    <!--如果请求不在资源映射时，会使用容量的默认servlet去处理，dispatcher处理的时/*所有资源，解决静态资源访问的处理对策 -->
+    <!--如果加上上面的mvc:view-controller ,正常的handle处理会出现不能访问，所以要添加下面这个标签,
+    直接访问资源，默认访问静态资源，自定义类型转换器等都需要annotation-driven 支持-->
+    <!--加上该注解，会自动注册RequestMappingHandler{Mapping和Adapter}与ExceptionHanderExceptionResolver三个bean，还将
+    提供ConversionService实例对表单参数类型转换，支持使用@NumBerFormatannotation和@DateTimeFormat注解格式化数据，
+    支持@Valid注解对JavaBean实例进行JSR 303验证，支持使用@RequestBody和@ResponseBody注解-->
+    <!--使用文档帮助https://docs.spring.io/spring/docs/current/spring-framework-reference/index.html-->
+    <mvc:annotation-driven conversion-service="conversionServiceFactoryBean" />
+    <!--如果请求不在资源映射时，会使用容量的默认servlet去处理，dispatcher处理的时/*所有资源，
+    解决静态资源访问的处理对策，该配置会让handlerAdapters 缺少AnnotationMethodHandlerAdapter.造成对控制器映射适配失效 -->
     <mvc:default-servlet-handler/>
+
+    <!--自定义类型转换器，需要添加到annotation-driven conversion-service中-->
+    <util:list id="conversionServices">
+        <!--自定义类型转换器-->
+        <bean>myStringToBeanConverter</bean>
+    </util:list>
+    <!--如果想用spring 默认转换类型FormattingConversionServiceFactoryBean,因为annotation-driven添加的Convertes默认转换器就是FormattingConversionServiceFactory-->
+    <bean id="conversionServiceFactoryBean"
+          class="org.springframework.format.support.FormattingConversionServiceFactoryBean"
+          p:converters-ref="conversionServices"
+    />
+<!--
+    <bean id="conversionServiceFactoryBean"
+          class="org.springframework.context.support.ConversionServiceFactoryBean" p:converters-ref="conversionServices" />
+-->
 
     <!--根据视图名字来解析视图,由于配置上面也定义了一个视图解析器，一般自定义的优先级要比常用解析优先级高。
     数字越小优先，InternalResourceViewResolver为Interger最大值127-->
     <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="100" />
 
+    <!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->
+<!--    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8" />
+        <property name="maxUploadSize" value="10485760000" />
+        <property name="maxInMemorySize" value="40960" />
+    </bean>-->
+    <!--第二种文件上传限制放到web.xml,第二个不需要第三方 jar 包支持，它使用 servlet 内置的上传功能，但是只能在 Servlet 3 以上的版本使用。-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
 </beans>
