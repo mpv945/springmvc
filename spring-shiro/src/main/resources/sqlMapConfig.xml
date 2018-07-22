@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC
+        "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="properties/db.properties" />
+    <!--mybatis全局配置参数，全局参数将会影响mybatis的运行行为。比如：开启二级缓存、开启延迟加载-->
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="multipleResultSetsEnabled" value="true"/>
+    </settings>
+    <typeAliases>
+        <!-- 单个别名定义 -->
+        <typeAlias type="com.hua.saf.pojo.User" alias="User" />
+        <!-- 批量别名定义，扫描整个包下的类，别名为类名（首字母大小写都可以） -->
+        <package name="com.kang.pojo"/>
+    </typeAliases>
+
+</configuration>

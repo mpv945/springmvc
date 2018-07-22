@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+		 version="4.0">
+
+	<!--微服务网关https://springcloud.cc/spring-cloud-config.html#_encryption_and_decryption 和http://www.baeldung.com/spring-cloud-configuration
+	https://blog.csdn.net/hry2015/article/details/78245149 和https://www.cnblogs.com/liferecord/p/6880883.html
+	https://www.cnblogs.com/andyfengzp/p/6835969.html -->
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<!-- 配置spring的profile -->
+	<context-param>
+		<param-name>spring.profiles.active</param-name>
+		<param-value>development</param-value>
+	</context-param>
+
+	<!-- Spring配置文件 -->
+	<!--默认加载上下文的 路径在 public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.xml";-->
+	<!--可以自定义在 例如 classpath:applicationContext.xml 或者classpath:spring/spring-*.xml，多个用,号隔开，如果*能扫进来，不需要在文件导入关联的xml-->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<!--<param-value>classpath:spring-root.xml,classpath:springmvc/spring-*.xml</param-value>-->
+		<param-value>classpath:spring-root.xml</param-value>
+	</context-param>
+
+	<!--java 配置-->
+<!--	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>com.aws.demo.config.AppConfig</param-value>
+	</context-param>-->
+
+	<!-- Spring监听器， 加载上下文配置-->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+
+	<!--spring web-->
+	<servlet>
+		<servlet-name>dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!--Spring MVC中DispatcherServlet默认使用WebApplicationContext作为上下文，Spring默认配置文件为“/WEB-INF/[servlet名字]-servlet.xml”。-->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc/spring-*.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+		<multipart-config>
+			<!--location：本地资源路径，必须是webapp根目录下的路径-->
+			<!--<location>/tmp/spittr/uploads</location>-->
+			<!-- 上传文件的大小限制，比如下面表示 5 M -->
+			<max-file-size>5242880</max-file-size>
+			<!-- 一次表单提交中文件的大小限制，必须下面代表 10 M -->
+			<max-request-size>10485760</max-request-size>
+			<!-- 多大的文件会被自动保存到硬盘上。0 代表所有 -->
+			<file-size-threshold>0</file-size-threshold>
+		</multipart-config>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<!--也可以配置*.do或者*.action-->
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<!--web.xml中，这段配置要放在所有filter的最前面-->
+	<filter>
+		<!--//过滤器使用spring类CharacterEncodingFilter-->
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<!--//过滤所有的路径：/*代表所有的路径-->
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+	<!--用于将POST 转换成POST 或者DELETE以及PUT-->
+	<filter>
+		<filter-name>httpMethodFilter</filter-name>
+		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>httpMethodFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+
+	
+</web-app>
