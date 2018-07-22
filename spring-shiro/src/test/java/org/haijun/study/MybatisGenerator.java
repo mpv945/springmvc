@@ -1,6 +1,7 @@
 package org.haijun.study;
 
 
+import org.junit.Test;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
 import org.mybatis.generator.config.xml.ConfigurationParser;
@@ -23,7 +24,7 @@ public class MybatisGenerator {
         try {
             List<String> warnings = new ArrayList<>();
             boolean overwrite = true;
-            File configFile = new File("generatorConfig.xml");
+            File configFile = new File("C:\\Users\\zhenx\\IdeaProjects\\springmvc\\spring-shiro\\src\\test\\resources\\generatorConfig.xml");
             ConfigurationParser cp = new ConfigurationParser(warnings);
             Configuration config = cp.parseConfiguration(configFile);
             DefaultShellCallback callback = new DefaultShellCallback(overwrite);
@@ -40,6 +41,31 @@ public class MybatisGenerator {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void mysql(){
+        try {
+            List<String> warnings = new ArrayList<>();
+            boolean overwrite = true;
+            File configFile = new File("C:\\Users\\zhenx\\IdeaProjects\\springmvc\\spring-shiro\\src\\test\\resources\\generatorConfig.xml");
+            ConfigurationParser cp = new ConfigurationParser(warnings);
+            Configuration config = cp.parseConfiguration(configFile);
+            DefaultShellCallback callback = new DefaultShellCallback(overwrite);
+            MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
+            myBatisGenerator.generate(null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XMLParserException e) {
+            e.printStackTrace();
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
