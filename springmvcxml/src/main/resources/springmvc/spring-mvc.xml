@@ -45,7 +45,8 @@
     提供ConversionService实例对表单参数类型转换，支持使用@NumBerFormatannotation和@DateTimeFormat注解格式化数据，
     支持@Valid注解对JavaBean实例进行JSR 303验证，支持使用@RequestBody和@ResponseBody注解-->
     <!--使用文档帮助https://docs.spring.io/spring/docs/current/spring-framework-reference/index.html-->
-    <mvc:annotation-driven conversion-service="conversionServiceFactoryBean" />
+    <!--注解驱动打开-->
+    <mvc:annotation-driven conversion-service="conversionServiceFactoryBean" /><!--可以添加validator-->
     <!--如果请求不在资源映射时，会使用容量的默认servlet去处理，dispatcher处理的时/*所有资源，
     解决静态资源访问的处理对策，该配置会让handlerAdapters 缺少AnnotationMethodHandlerAdapter.造成对控制器映射适配失效 -->
     <mvc:default-servlet-handler/>
@@ -55,6 +56,17 @@
         <!--自定义类型转换器-->
         <bean>myStringToBeanConverter</bean>
     </util:list>
+
+    <!--用来配置转换器和自定义严重以及属性编辑器-->
+<!--    <bean id="customBinder" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+        <property name="conversionService" ref="conversionServiceFactoryBean"></property>
+        <property name="validator" ref=""></property>
+        <property name="propertyEditorRegistrars">
+            <list>
+                <ref bean=""></ref>
+            </list>
+        </property>
+    </bean>-->
     <!--如果想用spring 默认转换类型FormattingConversionServiceFactoryBean,因为annotation-driven添加的Convertes默认转换器就是FormattingConversionServiceFactory-->
     <bean id="conversionServiceFactoryBean"
           class="org.springframework.format.support.FormattingConversionServiceFactoryBean"
