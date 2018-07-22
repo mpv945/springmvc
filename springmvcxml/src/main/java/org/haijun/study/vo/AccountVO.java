@@ -19,7 +19,7 @@ public class AccountVO {
     @NotBlank
     private String name;
 
-    @Email
+    @Email//(message = "{items.email.valid.msg}")直接指定消息内容，通过占位
     private String email;
 
     /*日期格式化 前端字符串转date*/

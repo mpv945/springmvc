@@ -64,6 +64,7 @@
 
 	<servlet-mapping>
 		<servlet-name>dispatcher</servlet-name>
+		<!--也可以配置*.do或者*.action-->
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	<!--web.xml中，这段配置要放在所有filter的最前面-->
