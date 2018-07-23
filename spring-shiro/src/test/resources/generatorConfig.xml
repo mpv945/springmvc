@@ -37,9 +37,9 @@
 
         <!--各个参数具体说明查看https://blog.csdn.net/zsq520520/article/details/50948926-->
         <!--自动生成的*Mapper.java存放路径 -->
-<!--        <javaClientGenerator type="XMLMAPPER" targetPackage="org.haijun.study.dao"  targetProject="src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="org.haijun.study.dao"  targetProject="src/main/java">
             <property name="enableSubPackages" value="true" />
-        </javaClientGenerator>-->
+        </javaClientGenerator>
 
 <!--        <table schema="DB2ADMIN" tableName="ALLTYPES" domainObjectName="Customer" >
             <property name="useActualColumnNames" value="true"/>
