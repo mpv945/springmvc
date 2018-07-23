@@ -21,7 +21,9 @@ import org.mybatis.generator.internal.DefaultCommentGenerator;
 public class MyCommentGenerator extends DefaultCommentGenerator {
     private Properties properties;
     private Properties systemPro;
+    // 时间戳
     private boolean suppressDate;
+    // 定义一个是否使用修改后的模式的标识
     private boolean suppressAllComments;
     private String currentDateStr;
     public MyCommentGenerator() {
@@ -39,6 +41,7 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
     /**
      * Adds a suitable comment to warn users that the element was generated, and
      * when it was generated.
+     * mapping原始注释
      */
     public void addComment(XmlElement xmlElement) {
         return;
@@ -117,6 +120,7 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
         }
 
     }
+    // 设置实体类的属性注释
     public void addFieldComment(Field field, IntrospectedTable introspectedTable,
                                 IntrospectedColumn introspectedColumn) {
         if (suppressAllComments) {
@@ -125,7 +129,7 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
             StringBuilder sb = new StringBuilder();
             field.addJavaDocLine("/**");
             sb.append(" * ");
-            sb.append(introspectedColumn.getRemarks());
+            sb.append(introspectedColumn.getRemarks());//注释内容
             field.addJavaDocLine(sb.toString());
             // addJavadocTag(field, false);
             field.addJavaDocLine(" */");
@@ -159,14 +163,18 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
         field.addJavaDocLine(sb.toString());
         field.addJavaDocLine(" */");
     }
+    // 去掉mapper原始注释
     public void addGeneralMethodComment(Method method, IntrospectedTable introspectedTable) {
         if (suppressAllComments) {
             return;
+        }else {
+            super.addGeneralMethodComment(method, introspectedTable);
         }
         // method.addJavaDocLine("/**");
         // addJavadocTag(method, false);
         // method.addJavaDocLine(" */");
     }
+    // 设置实体类 getter注释
     public void addGetterComment(Method method, IntrospectedTable introspectedTable,
                                  IntrospectedColumn introspectedColumn) {
         if (suppressAllComments) {
@@ -186,6 +194,7 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
         // addJavadocTag(method, false);
         method.addJavaDocLine(" */");
     }
+    // 设置实体类 setter注释
     public void addSetterComment(Method method, IntrospectedTable introspectedTable,
                                  IntrospectedColumn introspectedColumn) {
         if (suppressAllComments) {
@@ -209,6 +218,7 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
     @Deprecated
     public void addClassComment(InnerClass innerClass, IntrospectedTable introspectedTable, boolean markAsDoNotDelete) {
     }
+    // 导入包 和类的注释
     public void addModelClassComment(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         topLevelClass.addImportedType("javax.persistence.Column");
         topLevelClass.addImportedType("javax.persistence.Id");
@@ -237,8 +247,9 @@ public class MyCommentGenerator extends DefaultCommentGenerator {
     public static String toLowerCaseFirstOne(String s) {
         if (Character.isLowerCase(s.charAt(0)))
             return s;
-        else
+        else{
             return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
+        }
     }
     public void addGeneralMethodAnnotation(Method method, IntrospectedTable introspectedTable,
                                            Set<FullyQualifiedJavaType> imports) {
