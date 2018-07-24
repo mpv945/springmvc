@@ -1,12 +1,11 @@
 package org.haijun.study.aop;
 
 import lombok.extern.log4j.Log4j2;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -16,6 +15,18 @@ import javax.servlet.http.HttpServletRequest;
 @Log4j2
 public class ConvertRequestDataAop {
 
+    /**
+     * 参考https://www.cnblogs.com/zmxie/p/3399629.html
+     * 后置通知，用户注册成功后，将注册数据信息发送到神策数据进行分析
+     * @param joinPoint 接入点
+     * @param result 目标方法的返回结果
+     */
+/*    @AfterReturning(value = "execution(* me.sui.user.rest.StudentRestController.register(..)))",returning = "result")
+    public void afterMethod(JoinPoint joinPoint, Object result){
+        if((boolean) result){
+
+        }
+    }*/
     //切入点 @Pointcut("execution(public * *(..)) && @annotation(demo.APM)")
     @Pointcut("@annotation(org.haijun.study.annotation.ConvertRequestData)")
     public void myPoint() {}

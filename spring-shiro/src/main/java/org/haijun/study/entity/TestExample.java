@@ -3,6 +3,9 @@ package org.haijun.study.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 生成条件查询；参考https://www.jianshu.com/p/335960d6db6a ，https://segmentfault.com/q/1010000014330706
+ */
 public class TestExample {
     /**
      * t_test

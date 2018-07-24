@@ -25,7 +25,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<!--<param-value>classpath:spring-root.xml,classpath:springmvc/spring-*.xml</param-value>-->
-		<param-value>classpath:spring-root.xml</param-value>
+		<param-value>classpath:spring-config/spring-*.xml</param-value>
 	</context-param>
 
 	<!--java 配置-->
@@ -51,19 +51,9 @@
 		<!--Spring MVC中DispatcherServlet默认使用WebApplicationContext作为上下文，Spring默认配置文件为“/WEB-INF/[servlet名字]-servlet.xml”。-->
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:springmvc/spring-*.xml</param-value>
+			<param-value>classpath:spring-mvc.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
-		<multipart-config>
-			<!--location：本地资源路径，必须是webapp根目录下的路径-->
-			<!--<location>/tmp/spittr/uploads</location>-->
-			<!-- 上传文件的大小限制，比如下面表示 5 M -->
-			<max-file-size>5242880</max-file-size>
-			<!-- 一次表单提交中文件的大小限制，必须下面代表 10 M -->
-			<max-request-size>10485760</max-request-size>
-			<!-- 多大的文件会被自动保存到硬盘上。0 代表所有 -->
-			<file-size-threshold>0</file-size-threshold>
-		</multipart-config>
 	</servlet>
 
 	<servlet-mapping>
@@ -92,17 +82,17 @@
 	</filter-mapping>
 
 
-	<!--用于将POST 转换成POST 或者DELETE以及PUT-->
-	<filter>
-		<filter-name>httpMethodFilter</filter-name>
-		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	<!--DelegatingFilterProxy 类将通过springSessionRepositoryFilter 这个名称去查找Spring容器中配置的Bean并将其转换为过滤器，
+	对于调用DelegatingFilterProxy的每个请求，将调用springSessionRepositoryFilter这个过滤器。代理name指定的filter
+	https://blog.csdn.net/u011150002/article/details/72403720-->
+<!--	<filter>
+		<filter-name>mapperFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>httpMethodFilter</filter-name>
+		<filter-name>mapperFilter</filter-name>
 		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-
+	</filter-mapping>-->
 
 	
 </web-app>

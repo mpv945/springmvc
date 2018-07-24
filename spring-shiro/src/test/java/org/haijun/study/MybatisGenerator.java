@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 生成mybatis文档
+ * 生成mybatis文档；官网http://www.mybatis.org/mybatis-3/zh/index.html；http://www.mybatis.org/spring/zh/factorybean.html
+ * mysql 8  docker打开方式 https://blog.csdn.net/xinpengfei521/article/details/80403965
  */
 public class MybatisGenerator {
 

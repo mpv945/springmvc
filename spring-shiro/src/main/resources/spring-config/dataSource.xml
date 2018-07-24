@@ -21,7 +21,7 @@
     </bean>-->
 
 
-    <!-- 开发环境 -->
+    <!-- 开发环境 web.xml 配置spring.profiles.active -->
     <beans profile="development">
         <util:properties id="devDb" location="classpath:properties/db-development.properties" />
         <!--tomcat jdbc pool数据源配置-->
