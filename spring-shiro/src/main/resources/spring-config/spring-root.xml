@@ -7,7 +7,7 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!--spring 配置为父配置上下文，可以共享，但是不能访问子配置的上下文内容-->
-<!--    自定义验证：http://www.baeldung.com/spring-mvc-custom-validator
+<!--    自定义验证（参考实现类RegexpURLValidator）：http://www.baeldung.com/spring-mvc-custom-validator
     https://blog.csdn.net/poortess/article/details/78136170
     https://www.ibm.com/developerworks/cn/java/j-cn-hibernate-validator/index.html
     https://docs.spring.io/spring/docs/4.1.x/spring-framework-reference/html/validation.html-->
