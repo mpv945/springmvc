@@ -34,7 +34,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * 需要引入spring-data-jpa和hibernate-core
+ * 需要引入spring-data-jpa和hibernate-core;hibernate 5参考https://howtodoinjava.com/spring5/webmvc/spring5-mvc-hibernate5-example/
  * @author zhenx
  *
  */
