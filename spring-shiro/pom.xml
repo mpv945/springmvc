@@ -152,4 +152,48 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <!--<groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>-->
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat8-maven-plugin</artifactId>
+                <version>3.0-r1756463</version>
+                <configuration>
+                    <path>/</path>
+                    <port>8093</port>
+                    <!--                    <server>tomcat8</server>-->
+                </configuration>
+                <!--<executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>-->
+            </plugin>
+        </plugins>
+    </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>alfresco-public</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>alfresco-public-snapshots</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>beardedgeeks-releases</id>
+            <url>http://beardedgeeks.googlecode.com/svn/repository/releases</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

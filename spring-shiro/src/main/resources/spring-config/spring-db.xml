@@ -71,13 +71,18 @@
 
     <!--dao接口所在的包，可以到达自动注册接口，在servlet就可以直接实现，类似jpa-->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.cn.spring.learn.dao"/>
+        <property name="basePackage" value="org.haijun.study.dao"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
 
     <!-- 在容器启动时初始化一些数据,spirng boot 可以参考https://blog.csdn.net/wncnke/article/details/54906361 -->
-    <jdbc:initialize-database data-source="dataSource" enabled="true">
-        <jdbc:script execution="INIT" location=""/>
+    <!--enabled 可以读取配置文件的值enabled="#{systemProperties.INITIALIZE_DATABASE}"-->
+<!--    ignore-failures有三个值：NONE,DROPS,ALL；NONE时，不忽略任何错误，当sql执行报错时服务启动终止。
+    设置为DROPS时，忽略删除错误，如当sql中有一个删除表而表不存在，此时这个错误会被忽略。
+    设置为ALL时，忽略任何错误。
+    separator=";" 参数设置脚本执行分隔符。默认sql 为;-->
+    <jdbc:initialize-database data-source="dataSource" enabled="true" ignore-failures="ALL">
+        <jdbc:script execution="INIT" location="classpath:sql/createTable.sql"/>
     </jdbc:initialize-database>
 
 </beans>

@@ -13,6 +13,7 @@
     https://docs.spring.io/spring/docs/4.1.x/spring-framework-reference/html/validation.html-->
     <context:component-scan base-package="org.haijun.study">
         <context:exclude-filter  type="annotation" expression="org.springframework.stereotype.Controller" />
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController" />
     </context:component-scan>
 
 </beans>

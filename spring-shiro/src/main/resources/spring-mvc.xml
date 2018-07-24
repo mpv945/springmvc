@@ -11,6 +11,7 @@
     <!--spring mvc 配置只扫描控制器和DispatcherServlet相关的自定义配置。其他例如数据库和事务等配置可以放在父配置，也能访问-->
     <context:component-scan base-package="org.haijun.study" use-default-filters="false">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController" />
     </context:component-scan>
 
     <!--开启新的注解驱动，可以手动指定validator=""-->
