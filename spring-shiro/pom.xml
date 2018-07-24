@@ -99,6 +99,7 @@
             <version>5.1.4</version>
         </dependency>
         <!--通用接口。类似spring data jpa方式：https://github.com/abel533/Mapper/wiki-->
+        <!--mapper 中包含 mapper-generator-->
         <dependency>
             <groupId>tk.mybatis</groupId>
             <artifactId>mapper</artifactId>
