@@ -9,7 +9,8 @@
     <!--spring 配置为父配置上下文，可以共享，但是不能访问子配置的上下文内容-->
 <!--    自定义验证：http://www.baeldung.com/spring-mvc-custom-validator
     https://blog.csdn.net/poortess/article/details/78136170
-    https://www.ibm.com/developerworks/cn/java/j-cn-hibernate-validator/index.html-->
+    https://www.ibm.com/developerworks/cn/java/j-cn-hibernate-validator/index.html
+    https://docs.spring.io/spring/docs/4.1.x/spring-framework-reference/html/validation.html-->
     <context:component-scan base-package="org.haijun.study">
         <context:exclude-filter  type="annotation" expression="org.springframework.stereotype.Controller" />
     </context:component-scan>
