@@ -155,12 +155,12 @@
     <build>
         <plugins>
             <plugin>
-                <!--<groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.2</version>-->
                 <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+     <!--           <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat8-maven-plugin</artifactId>
-                <version>3.0-r1756463</version>
+                <version>3.0-r1756463</version>-->
                 <configuration>
                     <path>/</path>
                     <port>8093</port>
