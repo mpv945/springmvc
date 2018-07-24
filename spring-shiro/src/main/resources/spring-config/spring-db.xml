@@ -83,6 +83,7 @@
     separator=";" 参数设置脚本执行分隔符。默认sql 为;-->
     <jdbc:initialize-database data-source="dataSource" enabled="true" ignore-failures="ALL">
         <jdbc:script execution="INIT" location="classpath:sql/createTable.sql"/>
+        <jdbc:script execution="INIT" location="classpath:sql/addData.sql"/>
     </jdbc:initialize-database>
 
 </beans>
