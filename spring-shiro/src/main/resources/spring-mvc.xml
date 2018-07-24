@@ -13,7 +13,7 @@
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
     </context:component-scan>
 
-    <!--开启新的注解驱动-->
+    <!--开启新的注解驱动，可以手动指定validator=""-->
     <mvc:annotation-driven />
 
 </beans>
