@@ -11,7 +11,7 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 <!--参考书籍：https://github.com/mybatis-book/book，spring boot 使用https://github.com/abel533/MyBatis-Spring-Boot
-https://github.com/abel533/Mapper/wiki/3.config-->
+https://github.com/abel533/Mapper/wiki/3.config 或者https://www.cnblogs.com/lianggp/p/7573653.html-->
     <!--导入数据库配置-->
     <import resource="dataSource.xml" />
 
