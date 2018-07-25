@@ -70,7 +70,8 @@
     </bean>
 
     <!--dao接口所在的包，可以到达自动注册接口，在servlet就可以直接实现，类似jpa-->
-    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <!--使用 tk.mybatis :如果你项目已经使用 org. 进行了配置，只需要改成 tk. 即可。-->
+    <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="org.haijun.study.dao"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
@@ -81,7 +82,7 @@
     设置为DROPS时，忽略删除错误，如当sql中有一个删除表而表不存在，此时这个错误会被忽略。
     设置为ALL时，忽略任何错误。
     separator=";" 参数设置脚本执行分隔符。默认sql 为;-->
-    <jdbc:initialize-database data-source="dataSource" enabled="true" ignore-failures="NONE">
+    <jdbc:initialize-database data-source="dataSource" enabled="true" ignore-failures="ALL">
         <jdbc:script execution="INIT" encoding="UTF-8" location="classpath:sql/createTable.sql"/>
         <jdbc:script execution="INIT" encoding="UTF-8" location="classpath:sql/addData.sql"/>
     </jdbc:initialize-database>

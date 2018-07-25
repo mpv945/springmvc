@@ -16,7 +16,7 @@
         <!--<property name="useMapperCommentGenerator" value="false"/>-->
 
         <!--org.haijun.study.MyTkGenerator（自定义实现不生成set和get）替换，tk默认tk.mybatis.mapper.generator.MapperPlugin -->
-        <plugin type="org.haijun.study.MyTkGenerator">
+        <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
             <property name="mappers" value="tk.mybatis.mapper.common.Mapper"/>
             <property name="caseSensitive" value="true"/>
             <property name="forceAnnotation" value="true"/>
@@ -42,7 +42,7 @@
                              targetProject="src/test/java"
                              type="XMLMAPPER"/>
 
-        <table tableName="t_test" domainObjectName="Test">
+        <table tableName="t_test" domainObjectName="TkTest">
             <generatedKey column="id" sqlStatement="JDBC"/>
         </table>
 <!--        <table tableName="country">

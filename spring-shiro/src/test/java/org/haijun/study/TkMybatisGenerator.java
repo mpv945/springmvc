@@ -29,7 +29,7 @@ public class TkMybatisGenerator {
     @Test
     public void mysqlTk(){
 
-        String[] args =  new String[] { "-configfile", "C:\\Users\\zhenx\\IdeaProjects\\springmvc\\spring-shiro\\src\\test\\resources\\tk-generatorConfig.xml", "-overwrite" };
+        String[] args =  new String[] { "-configfile", "src\\test\\resources\\tk-generatorConfig.xml", "-overwrite" };
         ShellRunner.main(args);
         /*try {
             List<String> warnings = new ArrayList<String>();
