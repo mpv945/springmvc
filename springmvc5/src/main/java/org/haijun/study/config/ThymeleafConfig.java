@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 
+// 官网帮助文档https://docs.spring.io/spring/docs/5.0.0.BUILD-SNAPSHOT/spring-framework-reference/htmlsingle/
 // @EnableConfigurationProperties//开启对@ConfigurationProperties注解配置Bean的支持。把bena当作Properties来访问
 @Configuration
 @EnableWebMvc//<mvc:annotation-driven>
