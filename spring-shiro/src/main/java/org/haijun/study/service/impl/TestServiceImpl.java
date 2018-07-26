@@ -1,5 +1,8 @@
 package org.haijun.study.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.haijun.study.dao.TestMapper;
 import org.haijun.study.dao.TkTestMapper;
 import org.haijun.study.entity.Test;
@@ -25,7 +28,26 @@ public class TestServiceImpl implements ITestService {
     public List<Test> getAll() {
         TestExample te = new TestExample();
         te.createCriteria().andAgeBetween(1,100);
-        return testMapper.selectByExample(te);
+        // 第一种分页sqlSession.selectList("x.y.selectIf", null, new RowBounds(0, 10));
+        PageHelper.startPage(1, 10);//这个分页必须紧跟查询，用offsetPage方法一样
+        List<Test> ret = testMapper.selectByExample(te);
+        //用PageInfo对结果进行包装
+        PageInfo page = new PageInfo(ret);
+        //测试PageInfo全部属性
+/*        //PageInfo包含了非常全面的分页属性
+        assertEquals(1, page.getPageNum());
+        assertEquals(10, page.getPageSize());
+        assertEquals(1, page.getStartRow());
+        assertEquals(10, page.getEndRow());
+        assertEquals(183, page.getTotal());
+        assertEquals(19, page.getPages());
+        assertEquals(1, page.getFirstPage());
+        assertEquals(8, page.getLastPage());
+        assertEquals(true, page.isFirstPage());
+        assertEquals(false, page.isLastPage());
+        assertEquals(false, page.isHasPreviousPage());
+        assertEquals(true, page.isHasNextPage());*/
+        return ret;
     }
 
     /**
@@ -35,7 +57,8 @@ public class TestServiceImpl implements ITestService {
      */
     @Override
     public List<TkTest> getTkAll() {
-        return tkTestMapper.selectAll();
+        Page<TkTest> page = PageHelper.startPage(1, 10).doSelectPage(()-> tkTestMapper.selectAll());
+        return page.getResult();
     }
 
     /**

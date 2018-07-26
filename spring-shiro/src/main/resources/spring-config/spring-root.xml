@@ -15,5 +15,6 @@
         <context:exclude-filter  type="annotation" expression="org.springframework.stereotype.Controller" />
         <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController" />
     </context:component-scan>
-
+    <!--导入缓存配置文件-->
+    <!--<import resource="classpath:spring-config/cache.xml" />-->
 </beans>
