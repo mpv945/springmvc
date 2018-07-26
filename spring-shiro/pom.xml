@@ -138,6 +138,19 @@
             <version>3.2.7</version>
         </dependency>
 
+        <!--缓存,需要添加spring-context-support包，里面有很多实现 https://www.cnblogs.com/andyfengzp/p/6530322.html-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>5.0.7.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>2.10.5</version>
+        </dependency>
+
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

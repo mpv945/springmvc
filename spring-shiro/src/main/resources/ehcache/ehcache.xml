@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+    <!--当内存缓存中对象数量超过maxElementsInMemory时,将缓存对象写到磁盘缓存中(需对象实现序列化接口)-->
+    <!--path="">==用来配置磁盘缓存使用的物理路径,Ehcache磁盘缓存使用的文件后缀名是*.data和*.index-->
+    <!--<diskStore path="java.io.tmpdir"/>-->
+
+
+    <!--
+    配置提供者 启动异常https://cloud.tencent.com/developer/article/1042856
+        1、peerDiscovery，提供者方式，有两种方式：自动发现(automatic)、手动配置(manual)
+        2、rmiUrls，手动方式时提供者的地址，多个的话用|隔开
+    -->
+    <!--缓存成员发现工厂，管理cacheManager对象 -->
+<!--    timeToLive：
+    0是限制在同一个服务器
+    1是限制在同一个子网 （默认）
+    32是限制在同一个网站
+    64是限制在同一个region
+    128是限制在同一个大洲
+    255是不限制-->
+    <!--atutomatic 为自动 ；mulicastGroupAddress 广播组地址：230.0.0.1；mulicastGroupPort 广播组端口：4446
+    这样当缓存改变时,ehcache会向230.0.0.1端口4446发RMI UDP组播包-->
+    <cacheManagerPeerProviderFactory
+            class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+            properties="peerDiscovery=automatic, multicastGroupAddress=230.0.0.1, multicastGroupPort=4446,
+        multicastPacketTimeToLive=32" />
+
+
+    <!--发布：广播 ；针对cacheManager事件的监听，这里只介绍properties中的hostName、port属性，
+         这里我忽略了hostName的配置，查看他们的源码发现如果不填写hostName，
+        他们就会通过JDK中的InterAddress.getLocalHost().getHostAddress()获取本机的ip地址，
+        所以在这里我没有填写hostName的配置，方便部署到多台硬件服务器上。
+        但是如果一台已经服务器上有多个网卡，这里一定要指定hostName的IP，原因参考InterAddress源码。
+        post这里我指定的时40001，如果这里不填写port配置，ehcache就会通过ServerSocket的getLocalPort获取一个本机没有被占用的端口 -->
+    <cacheManagerPeerListenerFactory
+            class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
+            properties="port=40001" />
+
+    <!--默认缓存配置 -->
+    <defaultCache maxElementsInMemory="10000" eternal="false"
+                  timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="false"
+                  maxElementsOnDisk="10000000" diskPersistent="false"
+                  diskExpiryThreadIntervalSeconds="120" memoryStoreEvictionPolicy="LRU" />
+
+    <!--自定义缓存配置1 如果不是集群，只配默认和自定义缓存配置就好，其他去掉-->
+    <!--name=================缓存名称,cache的唯一标识(ehcache会把这个cache放到HashMap里)-->
+    <!--maxElementsInMemory==内存缓存中最多可以存放的元素数量,若放入Cache中的元素超过这个数值,则有以下两种情况
+        1)若overflowToDisk=true,则会将Cache中多出的元素放入磁盘文件中
+        2)若overflowToDisk=false,则根据memoryStoreEvictionPolicy策略替换Cache中原有的元素-->
+    <!--maxElementsOnDisk====磁盘缓存中最多可以存放的元素数量,0表示无穷大-->
+    <!--eternal==============缓存中对象是否永久有效,即是否永驻内存,true时将忽略timeToIdleSeconds和timeToLiveSeconds-->
+    <!--timeToIdleSeconds====缓存数据在失效前的允许闲置时间(单位:秒),仅当eternal=false时使用,默认值是0表示可闲置时间无穷大,此为可选属性
+        即访问这个cache中元素的最大间隔时间,若超过这个时间没有访问此Cache中的某个元素,那么此元素将被从Cache中清除-->
+    <!--timeToLiveSeconds====缓存数据在失效前的允许存活时间(单位:秒),仅当eternal=false时使用,默认值是0表示可存活时间无穷大
+        即Cache中的某元素从创建到清楚的生存时间,也就是说从创建开始计时,当超过这个时间时,此元素将从Cache中清除-->
+    <!--diskPersistent=======是否持久化磁盘缓存,当这个属性的值为true时,系统在初始化时会在磁盘中查找文件名为cache名称,后缀名为index的文件
+        这个文件中存放了已经持久化在磁盘中的cache的index,找到后会把cache加载到内存
+        要想把cache真正持久化到磁盘,写程序时注意执行net.sf.ehcache.Cache.put(Element element)后要调用flush()方法-->
+    <!--diskExpiryThreadIntervalSeconds==磁盘缓存的清理线程运行间隔,默认是120秒-->
+    <!--diskSpoolBufferSizeMB============设置DiskStore（磁盘缓存）的缓存区大小,默认是30MB-->
+    <!--memoryStoreEvictionPolicy========内存存储与释放策略,即达到maxElementsInMemory限制时,Ehcache会根据指定策略清理内存
+        共有三种策略,分别为LRU(最近最少使用)、LFU(最常用的)、FIFO(先进先出)-->
+    <cache name="myCache" maxElementsInMemory="10000"
+           maxElementsOnDisk="10000" eternal="false" overflowToDisk="false"
+           diskSpoolBufferSizeMB="20" timeToIdleSeconds="7200" timeToLiveSeconds="7200"
+           diskPersistent="false" memoryStoreEvictionPolicy="LFU">
+
+        <!--监听缓存事件，缓存移除、修改的时候同步其他服务器（Tomcat）的缓存，时间限制，具体属性不在这里说明 -->
+        <!--这个工厂支持以下属性 replicatePuts=true | false – 当一个新元素增加到缓存中的时候是否要复制到其他的peers。默认是true。
+        replicateUpdates=true | false – 当一个已经在缓存中存在的元素被覆盖时是否要进行复制。默认是true。
+        replicateRemovals= true | false – 当元素移除的时候是否进行复制。默认是true。
+        replicateAsynchronously=true | false – 复制方式是异步的指定为true时，还是同步的，指定为false时。默认是true。
+        replicatePutsViaCopy=true | false – 当一个新增元素被拷贝到其他的cache中时是否进行复制指定为true时为复制，默认是true。
+        replicateUpdatesViaCopy=true | false – 当一个元素被拷贝到其他的cache中时是否进行复制指定为true时为复制，默认是true。
+        asynchronousReplicationIntervalMillis=1000-->
+        <cacheEventListenerFactory
+                class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                properties="replicateAsynchronously=true,
+                replicatePuts=true,
+                replicateUpdates=true,
+                replicateUpdatesViaCopy=false,
+                replicateRemovals=true " />
+        <!--工厂是指启动是指一启动就同步数据，服务器（Tomcat）启动就同步其他服务器（Tomcat）中的缓存，时间限制，具体属性不再这里说明，用于在初始化缓存，以及自动设置 -->
+        <bootstrapCacheLoaderFactory
+                class="net.sf.ehcache.distribution.RMIBootstrapCacheLoaderFactory" />
+    </cache>
+
+</ehcache>

@@ -7,6 +7,7 @@ import org.haijun.study.entity.TestExample;
 import org.haijun.study.entity.TkTest;
 import org.haijun.study.service.ITestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,11 +41,45 @@ public class TestServiceImpl implements ITestService {
     /**
      * 添加
      *
-     * @param obj
+     * @param tkTest
      * @return
      */
     @Override
-    public boolean add(TkTest obj) {
-        return tkTestMapper.insert(obj)>0;
+    // https://blog.csdn.net/whatlookingfor/article/details/51833378/ 或者https://www.cnblogs.com/coprince/p/5984816.html
+    //@CachePut(value = "myCache",key="#id" ,condition = "#result")// 支持SpELhttps://blog.csdn.net/ya_1249463314/article/details/68484422
+    public boolean add(TkTest tkTest) {
+        return tkTestMapper.insert(tkTest)>0;
+    }
+
+
+    /**
+     * 删除操作
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public boolean remove(Long id) {
+        return false;
+    }
+
+    /**
+     * 更新
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public boolean update(Long id) {
+        return false;
+    }
+
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    public TkTest getById(Long id) {
+        return null;
     }
 }

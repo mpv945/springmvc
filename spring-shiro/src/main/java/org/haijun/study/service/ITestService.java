@@ -28,4 +28,25 @@ public interface ITestService {
      * @return
      */
     boolean add(TkTest obj);
+
+    /**
+     * 删除操作
+     * @param id
+     * @return
+     */
+    boolean remove(Long id);
+
+    /**
+     * 更新
+     * @param id
+     * @return
+     */
+    boolean update(Long id);
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    TkTest getById(Long id);
 }

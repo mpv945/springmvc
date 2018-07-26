@@ -21,7 +21,7 @@ public class TestController {
     @Autowired
     ITestService testService;
 
-    @GetMapping("/selectAll")
+    @GetMapping("/selectRange")
     public List<Test> test(){
         return testService.getAll();
     }
