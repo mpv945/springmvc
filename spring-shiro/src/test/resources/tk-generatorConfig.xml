@@ -8,6 +8,7 @@
     <!--读取配置-->
     <properties resource="properties/db.properties"/>
 
+    <!--MyBatis3 和 MyBatis3Simple -->
     <context id="Mysql" targetRuntime="MyBatis3Simple" defaultModelType="flat">
 
         <property name="javaFileEncoding" value="UTF-8"/>

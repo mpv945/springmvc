@@ -12,6 +12,8 @@ import org.haijun.study.service.ITestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.weekend.Weekend;
 
 import java.util.List;
 
@@ -26,6 +28,9 @@ public class TestServiceImpl implements ITestService {
 
     @Override
     public List<Test> getAll() {
+
+
+        // 自定义Example
         TestExample te = new TestExample();
         te.createCriteria().andAgeBetween(1,100);
         // 第一种分页sqlSession.selectList("x.y.selectIf", null, new RowBounds(0, 10));
@@ -57,6 +62,22 @@ public class TestServiceImpl implements ITestService {
      */
     @Override
     public List<TkTest> getTkAll() {
+        //部门查询部分 旧的Example
+  /*      Example example = new Example(User.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("departmentId", departmentId);
+        weekend.and(criteria)*/;
+
+        // 新的 Weekend 支持jdk 8   lambda
+        Weekend<Test> wd = Weekend.of(Test.class);
+        wd.weekendCriteria().andBetween(Test::getAge,1,100).andIsNotNull(Test::getId);
+
+        Weekend<Test> wd1 = Weekend.of(Test.class);
+        wd1.weekendCriteria().andIsNotNull(Test::getAge).orIsNotNull(Test::getName);
+
+        wd.and(wd1.createCriteria());// wd.or(); 会把两个对象的条件() and ()
+        //List<TkTest> ret = tkTestMapper.selectByExample(wd);
+
         Page<TkTest> page = PageHelper.startPage(1, 10).doSelectPage(()-> tkTestMapper.selectAll());
         return page.getResult();
     }

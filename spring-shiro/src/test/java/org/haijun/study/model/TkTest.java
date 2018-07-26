@@ -5,8 +5,9 @@ import javax.persistence.*;
 @Table(name = "`t_test`")
 public class TkTest {
     /**
-     * 主键
+     * 涓婚敭
      */
+    @Id
     @Column(name = "`id`")
     @GeneratedValue(generator = "JDBC")
     private Long id;
@@ -30,18 +31,18 @@ public class TkTest {
     private Integer age;
 
     /**
-     * 获取主键
+     * 获取涓婚敭
      *
-     * @return id - 主键
+     * @return id - 涓婚敭
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * 设置主键
+     * 设置涓婚敭
      *
-     * @param id 主键
+     * @param id 涓婚敭
      */
     public void setId(Long id) {
         this.id = id;
