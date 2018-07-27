@@ -8,6 +8,7 @@
     <!--导入数据库配置-->
     <import resource="dataSource.xml" />
 
+    <import resource="database-config.xml" />
     <!-- 配置事务管理器，注意这里的dataSource和SqlSessionFactoryBean的dataSource要一致，不然事务就没有作用了 -->
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />

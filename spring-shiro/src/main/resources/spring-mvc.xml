@@ -17,4 +17,8 @@
     <!--开启新的注解驱动，可以手动指定validator=""-->
     <mvc:annotation-driven />
 
+    <!--springmvc的配置中配置一遍,Controller中的@Value注解便能取到值了.-->
+    <context:property-placeholder
+            properties-ref="applicationProperties" file-encoding="UTF-8" ignore-unresolvable="false"/>
+
 </beans>

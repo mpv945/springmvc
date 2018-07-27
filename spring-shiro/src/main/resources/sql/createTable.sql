@@ -8,4 +8,13 @@ ALTER TABLE `t_test`
   ADD PRIMARY KEY (`id`);
 ALTER TABLE `t_test`
   MODIFY `id` bigint(18) NOT NULL AUTO_INCREMENT COMMENT '主键';
+CREATE TABLE `t_properties`  (
+  `id` int(6) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `key_` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `value_` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `createDate` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `key-unique`(`key_`) USING BTREE COMMENT 'key 不能重复'
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;

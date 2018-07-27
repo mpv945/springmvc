@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>从数据库装入配置到 propertyConfigurer</description>
+
+    <!--引用数据库当中的配置属性,ignore-unresolvable="false" 表示如果获取不到配置，提示异常， -->
+    <context:property-placeholder
+            properties-ref="applicationProperties" file-encoding="UTF-8" ignore-unresolvable="false"/>
+
+    <bean name="applicationProperties" class="org.haijun.study.tools.CommonsConfigurationFactory">
+        <constructor-arg ref="databaseConfiguration" />
+    </bean>
+
+    <bean name="databaseConfiguration" class="org.apache.commons.configuration2.DatabaseConfiguration">
+        <property name="dataSource" ref="dataSource" />
+        <property name="table" value="t_properties" />
+        <property name="keyColumn" value="key_" />
+        <property name="valueColumn" value="value_" />
+        <!--<property name="configurationNameColumn" value="name" />&lt;!&ndash;组名&ndash;&gt;-->
+    </bean>
+
+    <!--依赖jar-->
+<!--    <dependency>
+        <groupId>org.springmodules</groupId>
+        <artifactId>jakarta-commons</artifactId>
+        <version>0.8</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-configuration</groupId>
+        <artifactId>commons-configuration</artifactId>
+        <version>1.10</version>
+    </dependency>-->
+</beans>
