@@ -41,6 +41,12 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <!--连接redis-->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>2.0.9.RELEASE</version>
+        </dependency>
         <!--数据库的事务和连接-->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -106,7 +112,8 @@
             <version>4.0.3</version>
         </dependency>
 
-        <!--shiro 如果下载全部 shiro-all； 权限控制 https://blog.csdn.net/pengjwhx/article/details/78019094 -->
+        <!--shiro 如果下载全部 shiro-all； 权限控制 https://blog.csdn.net/pengjwhx/article/details/78019094
+         spring cloud ：https://gitee.com/vmaps/springcloud-app-->
         <dependency>
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-core</artifactId>

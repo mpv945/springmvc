@@ -59,6 +59,7 @@
 	<servlet-mapping>
 		<servlet-name>dispatcher</servlet-name>
 		<!--也可以配置*.do或者*.action-->
+		<!--可以配置*.do或*.action，所有请求的url扩展名为.do或.action由springmvc解析，此种方法常用 不可以/*，如果配置/*，返回jsp也由springmvc解析，这是不对的。-->
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	<!--web.xml中，这段配置要放在所有filter的最前面-->
@@ -93,6 +94,28 @@
 		<filter-name>mapperFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>-->
+
+
+	<!-- shiro的filter -->
+	<!-- shiro过虑器，DelegatingFilterProxy通过代理模式将spring容器中的bean和filter关联起来 -->
+	<filter>
+		<filter-name>shiroFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<!-- 设置true由servlet容器控制filter的生命周期，"targetFilterLifecycle"为True,则spring来管理Filter.init()和Filter.destroy();若为false,则这两个方法失效!! -->
+		<init-param>
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<!-- 设置spring容器filter的bean id，如果不设置则找与filter-name一致的bean-->
+		<init-param>
+			<param-name>targetBeanName</param-name>
+			<param-value>shiroFilter</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>shiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
 	
 </web-app>
