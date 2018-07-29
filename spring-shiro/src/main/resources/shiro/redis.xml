@@ -16,12 +16,16 @@
         <property name="hostName" value="127.0.0.1" />
         <property name="port" value="6379" />
         <!--<property name="password"></property>-->
-
+    </bean>
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="100" />
+        <property name="maxTotal" value="600" />
     </bean>
 
-    <!-- Spring-redis连接池管理工厂 -->
+    <!-- Spring-redis连接池管理工厂，集群配置https://www.cnblogs.com/EasonJim/p/7805297.html 和 https://blog.csdn.net/adsadadaddadasda/article/details/78829337 -->
     <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
         <constructor-arg ref="poolConfig" />
+        <constructor-arg ref="jedisPoolConfig" />
     </bean>
 
     <!-- 缓存序列化方式 -->

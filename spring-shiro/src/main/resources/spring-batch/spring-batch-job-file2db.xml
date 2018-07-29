@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+	http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>解析文件插入数据库</description>
+
+    <batch:job id="readFile2DBJob">
+        <batch:step id="readFile2DBStep">
+            <batch:tasklet>
+                <batch:chunk reader="logReader" writer="mysqlItemWriter" commit-interval="1000">
+                    <!-- 发生这些异常时，直接跳过继续处理,skippable-exception-classes必须要配合skip-limit属性使用
+                    <batch:skippable-exception-classes>
+                        <batch:include class="org.springframework.batch.item.file.FlatFileParseException"/>
+                    </batch:skippable-exception-classes>
+                     -->
+                </batch:chunk>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+
+    <!-- 文件读取Reader -->
+    <bean id="logReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <!-- 要读取的资源文件 -->
+        <property name="resource" value="file:/my/access.log"></property>
+        <!-- 行处理 -->
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <!-- 行处理bean -->
+                <property name="lineTokenizer" ref="accessLineTokenizer"></property>
+                <!-- 行映射bean -->
+                <property name="fieldSetMapper">
+                    <!-- 通过lineTokenizer解析的结果会自动填充accessBean对象 -->
+                    <bean class="org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper">
+                        <property name="prototypeBeanName" value="accessBean"></property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- mysql Write -->
+    <bean id="mysqlItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <!-- 数据源，这里使用了与spring batch元数据表同一个数据源，也可以根据实际情况换成任意数据源 -->
+        <property name="dataSource" ref="dataSource" />
+        <!-- 插入表的sql语句 -->
+        <property name="sql">
+            <value>
+                <![CDATA[
+               INSERT INTO access
+                    (date_str, `path`, userCode, `time`, userAgent)
+                    VALUES(:dateStr, :path, :userCode, :time, :userAgent)
+            ]]>
+            </value>
+        </property>
+        <!-- 匹配sql参数名与实体类accessBean属性 -->
+        <property name="itemSqlParameterSourceProvider">
+            <bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider" />
+        </property>
+    </bean>
+
+    <!-- 行解析 -->
+    <bean id="accessLineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <!-- 行按逗号分隔 -->
+        <property name="delimiter" value=","></property>
+        <!-- 分隔后的字段对应的key，注意顺序。这里配置5个，说明一行是由5部分组成的，如果某行逗号分隔后是4或者6，就会报错 -->
+        <property name="names">
+            <list>
+                <value>dateStr</value>
+                <value>path</value>
+                <value>userCode</value>
+                <value>time</value>
+                <value>userAgent</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>

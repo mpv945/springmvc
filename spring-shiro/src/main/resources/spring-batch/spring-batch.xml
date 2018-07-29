@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--https://gitee.com/heichong/spring-batch-demo
+    https://www.jianshu.com/p/47b715fd11e2
+    https://baijiahao.baidu.com/s?id=1593617060605638352&wfr=spider&for=pc
+    https://www.cnblogs.com/Leo_wl/p/6139576.html
+    https://www.cnblogs.com/treeliang/p/3340208.html
+    https://www.jianshu.com/p/4f0b59924733
+    http://www.zuidaima.com/share/3689422626819072.htm
+    https://www.cnblogs.com/jiafuwei/p/6145280.html
+    https://www.cnblogs.com/SpaceAnt/p/6354446.html
+    -->
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath:batch.properties" />
+    <!-- 扫描的包名 -->
+    <context:component-scan base-package="com.me.springbatch" />
+    <!--
+       初始化脚本，主要用来创建spring-batch运行时的数据，应用生成环境时应该去掉此配置，手工创建下对应的表
+       spring-batch本身job运行需要的表的创建脚本，spring-batch.jar中默认提供了各种数据库的DDL语句
+
+    -->
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="${batch.schema.script.drop}" />
+        <jdbc:script location="${batch.schema.script}" />
+    </jdbc:initialize-database>
+    <!-- 数据源：spring batch 本身所依赖的数据源，记录运行参数及过程信息 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="${batch.jdbc.driver}"></property>
+        <property name="url" value="${batch.jdbc.url}"></property>
+        <property name="username" value="${batch.jdbc.user}"></property>
+        <property name="password" value="${batch.jdbc.password}"></property>
+    </bean>
+    <!-- spring batch 本身所依赖的事务管理,使用spring batch命名空间，transactional advice（事务AOP）会被自动创建 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 定义batch对象：jobRepository -->
+    <batch:job-repository id="jobRepository" />
+    <!-- 定义batch对象：jobLauncher -->
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"></property>
+    </bean>
+
+    <!-- 实体bean scope="prototype"非单例-->
+    <bean id="accessBean" class="com.me.springbatch.support.AccessBean" scope="prototype"></bean>
+
+    <import resource="classpath:/META-INF/spring/*.xml" />
+</beans>

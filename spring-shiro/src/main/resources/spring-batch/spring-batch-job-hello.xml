@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+	http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>Hello Job</description>
+
+    <batch:job id="helloJob">
+        <batch:step id="helloStep">
+            <batch:tasklet>
+                <!-- commit-interval:事务批量提交数 -->
+                <batch:chunk reader="helloItemReader" processor="helloItemProcessor" writer="helloItemWriter"
+                             commit-interval="1" />
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="helloItemReader" class="com.me.springbatch.hello.HelloItemReader"></bean>
+    <bean id="helloItemWriter" class="com.me.springbatch.hello.HelloItemWriter"></bean>
+    <bean id="helloItemProcessor" class="com.me.springbatch.hello.HelloItemProcessor"></bean>
+
+</beans>
