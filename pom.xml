@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--        同步git。首先根据项目名在git上新建项目名
+        如果windows 上打开git CMD；如果linux 直接安装git
+        第一步执行 Git全局设置git config &#45;&#45;global user.name“xiehaijun” 或者 git config &#45;&#45;global user.email“xiehaijun@fulan.com.cn”
+        第二部克隆到本地git clone http://shared-gitlab-elb-64450908.cn-north-1.elb.amazonaws.com.cn/xiehaijun/my_新建项目.git
+        第三部 cd 本地项目路径（把前面eclipse下生成的项目文件copy到git克隆的目录下）
+        第四部上传 git add .；  然后执行git commit -m "Initial commit"；最后执行git push -u origin master
+        如果本地存在项目直接上传到git，可以使用以下步骤
+        cd existing_repo
+        git remote add origin http://shared-gitlab-elb-64450908.cn-north-1.elb.amazonaws.com.cn/xiehaijun/my_新项目名称.git
+        git push -u origin &#45;&#45;all
+        git push -u origin &#45;&#45;tags
+        切换到某一分支：git checkout  分支名称
+        合并分支：git merge 原分支  目标分支
+        下载更下到本地 git pull origin master-->
+
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
