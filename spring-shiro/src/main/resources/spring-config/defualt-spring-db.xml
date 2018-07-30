@@ -89,7 +89,8 @@ https://github.com/abel533/Mapper/wiki/3.config-->
 
     </bean>
 
-    <!-- mybatis spring sqlSessionTemplate,使用时直接让spring注入即可：参考http://www.mybatis.org/spring/zh/sqlsession.html#SqlSessionTemplate -->
+    <!-- mybatis spring sqlSessionTemplate,使用时直接让spring注入即可：参考http://www.mybatis.org/spring/zh/sqlsession.html#SqlSessionTemplate
+     http://www.mybatis.org/spring/zh/sqlsession.html-->
     <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
         <constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
     </bean>

@@ -13,6 +13,7 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
+import org.haijun.study.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.itcast.ssm.po.ActiveUser;
@@ -40,7 +41,7 @@ public class CustomRealm extends AuthorizingRealm {
 	
 	//注入service
 	@Autowired
-	private SysService sysService;
+	private IUserService userService;
 
 	// 设置realm的名称
 	@Override
@@ -49,63 +50,9 @@ public class CustomRealm extends AuthorizingRealm {
 	}
 
 	// 用于认证
-	//没有连接数据库的方法
-	/*@Override
-	protected AuthenticationInfo doGetAuthenticationInfo(
-			AuthenticationToken token) throws AuthenticationException {
-		
-		// token是用户输入的用户名和密码 
-		// 第一步从token中取出用户名
-		String userCode = (String) token.getPrincipal();
-
-		// 第二步：根据用户输入的userCode从数据库查询
-		// ....
-	
-
-		// 如果查询不到返回null
-		//数据库中用户账号是zhangsansan
-		if(!userCode.equals("zhangsansan")){//
-			return null;
-		}
-		
-		
-		// 模拟从数据库查询到密码
-		String password = "111111";
-
-		// 如果查询到返回认证信息AuthenticationInfo
-		
-		//activeUser就是用户身份信息
-		ActiveUser activeUser = new ActiveUser();
-		
-		activeUser.setUserid("zhangsan");
-		activeUser.setUsercode("zhangsan");
-		activeUser.setUsername("张三");
-		//..
-		
-		//根据用户id取出菜单
-		//通过service取出菜单 
-		List<SysPermission> menus  = null;
-		try {
-			menus = sysService.findMenuListByUserId("zhangsan");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		//将用户菜单 设置到activeUser
-		activeUser.setMenus(menus);
-		
-		
-		//将activeUser设置simpleAuthenticationInfo
-		SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(
-				activeUser, password, this.getName());
-
-		return simpleAuthenticationInfo;
-	}*/
-	
 	//realm的认证方法，从数据库查询用户信息
 	@Override
-	protected AuthenticationInfo doGetAuthenticationInfo(
-			AuthenticationToken token) throws AuthenticationException {
+	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 		
 		// token是用户输入的用户名和密码 
 		// 第一步从token中取出用户名

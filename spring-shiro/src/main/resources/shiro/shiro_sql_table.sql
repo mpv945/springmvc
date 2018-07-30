@@ -2,7 +2,8 @@
 SQLyog v10.2 
 MySQL - 5.1.72-community : Database - shiro
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -25,7 +26,7 @@ CREATE TABLE `sys_permission` (
   `sortstring` varchar(128) DEFAULT NULL COMMENT '排序号',
   `available` char(1) DEFAULT NULL COMMENT '是否可用,1：可用，0不可用',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限（许可）';
 
 /*Table structure for table `sys_role` */
 
@@ -34,7 +35,7 @@ CREATE TABLE `sys_role` (
   `name` varchar(128) NOT NULL,
   `available` char(1) DEFAULT NULL COMMENT '是否可用,1：可用，0不可用',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色';
 
 /*Table structure for table `sys_role_permission` */
 
@@ -43,7 +44,7 @@ CREATE TABLE `sys_role_permission` (
   `sys_role_id` varchar(32) NOT NULL COMMENT '角色id',
   `sys_permission_id` varchar(32) NOT NULL COMMENT '权限id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限和权限关联表';
 
 /*Table structure for table `sys_user` */
 
@@ -55,7 +56,7 @@ CREATE TABLE `sys_user` (
   `salt` varchar(64) DEFAULT NULL COMMENT '盐',
   `locked` char(1) DEFAULT NULL COMMENT '账号是否锁定，1：锁定，0未锁定',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户信息';
 
 /*Table structure for table `sys_user_role` */
 
@@ -64,7 +65,7 @@ CREATE TABLE `sys_user_role` (
   `sys_user_id` varchar(32) NOT NULL,
   `sys_role_id` varchar(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户和权限关联表';
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

@@ -5,6 +5,7 @@ import tk.mybatis.mapper.mapperhelper.MapperHelper;
 import tk.mybatis.mapper.mapperhelper.MapperTemplate;
 import tk.mybatis.mapper.mapperhelper.SqlHelper;
 
+// https://github.com/abel533/Mapper/wiki/5.extend(ExtendMapper 接口）
 public class MySelectProvider extends MapperTemplate {
 
     public MySelectProvider(Class<?> mapperClass, MapperHelper mapperHelper) {

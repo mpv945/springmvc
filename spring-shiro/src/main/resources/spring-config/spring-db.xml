@@ -86,6 +86,8 @@
     <jdbc:initialize-database data-source="dataSource" enabled="true" ignore-failures="ALL">
         <jdbc:script execution="INIT" encoding="UTF-8" location="classpath:sql/createTable.sql"/>
         <jdbc:script execution="INIT" encoding="UTF-8" location="classpath:sql/addData.sql"/>
+        <jdbc:script execution="INIT" encoding="UTF-8" location="classpath:shiro/shiro_sql_table.sql"/>
+        <jdbc:script execution="INIT" encoding="UTF-8" location="classpath:shiro/shiro_sql_table_data.sql"/>
     </jdbc:initialize-database>
 
 </beans>

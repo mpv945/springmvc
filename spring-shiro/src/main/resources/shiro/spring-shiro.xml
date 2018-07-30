@@ -78,7 +78,7 @@
 	</bean>
 
 <!-- realm -->
-<bean id="customRealm" class="cn.itcast.ssm.shiro.CustomRealm">
+<bean id="customRealm" class="org.haijun.study.shiro.CustomRealm">
 	<!-- 将凭证匹配器设置到realm中，realm按照凭证匹配器的要求进行散列 -->
 	<property name="credentialsMatcher" ref="credentialsMatcher"/>
 </bean>
@@ -105,8 +105,7 @@
 
 <!-- 自定义form认证过虑器 -->
 <!-- 基于Form表单的身份验证过滤器，不配置将也会注册此过虑器，表单中的用户账号、密码及loginurl将采用默认值，建议配置 -->
-	<bean id="formAuthenticationFilter" 
-	class="cn.itcast.ssm.shiro.CustomFormAuthenticationFilter ">
+	<bean id="formAuthenticationFilter" class="org.haijun.study.shiro.CustomFormAuthenticationFilter">
 		<!-- 表单中账号的input名称 -->
 		<property name="usernameParam" value="username" />
 		<!-- 表单中密码的input名称 -->
