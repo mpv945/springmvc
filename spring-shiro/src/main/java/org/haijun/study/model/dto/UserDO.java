@@ -1,47 +1,34 @@
-package org.haijun.study.entity;
+package org.haijun.study.model.dto;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
-
-@Table(name = "`sys_user`")
-public class User {
+public class UserDO {
     /**
      * 主键
      */
-    @Column(name = "`id`")
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "SELECT LAST_INSERT_ID()")
     private Long id;
 
     /**
      * 账号
      */
-    @Column(name = "`usercode`")
     private String usercode;
 
     /**
      * 姓名
      */
-    @Column(name = "`username`")
     private String username;
 
     /**
      * 密码
      */
-    @Column(name = "`password`")
     private String password;
 
     /**
      * 盐
      */
-    @Column(name = "`salt`")
     private String salt;
 
     /**
      * 账号是否锁定，1：锁定，0未锁定
      */
-    @Column(name = "`locked`")
     private String locked;
 
     /**

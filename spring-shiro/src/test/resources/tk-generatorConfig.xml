@@ -47,7 +47,7 @@
 <!--        <table tableName="t_test" domainObjectName="TkTest">
             <generatedKey column="id" sqlStatement="JDBC"/>
         </table>-->
-        <table tableName="sys_permission" domainObjectName="Permission">
+<!--        <table tableName="sys_permission" domainObjectName="Permission">
             <generatedKey column="id" sqlStatement="MySql"/>
         </table>
         <table tableName="sys_role" domainObjectName="Role">
@@ -55,13 +55,13 @@
         </table>
         <table tableName="sys_role_permission" domainObjectName="RolePermission">
             <generatedKey column="id" sqlStatement="MySql"/>
-        </table>
+        </table>-->
         <table tableName="sys_user" domainObjectName="User">
             <generatedKey column="id" sqlStatement="MySql"/>
         </table>
-        <table tableName="sys_user_role" domainObjectName="UserRole">
+<!--        <table tableName="sys_user_role" domainObjectName="UserRole">
             <generatedKey column="id" sqlStatement="MySql"/>
-        </table>
+        </table>-->
 <!--        <table tableName="country">
             <generatedKey column="id" sqlStatement="JDBC"/>
         </table>-->

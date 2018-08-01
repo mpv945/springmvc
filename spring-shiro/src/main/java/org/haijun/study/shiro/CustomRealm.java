@@ -13,6 +13,8 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
+import org.haijun.study.model.dto.UserDO;
+import org.haijun.study.model.vo.ActiveUserVO;
 import org.haijun.study.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -59,34 +61,24 @@ public class CustomRealm extends AuthorizingRealm {
 		String userCode = (String) token.getPrincipal();
 
 		// 第二步：根据用户输入的userCode从数据库查询
-		SysUser sysUser = null;
-		try {
-			sysUser = sysService.findSysUserByUserCode(userCode);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		UserDO userInfo = userService.findUserByUserCode(userCode);
 
 		// 如果查询不到返回null
-		if(sysUser==null){//
+		if(userInfo==null){//
 			return null;
 		}
 		// 从数据库查询到密码
-		String password = sysUser.getPassword();
+		String password = userInfo.getPassword();
 		
 		//盐
-		String salt = sysUser.getSalt();
+		String salt = userInfo.getSalt();
 
 		// 如果查询到返回认证信息AuthenticationInfo
-		
 		//activeUser就是用户身份信息
-		ActiveUser activeUser = new ActiveUser();
-		
-		activeUser.setUserid(sysUser.getId());
-		activeUser.setUsercode(sysUser.getUsercode());
-		activeUser.setUsername(sysUser.getUsername());
-		//..
-		
+		ActiveUserVO activeUser = new ActiveUserVO();
+		activeUser.setUserId(userInfo.getId());
+		activeUser.setUserCode(userInfo.getUsercode());
+		activeUser.setUserName(userInfo.getUsername());
 		//根据用户id取出菜单
 		List<SysPermission> menus  = null;
 		try {

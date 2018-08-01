@@ -1,6 +1,7 @@
 package org.haijun.study.service;
 
-import org.haijun.study.model.po.User;
+
+import org.haijun.study.model.dto.UserDO;
 
 public interface IUserService {
 
@@ -9,7 +10,7 @@ public interface IUserService {
      * @param usercode
      * @return
      */
-    User findUserByUserCode(String usercode);
+    UserDO findUserByUserCode(String usercode);
 
 
 }
