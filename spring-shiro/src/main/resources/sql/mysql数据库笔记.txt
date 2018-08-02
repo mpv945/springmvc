@@ -1,0 +1,21 @@
+mysql中int、bigint、smallint 和 tinyint的区别详细介绍
+类型[(M)] [UNSIGNED] [ZEROFILL] 位字段类型，M表示每个值的位数，范围从1到64，M值只对ZEROFILL有效，标识不够补零几位，对类型实际位数无关
+        ALTER TABLE `表` MODIFY COLUMN `字段名` tinyint UNSIGNED ; 标识没有符号，就是没有负数
+        ZEROFILL 用户标识指定位数时，不够左边补零
+TINYINT[(M)] [UNSIGNED] [ZEROFILL]  M默认为4 ；带符号的范围是-128到127。无符号的范围是0到255。
+        TINYINT(1)的同义词。zero值被视为假。非zero值视为真。
+SMALLINT[(M)] [UNSIGNED] [ZEROFILL] M默认为6 带符号的范围是-32768到32767。无符号的范围是0到65535。
+
+MEDIUMINT[(M)] [UNSIGNED] [ZEROFILL] M默认为9 带符号的范围是-8388608到8388607。无符号的范围是0到16777215。
+INT[(M)] [UNSIGNED] [ZEROFILL]   M默认为11 带符号的范围是-2147483648到2147483647。无符号的范围是0到4294967295。
+
+
+MySQL添加字段和修改字段
+1添加表字段
+alter table [table1] add [id] int unsigned not Null auto_increment primary key COMMENT '年龄';
+2.修改某个表的字段类型及指定为空或非空
+alter table 表名称 modify 字段名称 字段类型 [是否允许非空];
+alter table 表名称 change 字段原名称 字段新名称 字段类型 [是否允许非空
+4如果要删除某一字段
+ALTER TABLE mytable DROP 字段名;
+
