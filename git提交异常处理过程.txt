@@ -1,0 +1,2 @@
+git push 提交时显示 Empty reply from server的解决办法 :
+        切换到项目目录 执行git fetch origin --prune
