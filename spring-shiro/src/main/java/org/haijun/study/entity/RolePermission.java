@@ -9,31 +9,31 @@ import javax.persistence.Table;
 public class RolePermission {
     @Column(name = "`id`")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "SELECT LAST_INSERT_ID()")
-    private String id;
+    private Long id;
 
     /**
      * 角色id
      */
     @Column(name = "`sys_role_id`")
-    private String sysRoleId;
+    private Integer sysRoleId;
 
     /**
      * 权限id
      */
     @Column(name = "`sys_permission_id`")
-    private String sysPermissionId;
+    private Long sysPermissionId;
 
     /**
      * @return id
      */
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
     /**
      * @param id
      */
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -42,7 +42,7 @@ public class RolePermission {
      *
      * @return sys_role_id - 角色id
      */
-    public String getSysRoleId() {
+    public Integer getSysRoleId() {
         return sysRoleId;
     }
 
@@ -51,7 +51,7 @@ public class RolePermission {
      *
      * @param sysRoleId 角色id
      */
-    public void setSysRoleId(String sysRoleId) {
+    public void setSysRoleId(Integer sysRoleId) {
         this.sysRoleId = sysRoleId;
     }
 
@@ -60,7 +60,7 @@ public class RolePermission {
      *
      * @return sys_permission_id - 权限id
      */
-    public String getSysPermissionId() {
+    public Long getSysPermissionId() {
         return sysPermissionId;
     }
 
@@ -69,7 +69,7 @@ public class RolePermission {
      *
      * @param sysPermissionId 权限id
      */
-    public void setSysPermissionId(String sysPermissionId) {
+    public void setSysPermissionId(Long sysPermissionId) {
         this.sysPermissionId = sysPermissionId;
     }
 }

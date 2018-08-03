@@ -42,7 +42,7 @@ public class User {
      * 账号是否锁定，1：锁定，0未锁定
      */
     @Column(name = "`locked`")
-    private String locked;
+    private Boolean locked;
 
     /**
      * 获取主键
@@ -139,7 +139,7 @@ public class User {
      *
      * @return locked - 账号是否锁定，1：锁定，0未锁定
      */
-    public String getLocked() {
+    public Boolean getLocked() {
         return locked;
     }
 
@@ -148,7 +148,7 @@ public class User {
      *
      * @param locked 账号是否锁定，1：锁定，0未锁定
      */
-    public void setLocked(String locked) {
+    public void setLocked(Boolean locked) {
         this.locked = locked;
     }
 }

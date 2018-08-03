@@ -210,6 +210,12 @@
             <version>2.10.5</version>
         </dependency>
 
+        <!--url重写 : http://www.tuckey.org/urlrewrite/-->
+        <dependency>
+            <groupId>org.tuckey</groupId>
+            <artifactId>urlrewritefilter</artifactId>
+            <version>4.0.4</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

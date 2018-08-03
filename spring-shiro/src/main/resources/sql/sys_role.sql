@@ -11,7 +11,7 @@
  Target Server Version : 50722
  File Encoding         : 65001
 
- Date: 01/08/2018 17:42:01
+ Date: 03/08/2018 09:20:48
 */
 
 SET NAMES utf8mb4;
@@ -26,6 +26,6 @@ CREATE TABLE `sys_role`  (
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `available` tinyint(1) NULL DEFAULT NULL COMMENT '是否可用,1：可用，0不可用',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

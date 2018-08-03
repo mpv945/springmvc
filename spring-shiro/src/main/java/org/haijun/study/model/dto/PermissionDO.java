@@ -1,65 +1,49 @@
-package org.haijun.study.entity;
+package org.haijun.study.model.dto;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
-
-@Table(name = "`sys_permission`")
-public class Permission {
+public class PermissionDO {
     /**
      * 主键
      */
-    @Column(name = "`id`")
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "SELECT LAST_INSERT_ID()")
     private Long id;
 
     /**
      * 资源名称
      */
-    @Column(name = "`name`")
     private String name;
 
     /**
      * 资源类型：menu,button,
      */
-    @Column(name = "`type`")
     private String type;
 
     /**
      * 访问url地址
      */
-    @Column(name = "`url`")
     private String url;
 
     /**
      * 权限代码字符串
      */
-    @Column(name = "`percode`")
     private String percode;
 
     /**
      * 父结点id
      */
-    @Column(name = "`parentid`")
     private Long parentid;
 
     /**
      * 父结点id列表串
      */
-    @Column(name = "`parentids`")
     private String parentids;
 
     /**
      * 排序号
      */
-    @Column(name = "`sortstring`")
     private String sortstring;
 
     /**
      * 是否可用,1：可用，0不可用
      */
-    @Column(name = "`available`")
     private Boolean available;
 
     /**

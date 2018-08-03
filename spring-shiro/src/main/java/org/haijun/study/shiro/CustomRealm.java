@@ -13,15 +13,11 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
+import org.haijun.study.model.dto.PermissionDO;
 import org.haijun.study.model.dto.UserDO;
 import org.haijun.study.model.vo.ActiveUserVO;
 import org.haijun.study.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import cn.itcast.ssm.po.ActiveUser;
-import cn.itcast.ssm.po.SysPermission;
-import cn.itcast.ssm.po.SysUser;
-import cn.itcast.ssm.service.SysService;
 
 /**
  * 
@@ -64,7 +60,7 @@ public class CustomRealm extends AuthorizingRealm {
 		UserDO userInfo = userService.findUserByUserCode(userCode);
 
 		// 如果查询不到返回null
-		if(userInfo==null){//
+		if(userInfo==null){
 			return null;
 		}
 		// 从数据库查询到密码
@@ -80,7 +76,7 @@ public class CustomRealm extends AuthorizingRealm {
 		activeUser.setUserCode(userInfo.getUsercode());
 		activeUser.setUserName(userInfo.getUsername());
 		//根据用户id取出菜单
-		List<SysPermission> menus  = null;
+		List<PermissionDO> menus  = null;
 		try {
 			//通过service取出菜单 
 			menus = sysService.findMenuListByUserId(sysUser.getId());

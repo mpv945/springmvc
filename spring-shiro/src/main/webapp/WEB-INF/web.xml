@@ -82,6 +82,24 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	<!--url重写，实现伪静态；默认/WEB-INF/urlrewrite.xml
+	https://www.cnblogs.com/keyi/p/6182288.html
+	https://www.cnblogs.com/dead-trap-ramble/p/3575057.html
+	https://blog.csdn.net/ygf215/article/details/4766285-->
+	<filter>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+<!--		<init-param>
+			<param-name>confPath</param-name>
+			<param-value>/WEB-INF/urlrewrite.xml</param-value>
+		</init-param>-->
+	</filter>
+	<filter-mapping>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
 
 	<!--DelegatingFilterProxy 类将通过springSessionRepositoryFilter 这个名称去查找Spring容器中配置的Bean并将其转换为过滤器，
 	对于调用DelegatingFilterProxy的每个请求，将调用springSessionRepositoryFilter这个过滤器。代理name指定的filter

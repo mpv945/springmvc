@@ -29,7 +29,7 @@ public class UserDO {
     /**
      * 账号是否锁定，1：锁定，0未锁定
      */
-    private String locked;
+    private Boolean locked;
 
     /**
      * 获取主键
@@ -121,12 +121,13 @@ public class UserDO {
         this.salt = salt;
     }
 
+
     /**
      * 获取账号是否锁定，1：锁定，0未锁定
      *
      * @return locked - 账号是否锁定，1：锁定，0未锁定
      */
-    public String getLocked() {
+    public Boolean getLocked() {
         return locked;
     }
 
@@ -135,7 +136,7 @@ public class UserDO {
      *
      * @param locked 账号是否锁定，1：锁定，0未锁定
      */
-    public void setLocked(String locked) {
+    public void setLocked(Boolean locked) {
         this.locked = locked;
     }
 }
