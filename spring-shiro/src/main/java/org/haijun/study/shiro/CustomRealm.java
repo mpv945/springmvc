@@ -79,7 +79,7 @@ public class CustomRealm extends AuthorizingRealm {
 		List<PermissionDO> menus  = null;
 		try {
 			//通过service取出菜单 
-			menus = sysService.findMenuListByUserId(sysUser.getId());
+			menus = sysService.findMenuListByUserId(userInfo.getId());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
