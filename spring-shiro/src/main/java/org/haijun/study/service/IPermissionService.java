@@ -13,4 +13,11 @@ public interface IPermissionService {
      */
     List<PermissionDO> findMenuListByUserId(Long userId);
 
+    /**
+     * 查询用户的全部授权信息
+     * @param userId
+     * @return
+     */
+    List<PermissionDO> findPermissionListByUserId(Long userId);
+
 }

@@ -1,8 +1,5 @@
 package org.haijun.study.shiro;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -16,8 +13,15 @@ import org.apache.shiro.util.ByteSource;
 import org.haijun.study.model.dto.PermissionDO;
 import org.haijun.study.model.dto.UserDO;
 import org.haijun.study.model.vo.ActiveUserVO;
+import org.haijun.study.service.IPermissionService;
 import org.haijun.study.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -40,6 +44,9 @@ public class CustomRealm extends AuthorizingRealm {
 	//注入service
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private IPermissionService permissionService;
 
 	// 设置realm的名称
 	@Override
@@ -75,17 +82,9 @@ public class CustomRealm extends AuthorizingRealm {
 		activeUser.setUserId(userInfo.getId());
 		activeUser.setUserCode(userInfo.getUsercode());
 		activeUser.setUserName(userInfo.getUsername());
-		//根据用户id取出菜单
-		List<PermissionDO> menus  = null;
-		try {
-			//通过service取出菜单 
-			menus = sysService.findMenuListByUserId(userInfo.getId());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		//将用户菜单 设置到activeUser
-		activeUser.setMenus(menus);
+		activeUser.setPermissionDOS(permissionService.findMenuListByUserId(userInfo.getId()));
 
 		//将activeUser设置simpleAuthenticationInfo
 		SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(
@@ -93,8 +92,6 @@ public class CustomRealm extends AuthorizingRealm {
 
 		return simpleAuthenticationInfo;
 	}
-	
-	
 
 	// 用于授权
 	@Override
@@ -103,27 +100,16 @@ public class CustomRealm extends AuthorizingRealm {
 		
 		//从 principals获取主身份信息
 		//将getPrimaryPrincipal方法返回值转为真实身份类型（在上边的doGetAuthenticationInfo认证通过填充到SimpleAuthenticationInfo中身份类型），
-		ActiveUser activeUser =  (ActiveUser) principals.getPrimaryPrincipal();
+		ActiveUserVO activeUser =  (ActiveUserVO) principals.getPrimaryPrincipal();
 		
 		//根据身份信息获取权限信息
 		//从数据库获取到权限数据
-		List<SysPermission> permissionList = null;
-		try {
-			permissionList = sysService.findPermissionListByUserId(activeUser.getUserid());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		List<PermissionDO> permissionList = permissionService.findPermissionListByUserId(activeUser.getUserId());
 		//单独定一个集合对象 
 		List<String> permissions = new ArrayList<String>();
-		if(permissionList!=null){
-			for(SysPermission sysPermission:permissionList){
-				//将数据库中的权限标签 符放入集合
-				permissions.add(sysPermission.getPercode());
-			}
+		if(!CollectionUtils.isEmpty(permissionList)){
+			permissions = permissionList.stream().map(PermissionDO::getPercode).filter(percode->StringUtils.isEmpty(percode)).collect(Collectors.toList());
 		}
-		
-		
 	/*	List<String> permissions = new ArrayList<String>();
 		permissions.add("user:create");//用户的创建
 		permissions.add("item:query");//商品查询权限

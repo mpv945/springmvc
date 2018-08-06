@@ -26,7 +26,7 @@ public interface PermissionMapper extends Mapper<Permission> {
             "SELECT sys_permission_id FROM sys_role_permission " +
             "<where>" +
             "<choose>" +
-            "<when test='roles != null and roles.size()>0'>" +
+            "<when test='roles != null and roles.size()>0' >" +
             "sys_role_id IN " +
             "<foreach collection='roles' open='(' close=')' separator=',' item='item' index='index'> " +
             "#{item}" + //#{orgId,jdbcType=BIGINT}
@@ -37,7 +37,10 @@ public interface PermissionMapper extends Mapper<Permission> {
             "</otherwise> " +
             "</choose> " +
             "</where> " +
-            ") "+
+            ") " +
+            "<if test=\"type != null and type != ''\">" +
+            "and type=#{type} " +
+            "</if> "+
             "</script>")
-    List<PermissionDO> findMenuListByRoles(@Param("roles") List<Long> roles);// 如果参数时map类型，不要@Param，直接取值就用key
+    List<PermissionDO> findMenuListByRoles(@Param("roles") List<Long> roles,@Param("type") String type);// 如果参数时map类型，不要@Param，直接取值就用key
 }
