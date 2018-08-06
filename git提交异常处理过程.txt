@@ -1,2 +1,8 @@
 git push 提交时显示 Empty reply from server的解决办法 :
         切换到项目目录 执行git fetch origin --prune
+
+RPC failed; curl 56 OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 10054 的解决办法
+        git config http.postBuffer 524288000
+
+出现如下错误：curl 56 OpenSSL SSL_read:SSL_ERROR_sysCALL
+        git config http.sslVerify "false"
