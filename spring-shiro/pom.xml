@@ -159,6 +159,7 @@
             <version>1.4.0</version>
         </dependency>
 
+
         <dependency>
             <groupId>org.mybatis.generator</groupId>
             <artifactId>mybatis-generator-core</artifactId>
@@ -199,6 +200,13 @@
         </dependency>
 
         <!--缓存,需要添加spring-context-support包，里面有很多实现 https://www.cnblogs.com/andyfengzp/p/6530322.html-->
+        <!--用最新的freemarker替换spring-context-support包含的freemarker版本，最先出现优先依赖-->
+        <!--参考：https://www.baeldung.com/freemarker-in-spring-mvc-tutorial-->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.28</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>

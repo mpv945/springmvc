@@ -2,6 +2,7 @@ package org.haijun.study.controller;
 
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.crypto.hash.SimpleHash;
 import org.haijun.study.exception.CustomException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

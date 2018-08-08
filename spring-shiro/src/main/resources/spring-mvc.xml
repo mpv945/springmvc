@@ -35,9 +35,32 @@ org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
 
     <!-- 配置视图解析器 要求将jstl的包加到classpath -->
     <!-- ViewResolver -->
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<!--    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/jsp/" />
         <property name="suffix" value=".jsp" />
+    </bean>-->
+    <!-- 设置freeMarker的配置文件路径 -->
+    <bean id="freemarkerConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="location" value="classpath:freemarker.properties"/>
+    </bean>
+    <!-- 配置freeMarker的模板路径 -->
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath" value="/WEB-INF/views/ftl/" />
+        <property name="defaultEncoding" value="utf-8" />
+        <property name="freemarkerSettings" ref="freemarkerConfiguration"/>
+    </bean>
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver" id="freeMarkerViewResolver">
+        <property name="cache" value="true"></property><!--控制缓存模式 - 这应该仅在调试和开发时禁用。-->
+        <!--<property name="prefix" value="" />--><!-- 上面已经配了，这里就不用配啦 -->
+        <property name="suffix" value=".ftl" />
+        <property name="contentType" value="text/html;charset=utf-8"></property>
+<!--
+        <property name="allowSessionOverride" value="true" />
+        <property name="allowRequestOverride" value="true" />
+        <property name="exposeSpringMacroHelpers" value="true" />
+        <property name="exposeRequestAttributes" value="true" />
+        <property name="exposeSessionAttributes" value="true" />
+        <property name="requestContextAttribute" value="request" />-->
     </bean>
 
     <!-- 转换器 -->
