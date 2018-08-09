@@ -1,0 +1,41 @@
+下载：http://builds.archive.org:8080/maven2/org/archive/heritrix/heritrix/3.1.1/heritrix-3.1.1-dist.zip
+
+进入到bin目录
+cd bin　　
+启动Heritrix
+./heritrix -a admin:admin
+在web界面查看https://localhost:8443　　 
+
+新建任务
+进入任务，配置xml
+		1)metadata.operatorContactUrl   你控制Heritrix的URL,一般是http://127.0.0.1
+		2)metadata.jobName 表示你的抓取名字,我们刚才创建的是test_job,那就修改为test_job
+		3)metadata.description 表示对这个抓取任务的简单描述,我们这里就描述为 firt crawl job
+		
+		在longerOverrides bean的<prop>下，输入爬行开始的URL。如http://www.giftour.com
+		
+		<bean id="metadata" class="org.archive.modules.CrawlMetadata" autowire="byName"> 里面可以配置更多
+				其中userAgentTemplate 模拟浏览器信息（是否可以设置头部信息，例如session）
+				模拟成谷歌爬虫的value="Mozilla/5.0 (compatible; Googlebot/2.1; +@OPERATOR_CONTACT_URL@) "/>，各大网站一般会放开（各大公司http://www.lrxin.com/archives-325.html）
+				百度： value="Mozilla/5.0 (compatible; Baiduspider/2.0; +@OPERATOR_CONTACT_URL@) "
+				
+		<bean id="warcWriter" class="org.archive.modules.writer.WARCWriterProcessor">
+				这个bean的class改为org.archive.modules.writer.MirrorWriterProcessor，
+				这样就下载的网页是以镜像文件的形式保存在，一般存放在项目根目录下的mirror目录下
+
+1)         Build:从无到有创建一个抓取任务
+2)         Launch:载入一个抓取任务,该抓取任务必须先存在.配置好了的话,可以在该抓取任务基础上进行增量抓取.
+3)         Pause:暂停抓取任务.不会立即停止,要各个线程
+4)         Unpause:重启抓取
+5)         Checkpoint:如同数据库的checkpoint,备份一个抓取任务.备份时会暂停
+6)         Terminate:终止抓取任务.
+7)         Teardown:Heritrix3.0可以运行多个抓取任务,点击该按钮后,当前任务会从多个任务中删除.
+
+抓取完会在bin/jobs/自己创建job名/日期/warcs/目录下压缩包 就是抓取的内容
+
+参考
+
+	https://www.jianshu.com/p/8a0ce3b34d75
+	https://blog.csdn.net/neo_liukun/article/details/7436338
+	http://guoyunsky.iteye.com/blog/1744462
+	https://blog.csdn.net/White_Idiot/article/details/80296241
