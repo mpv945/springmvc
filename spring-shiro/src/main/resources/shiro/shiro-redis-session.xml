@@ -39,6 +39,7 @@
         <property name="httpOnly" value="true"/>
     </bean>
 
+    <!--https://www.cnblogs.com/zr520/p/5009790.html     https://blog.csdn.net/jc_zhibaobao/article/details/77163964-->
     <!-- 开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 -->
     <!-- 配置以下两个bean即可实现此功能 -->
     <!-- Enable Shiro Annotations for Spring-configured beans. Only run after the lifecycleBeanProcessor has run -->

@@ -8,9 +8,9 @@
 	https://blog.csdn.net/hry2015/article/details/78245149 和https://www.cnblogs.com/liferecord/p/6880883.html
 	https://www.cnblogs.com/andyfengzp/p/6835969.html -->
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-		<welcome-file>index.htm</welcome-file>
-		<welcome-file>index.jsp</welcome-file>
+		<!--<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>-->
+		<welcome-file>/home</welcome-file>
 	</welcome-file-list>
 
 	<!-- 配置spring的profile -->
@@ -25,7 +25,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<!--<param-value>classpath:spring-root.xml,classpath:springmvc/spring-*.xml</param-value>-->
-		<param-value>classpath:spring-config/spring-*.xml</param-value>
+		<param-value>classpath:spring-config/spring-*.xml,classpath:shiro/spring-*.xml</param-value>
 	</context-param>
 
 	<!--java 配置-->
@@ -51,7 +51,7 @@
 		<!--Spring MVC中DispatcherServlet默认使用WebApplicationContext作为上下文，Spring默认配置文件为“/WEB-INF/[servlet名字]-servlet.xml”。-->
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring-mvc.xml,classpath:shiro/spring-*.xml</param-value>
+			<param-value>classpath:spring-mvc.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -125,10 +125,10 @@
 			<param-value>true</param-value>
 		</init-param>
 		<!-- 设置spring容器filter的bean id，如果不设置则找与filter-name一致的bean-->
-<!--		<init-param>
+		<init-param>
 			<param-name>targetBeanName</param-name>
 			<param-value>shiroFilters</param-value>
-		</init-param>-->
+		</init-param>
 	</filter>
 	<filter-mapping>
 		<filter-name>filterProxy</filter-name>

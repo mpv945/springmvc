@@ -11,7 +11,7 @@
 	http://www.cnblogs.com/cshhs/p/9269411.html
 	https://www.jianshu.com/p/f37f8c295057-->
 
-	<!--<import resource="classpath:shiro/shiro-redis-session.xml" />-->
+	<import resource="classpath:shiro/shiro-redis-session.xml" />
 
 	<!-- 开启aop，对类代理，如果主配置没有添加aop,需要添加开启aop代理配置开关	 -->
 	<!--<aop:config proxy-target-class="true"></aop:config>-->
@@ -22,18 +22,47 @@
 
 <!-- web.xml中shiro的filter对应的bean -->
 <!-- Shiro 的Web过滤器 -->
-	<bean id="filterProxy" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+	<bean id="shiroFilters" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		<property name="securityManager" ref="securityManager" />
 		<!-- loginUrl认证提交地址，如果没有认证将会请求此地址进行认证，请求此地址将由formAuthenticationFilter进行表单认证 -->
-		<property name="loginUrl" value="/login.action" />
+		<property name="loginUrl" value="/login" />
 		<!-- 认证成功统一跳转到first.action，建议不配置，shiro认证成功自动到上一个请求路径 -->
-		<property name="successUrl" value="/first.action"/>
+		<!--<property name="successUrl" value="/first.action"/>-->
 		<!-- 通过unauthorizedUrl指定没有权限操作时跳转页面-->
 		<property name="unauthorizedUrl" value="/refuse.jsp" />
 		<!-- 自定义filter配置 -->
+		<property name="filters">
+			<map>
+				<!-- 将自定义 的FormAuthenticationFilter注入shiroFilter中-->
+				<entry key="authc" value-ref="formAuthenticationFilter" />
+			</map>
+		</property>
 
-		
 		<!-- 过虑器链定义，从上向下顺序执行，一般将/**放在最下边 -->
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 对静态资源设置匿名访问 -->
+				/images/** = anon
+				/js/** = anon
+				/styles/** = anon
+				<!-- 验证码，可匿名访问 -->
+				/validatecode.jsp = anon
+
+				<!-- 请求 logout.action地址，shiro去清除session-->
+				/logout.action = logout
+				<!--商品查询需要商品查询权限 ，取消url拦截配置，使用注解授权方式 -->
+				<!-- /items/queryItems.action = perms[item:query]
+				/items/editItems.action = perms[item:edit] -->
+				<!-- 配置记住我或认证通过可以访问的地址 -->
+				/index.jsp  = user
+				/first.action = user
+				/welcome.jsp = user
+				<!-- /** = authc 所有url都必须认证通过才可以访问-->
+				/** = authc
+				<!-- /** = anon所有url都可以匿名访问 -->
+
+			</value>
+		</property>
 
 	</bean>
 

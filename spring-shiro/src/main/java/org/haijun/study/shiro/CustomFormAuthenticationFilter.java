@@ -31,13 +31,13 @@ public class CustomFormAuthenticationFilter extends FormAuthenticationFilter {
 		
 		//取出页面的验证码
 		//输入的验证和session中的验证进行对比 
-		String randomCode = httpServletRequest.getParameter("randomcode");
-		if(randomCode!=null && validateCode!=null && !randomCode.equals(validateCode)){
+		//String randomCode = httpServletRequest.getParameter("randomcode");
+		//if(randomCode!=null && validateCode!=null && !randomCode.equals(validateCode)){
 			//如果校验失败，将验证码错误失败信息，通过shiroLoginFailure设置到request中
-			httpServletRequest.setAttribute("shiroLoginFailure", "randomCodeError");
+			//httpServletRequest.setAttribute("shiroLoginFailure", "randomCodeError");
 			//拒绝访问，不再校验账号和密码 
-			return true; 
-		}
+			//return true;
+		//}
 		return super.onAccessDenied(request, response);
 	}
 

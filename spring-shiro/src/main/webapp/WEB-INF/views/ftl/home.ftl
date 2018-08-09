@@ -34,25 +34,13 @@
 
 <div id="content">
 
-    <fieldset>
-        <legend>Add Car</legend>
-        <form name="car" action="/login" method="post">
-            用户名 : <input type="text" name="username" />	<br/>
-            密码: <input type="password" name="password" />	<br/>
-            <input type="submit" value="   Save   " />
-        </form>
-    </fieldset>
 
     <br/>
     <table class="datatable">
         <tr>
-            <th>Make</th>  <th>Model</th>
+            进入系统主页面............
         </tr>
-    <#list model["carList"] as car>
-	  	<tr>
-            <td>${car.make}</td> <td>${car.model}</td>
-        </tr>
-    </#list>
+
     </table>
 
 </div>

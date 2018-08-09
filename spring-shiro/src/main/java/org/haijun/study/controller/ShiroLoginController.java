@@ -36,4 +36,9 @@ public class ShiroLoginController {
         //登陆失败还到login页面
         return "login";
     }
+
+    @RequestMapping("home")
+    public String home(HttpServletRequest request){
+        return "home";
+    }
 }
