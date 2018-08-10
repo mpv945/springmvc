@@ -1,7 +1,10 @@
 package org.haijun.study.model.dto;
 
-public class RoleDO {
+import java.io.Serializable;
 
+public class RoleDO implements Serializable {
+
+    private static final long serialVersionUID = 545030259922586465L;
     private Integer id;
 
     /**

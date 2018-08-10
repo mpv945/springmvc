@@ -1,6 +1,9 @@
 package org.haijun.study.model.dto;
 
-public class PermissionDO {
+import java.io.Serializable;
+
+public class PermissionDO implements Serializable {
+    private static final long serialVersionUID = 7685896248241598252L;
     /**
      * 主键
      */

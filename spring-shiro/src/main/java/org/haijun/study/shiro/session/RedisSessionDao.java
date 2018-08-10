@@ -19,6 +19,10 @@ public class RedisSessionDao extends EnterpriseCacheSessionDAO {
 
     private static final String KEY_PREFIX = "shiro_redis_session:";
 
+    //设置过期时间
+    private static final long REDIS_EXPIRE_TIME = 1800;// redis 过期是按秒计算
+    private static final long SESSION_EXPIRE_TIME = REDIS_EXPIRE_TIME*1000; //session是按毫秒过时的
+
     // 创建session，保存到数据库
     @Override
     protected Serializable doCreate(Session session) {
@@ -59,10 +63,9 @@ public class RedisSessionDao extends EnterpriseCacheSessionDAO {
             //logger.error("session or session id is null");
             return;
         }
-        //设置过期时间
-        long expireTime = 1800000l;
-        session.setTimeout(expireTime);
-        redisManager.setEx(KEY_PREFIX + sessionId, session, expireTime);
+
+        session.setTimeout(SESSION_EXPIRE_TIME);// 设置的最大时间，正负都可以，为负数时表示永不超时。时间单位是:ms(毫秒)，但是Shiro会把这个时间转成:s
+        redisManager.setEx(KEY_PREFIX + sessionId, session, REDIS_EXPIRE_TIME);
     }
 
 /*    @Override

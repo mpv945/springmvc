@@ -44,12 +44,13 @@
 				<!-- 对静态资源设置匿名访问 -->
 				/images/** = anon
 				/js/** = anon
-				/styles/** = anon
+				/css/** = anon
 				<!-- 验证码，可匿名访问 -->
-				/validatecode.jsp = anon
+				/kaptcha/getKaptchaImage = anon
+				/kaptcha/checkmCode = anon
 
 				<!-- 请求 logout.action地址，shiro去清除session-->
-				/logout.action = logout
+				/logout = logout
 				<!--商品查询需要商品查询权限 ，取消url拦截配置，使用注解授权方式 -->
 				<!-- /items/queryItems.action = perms[item:query]
 				/items/editItems.action = perms[item:edit] -->
@@ -72,7 +73,8 @@
 		<!-- 注入缓存管理器 -->
 		<!--<property name="cacheManager" ref="cacheManager"/>-->
 		<!-- 注入session管理器 -->
-		<property name="sessionManager" ref="sessionManager" />
+		<!--<property name="sessionManager" ref="sessionManager" />-->
+		<property name="sessionManager" ref="defaultWebSessionManager" />
 		<!-- 记住我 -->
 		<property name="rememberMeManager" ref="rememberMeManager"/>
 		
@@ -87,7 +89,8 @@
 <!-- 凭证匹配器 -->
 <bean id="credentialsMatcher"
 	class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
-	<property name="hashAlgorithmName" value="md5" />
+	<!--md5/SHA-256-->
+	<property name="hashAlgorithmName" value="SHA-256" />
 	<property name="hashIterations" value="1" />
 </bean>
 

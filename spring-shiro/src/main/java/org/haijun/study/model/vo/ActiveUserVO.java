@@ -3,10 +3,19 @@ package org.haijun.study.model.vo;
 import org.haijun.study.model.dto.PermissionDO;
 import org.haijun.study.model.dto.RoleDO;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ActiveUserVO {
+/**
+ * 该类需要shiro保存到redis，所以需要序列化
+ *
+ * File -> Settings… -> Editor -> Inspections -> Serialization issues[在java类目下] ->
+ * Serializable class without ‘serialVersionUID’（选中）
+ * 进入实现了Serializable中的类，选中类名，Alt+Enter弹出提示，然后直接导入生成 SerializableID
+ */
+public class ActiveUserVO implements Serializable {
 
+    private static final long serialVersionUID = -6444825324187074485L;
     /**
      * 用户id
      */

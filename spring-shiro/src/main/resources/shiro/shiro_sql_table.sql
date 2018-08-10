@@ -2,7 +2,7 @@ CREATE TABLE `sys_user`  (
   `id` bigint(36) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `usercode` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '账号',
   `username` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '姓名',
-  `password` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '密码',
+  `password` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '密码',
   `salt` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '盐',
   `locked` tinyint(1) NULL DEFAULT NULL COMMENT '账号是否锁定，1：锁定，0未锁定',
   PRIMARY KEY (`id`) USING BTREE

@@ -7,14 +7,19 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- 加载配置文件 -->
-    <context:property-placeholder location="classpath:shiro/redis.properties" />
+    <!--<context:property-placeholder location="classpath:shiro/redis.properties" />-->
 
     <!-- redis数据源 具体参考https://www.cnblogs.com/Jxwz/p/8372308.html 和  https://juejin.im/post/5b1fae0bf265da6e406ea6d3-->
     <bean id="poolConfig" class="org.springframework.data.redis.connection.RedisStandaloneConfiguration">
         <!--<property name="database" value="2" />-->
 
-        <property name="hostName" value="192.168.0.110" />
-        <property name="port" value="6379" />
+        <property name="hostName">
+            <value>${redis.host}</value>
+        </property>
+        <property name="port">
+            <value>${redis.port}</value>
+        </property>
+        <!--<property name="port" value="${redis.port}" />-->
         <!--<property name="password"></property>-->
     </bean>
 <!--    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">

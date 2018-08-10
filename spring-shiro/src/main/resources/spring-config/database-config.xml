@@ -9,7 +9,10 @@
     <description>从数据库装入配置到 propertyConfigurer</description>
 
     <!--引用数据库当中的配置属性,ignore-unresolvable="false" 表示如果获取不到配置，提示异常， -->
-    <context:property-placeholder
+    <!--property-placeholder配置多个读取不到。可以在location配置多个,隔开的配置路径
+    Spring容器是采用反射扫描的发现机制，通过标签的命名空间实例化实例，当Spring探测到容器中有一个org.springframework.beans.
+    factory.config.PropertyPlaceholderCVonfigurer的Bean就会停止对剩余PropertyPlaceholderConfigurer的扫描，即只能存在一个实例。-->
+    <context:property-placeholder location="classpath:shiro/redis.properties"
             properties-ref="applicationProperties" file-encoding="UTF-8" ignore-unresolvable="false"/>
 
     <bean name="applicationProperties" class="org.haijun.study.tools.CommonsConfigurationFactory">
