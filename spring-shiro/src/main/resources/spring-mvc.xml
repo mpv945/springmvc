@@ -3,7 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
@@ -11,6 +13,7 @@
     <!--spring mvc 配置只扫描控制器和DispatcherServlet相关的自定义配置。其他例如数据库和事务等配置可以放在父配置，也能访问-->
     <context:component-scan base-package="org.haijun.study" use-default-filters="false">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+        <context:include-filter type="annotation" expression="org.apache.shiro.authz.annotation.RequiresRoles" />
         <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController" />
     </context:component-scan>
 
@@ -20,11 +23,25 @@
             properties-ref="applicationProperties" file-encoding="UTF-8" ignore-unresolvable="false"/>
 
     <!-- 开启aop，对类代理 -->
-<!--    <aop:config proxy-target-class="true"></aop:config>
-    &lt;!&ndash; 开启shiro注解支持 &ndash;&gt;
-    <bean
-            class="
-org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+    <!--<aop:config proxy-target-class="true"></aop:config>-->
+    <!-- 保证实现了 Shiro 内部 lifecycle 函数的 bean 执行
+ LifecycleBeanPostProcessor将Initializable和Destroyable的实现类统一在其内部自动分别调用了Initializable.init()
+ 和Destroyable.destroy()方法，从而达到管理shiro bean生命周期的目的。-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+    <!--https://www.cnblogs.com/zr520/p/5009790.html     https://blog.csdn.net/jc_zhibaobao/article/details/77163964-->
+    <!-- 开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 -->
+    <!-- 配置以下两个bean即可实现此功能 -->
+    <!-- Enable Shiro Annotations for Spring-configured beans. Only run after the lifecycleBeanProcessor has run -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>
+
+    <!-- 开启aop，对类代理，如果主配置没有添加aop,需要添加开启aop代理配置开关	 -->
+    <!--< proxy-target-class="true"></aop:config>-->
+    <!-- 开启shiro注解支持，我方到自己配置文件 --><!--添加Shiro Spring AOP权限注解的支持-->
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager" />
+    </bean>
+    <!-- 开启shiro注解支持 -->
+<!--    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
         <property name="securityManager" ref="securityManager" />
     </bean>-->
 
@@ -44,7 +61,8 @@ org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
         <property name="location" value="classpath:freemarker.properties"/>
     </bean>
     <!-- 配置freeMarker的模板路径 -->
-    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+    <!--<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">-->
+    <bean class="org.haijun.study.shiro.FreeMarkerConfigExtend"><!--让freeMarker支持shiro标签-->
         <property name="templateLoaderPath" value="/WEB-INF/views/ftl/" />
         <property name="defaultEncoding" value="utf-8" />
         <property name="freemarkerSettings" ref="freemarkerConfiguration"/>

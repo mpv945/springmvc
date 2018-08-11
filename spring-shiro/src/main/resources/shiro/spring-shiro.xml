@@ -3,6 +3,7 @@
 	xsi:schemaLocation="
 	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+	<!--boot 方式https://www.cnblogs.com/hyyq/p/6886004.html-->
 	<!--参考https://blog.csdn.net/modjie/article/details/79221774
 	https://blog.csdn.net/zhuchunyan_aijia/article/details/51744152
 	https://blog.csdn.net/sage_wang/article/details/79592269
@@ -10,15 +11,10 @@
 	https://blog.csdn.net/qq_31489805/article/details/80267916
 	http://www.cnblogs.com/cshhs/p/9269411.html
 	https://www.jianshu.com/p/f37f8c295057-->
-
+	<!--纯redis-->
 	<import resource="classpath:shiro/shiro-redis-session.xml" />
-
-	<!-- 开启aop，对类代理，如果主配置没有添加aop,需要添加开启aop代理配置开关	 -->
-	<!--<aop:config proxy-target-class="true"></aop:config>-->
-	<!-- 开启shiro注解支持，我方到自己配置文件 -->
-	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
-		<property name="securityManager" ref="securityManager" />
-	</bean>
+	<!--本地cache套redis-->
+	<!--<import resource="classpath:shiro/shiro-cache-redis-session.xml" />-->
 
 <!-- web.xml中shiro的filter对应的bean -->
 <!-- Shiro 的Web过滤器 -->
@@ -29,7 +25,7 @@
 		<!-- 认证成功统一跳转到first.action，建议不配置，shiro认证成功自动到上一个请求路径 -->
 		<!--<property name="successUrl" value="/first.action"/>-->
 		<!-- 通过unauthorizedUrl指定没有权限操作时跳转页面-->
-		<property name="unauthorizedUrl" value="/refuse.jsp" />
+		<property name="unauthorizedUrl" value="/refuse" />
 		<!-- 自定义filter配置 -->
 		<property name="filters">
 			<map>
@@ -42,18 +38,23 @@
 		<property name="filterChainDefinitions">
 			<value>
 				<!-- 对静态资源设置匿名访问 -->
+				<!--注：anon，authcBasic，auchc，user是认证过滤器，
+				perms，roles，ssl，rest，port是授权过滤器 详情https://blog.csdn.net/j_bang/article/details/78233724-->
 				/images/** = anon
 				/js/** = anon
 				/css/** = anon
+				/favicon.ico = anon
 				<!-- 验证码，可匿名访问 -->
 				/kaptcha/getKaptchaImage = anon
 				/kaptcha/checkmCode = anon
-
+				/guest = anon
 				<!-- 请求 logout.action地址，shiro去清除session-->
 				/logout = logout
 				<!--商品查询需要商品查询权限 ，取消url拦截配置，使用注解授权方式 -->
 				<!-- /items/queryItems.action = perms[item:query]
 				/items/editItems.action = perms[item:edit] -->
+				<!--角色拦截-->
+				<!--/roleTest = roles[admin,isShopMan]-->
 				<!-- 配置记住我或认证通过可以访问的地址 -->
 				/index.jsp  = user
 				/first.action = user
@@ -80,10 +81,26 @@
 		
 	</bean>
 
+	<!-- 自定义一个权限匹配器 然后在定义Realm里面的授权设置改成存放url：info.setStringPermissions(new HashSet<>(urlList))-->
+	<bean id="permissionResolver" class="org.haijun.study.shiro.UrlPermissionResolver"/>
 <!-- realm -->
 <bean id="customRealm" class="org.haijun.study.shiro.CustomRealm">
 	<!-- 将凭证匹配器设置到realm中，realm按照凭证匹配器的要求进行散列 -->
 	<property name="credentialsMatcher" ref="credentialsMatcher"/>
+	<!-- 将自定义的权限匹配器注入到自定义 Realm 中 -->
+	<property name="permissionResolver" ref="permissionResolver"/>
+
+	<!-- 配置缓存相关 -->
+	<!-- 启用缓存 -->
+<!--	<property name="cachingEnabled" value="true"/>
+	&lt;!&ndash; 开启认证缓存&ndash;&gt;
+	<property name="authenticationCachingEnabled" value="true"/>
+	&lt;!&ndash; 指定认证缓存的名字(与 ehcache.xml 中声明的相同) &ndash;&gt;
+	<property name="authenticationCacheName" value="shiro-authenticationCache"/>
+	&lt;!&ndash;开启授权缓存&ndash;&gt;
+	<property name="authorizationCachingEnabled" value="true"/>
+	&lt;!&ndash; 指定授权缓存的名字(与 ehcache.xml 中声明的相同) &ndash;&gt;
+	<property name="authorizationCacheName" value="shiro-authorizationCache"/>-->
 </bean>
 
 <!-- 凭证匹配器 -->
@@ -100,12 +117,12 @@
     </bean>-->
 
 <!-- 会话管理器 -->
-    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
-        <!-- session的失效时长，单位毫秒 -->
+<!--    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        &lt;!&ndash; session的失效时长，单位毫秒 &ndash;&gt;
         <property name="globalSessionTimeout" value="600000"/>
-        <!-- 删除失效的session -->
+        &lt;!&ndash; 删除失效的session &ndash;&gt;
         <property name="deleteInvalidSessions" value="true"/>
-    </bean>
+    </bean>-->
 
 <!-- 自定义form认证过虑器 -->
 <!-- 基于Form表单的身份验证过滤器，不配置将也会注册此过虑器，表单中的用户账号、密码及loginurl将采用默认值，建议配置 -->
@@ -116,7 +133,9 @@
 		<property name="passwordParam" value="password" />
 		<!-- 记住我input的名称 -->
 		<property name="rememberMeParam" value="rememberMe"/>
- </bean>
+
+		<property name="loginUrl" value="/login"/>
+	</bean>
 
 <!-- rememberMeManager管理器，写cookie，取出cookie生成用户信息 -->
 	<bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">

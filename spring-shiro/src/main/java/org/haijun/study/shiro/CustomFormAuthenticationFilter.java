@@ -6,6 +6,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.google.code.kaptcha.Constants;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
 import java.io.File;
@@ -39,8 +42,18 @@ public class CustomFormAuthenticationFilter extends FormAuthenticationFilter {
 		return isLogin;
 	}
 
+	@Override
+	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
+		boolean isLoginOk = super.isAccessAllowed(request, response, mappedValue);
+		System.out.println("是否是登陆成功"+isLoginOk);
+		Subject subject = SecurityUtils.getSubject();
+		System.out.println("Session ID:"+subject.getSession().getId().toString());
+		return isLoginOk;
+	}
+
 	//原FormAuthenticationFilter的认证方法
 	// 表示当访问拒绝时是否已经处理了；如果返回true表示需要继续处理；如果返回false表示该拦截器实例已经处理了，将直接返回即可。
+	// isAccessAllowed判断了用户未登录，则会调用onAccessDenied方法做用户登录操作。
 	@Override
 	protected boolean onAccessDenied(ServletRequest request,
 			ServletResponse response) throws Exception {
@@ -55,22 +68,22 @@ public class CustomFormAuthenticationFilter extends FormAuthenticationFilter {
 		String getRequestURI =((HttpServletRequest)request).getRequestURI();
 		String getQueryString =((HttpServletRequest)request).getQueryString();
 		String getRemoteUser =((HttpServletRequest)request).getRemoteUser();
-		System.out.println("getContextPath:"+ getContextPath +"<br>");
+		//System.out.println("getContextPath:"+ getContextPath +"<br>");
 		System.out.println("basePath:"+basePath+"<br>");
-		System.out.println("getRemoteAddress:"+ getRemoteAddress +"<br>");
+		/*System.out.println("getRemoteAddress:"+ getRemoteAddress +"<br>");
 		System.out.println("getServletPath:"+ getServletPath +"<br>");
 		System.out.println("getServletContext_getRealPath:"+ getServletContext_getRealPath +"<br>");
 		System.out.println("getRequestURL:"+ getRequestURL +"<br>");
 		System.out.println("getRequestURI:"+ getRequestURI +"<br>");
 		System.out.println("getQueryString:"+ getQueryString +"<br>");
-		System.out.println("getRemoteUser:"+ getRemoteUser +"<br>");
+		System.out.println("getRemoteUser:"+ getRemoteUser +"<br>");*/
 		//在这里进行验证码的校验
 		
 		//从session获取正确验证码
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		HttpSession session =httpServletRequest.getSession();
 		//取出session的验证码（正确的验证码）
-		String validateCode = (String) session.getAttribute("validateCode");
+		String validateCode = (String) session.getAttribute(Constants.KAPTCHA_SESSION_KEY);
 		
 		//取出页面的验证码
 		//输入的验证和session中的验证进行对比 

@@ -24,6 +24,8 @@ public class RedisSessionDao extends EnterpriseCacheSessionDAO {
     private static final long SESSION_EXPIRE_TIME = REDIS_EXPIRE_TIME*1000; //session是按毫秒过时的
 
     // 创建session，保存到数据库
+    // 当有请求过来的时候，会有一个线程来对应响应，每次请求的对应的线程是不一样的，因为subject与线程绑定的，有的线程没有subject，会再次登录，并生成session，
+    // 所以sessionid不一样，但是连接池是循环使用的，当我们多次请求的时候，你会发现sessionid有重复的，原因就是这个线程的subject之前有登录过。
     @Override
     protected Serializable doCreate(Session session) {
         Serializable sessionId = super.doCreate(session);

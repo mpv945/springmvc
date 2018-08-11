@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableCaching
+// 参考:https://blog.csdn.net/u012106290/article/details/52154241
 public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {

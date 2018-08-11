@@ -121,6 +121,9 @@ public class CustomRealm extends AuthorizingRealm {
 		SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
 		//将上边查询到授权信息填充到simpleAuthorizationInfo对象中
 		simpleAuthorizationInfo.addStringPermissions(permissions);
+		// 角色插入
+		simpleAuthorizationInfo.addRole("admin");
+
 
 		return simpleAuthorizationInfo;
 	}
@@ -129,6 +132,8 @@ public class CustomRealm extends AuthorizingRealm {
 	public void clearCached() {
 		PrincipalCollection principals = SecurityUtils.getSubject().getPrincipals();
 		super.clearCache(principals);
+		/*this.clearCachedAuthorizationInfo(principals);//缓存的授权信息
+		this.clearCachedAuthenticationInfo(principals);// 认证信息*/
 	}
 
 

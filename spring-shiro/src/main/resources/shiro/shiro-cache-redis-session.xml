@@ -7,6 +7,21 @@
 
 <!--    <import resource="classpath:shiro/applicationContext-shiro.xml"/>-->
 
+    <!--配置缓存管理器-->
+    <bean id="nativeEhCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:shiro/shiro-ehcache.xml" />
+        <property name="shared" value="true"></property>
+    </bean>
+    <!-- 缓存管理器 使用Ehcache实现 -->
+    <bean id="shiroEhCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManager" ref="nativeEhCacheManager" />
+    </bean>
+
+    <bean id="localCaCheSessionDao" class="org.haijun.study.shiro.session.LocalCaCheSessionDao">
+        <property name="redisSessionDao" ref="shiroRedisSessionDAO"></property> <!-- (给localSessionDAO注入原先redisSessionDAO的bean)-->
+        <property name="cacheManager" ref="shiroEhCacheManager"></property>
+        <property name="activeSessionsCacheName" value="shiroSessionCache"></property><!-- (在这里指定ehCache的缓存名)-->
+    </bean>
 
     <!-- session会话存储的实现类 -->
     <bean id="shiroRedisSessionDAO" class="org.haijun.study.shiro.session.RedisSessionDao">
@@ -17,7 +32,8 @@
     <!-- 自定义session管理器 可以使用cache增加一层https://blog.csdn.net/s674334235/article/details/78974707-->
     <bean id="defaultWebSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
         <!-- session存储的实现 -->
-        <property name="sessionDAO" ref="shiroRedisSessionDAO" />
+        <property name="sessionDAO" ref="localCaCheSessionDao" />
+        <property name="cacheManager" ref="shiroEhCacheManager" />
         <!-- sessionIdCookie的实现,用于重写覆盖容器默认的JSESSIONID -->
         <property name="sessionIdCookie" ref="shareSession" />
         <!-- 设置全局会话超时时间，默认30分钟(1800000) -->
