@@ -32,7 +32,7 @@
             <version>0.6.4</version>
         </dependency>-->
 
-        <!--项目使用JWT生成-->
+        <!--项目使用JWT生成 ；测试和各个平台依赖https://jwt.io/-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
