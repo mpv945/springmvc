@@ -4,7 +4,7 @@ import org.apache.shiro.authc.HostAuthenticationToken;
 import org.apache.shiro.authc.RememberMeAuthenticationToken;
 
 /**
- *  支持token 参考https://www.jianshu.com/p/f37f8c295057
+ *  支持token 参考https://www.jianshu.com/p/f37f8c295057 和 https://blog.csdn.net/he90227/article/details/53308222
  */
 public class JWTToken implements HostAuthenticationToken, RememberMeAuthenticationToken {
 
