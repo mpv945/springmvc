@@ -42,18 +42,39 @@ public class CustomFormAuthenticationFilter extends FormAuthenticationFilter {
 		return isLogin;
 	}
 
+	/**
+	 * 表示是否允许访问 ，如果允许访问返回true，否则false；
+	 * @param request
+	 * @param response
+	 * @param mappedValue 表示写在拦截器中括号里面的字符串 mappedValue 就是 [urls] 配置中拦截器参数部分
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
+		Subject subject = getSubject(request,response);// 获得认证主体：
+		//Subject subject = SecurityUtils.getSubject();// 获得认证主体：
+		String url = getPathWithinApplication(request);// 获得当前请求的 url
+		System.out.println("当前用户正在访问的 url => " + url);
 		boolean isLoginOk = super.isAccessAllowed(request, response, mappedValue);
 		System.out.println("是否是登陆成功"+isLoginOk);
-		Subject subject = SecurityUtils.getSubject();
 		System.out.println("Session ID:"+subject.getSession().getId().toString());
+		System.out.println("会话创建时间：" + subject.getSession().getStartTimestamp());
 		return isLoginOk;
 	}
 
 	//原FormAuthenticationFilter的认证方法
 	// 表示当访问拒绝时是否已经处理了；如果返回true表示需要继续处理；如果返回false表示该拦截器实例已经处理了，将直接返回即可。
 	// isAccessAllowed判断了用户未登录，则会调用onAccessDenied方法做用户登录操作。
+	/**
+	 * onAccessDenied：表示当访问拒绝时是否已经处理了；如果返回 true 表示需要继续处理；
+	 * 如果返回 false 表示该拦截器实例已经处理了，将直接返回即可。
+	 * 当 isAccessAllowed 返回 false 的时候，才会执行 method onAccessDenied
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	protected boolean onAccessDenied(ServletRequest request,
 			ServletResponse response) throws Exception {
@@ -94,6 +115,7 @@ public class CustomFormAuthenticationFilter extends FormAuthenticationFilter {
 			//拒绝访问，不再校验账号和密码 
 			return true;
 		}
+		// 返回 false 表示已经处理，例如页面跳转啥的，表示不在走以下的拦截器了（如果还有配置的话）
 		return super.onAccessDenied(request, response);
 	}
 

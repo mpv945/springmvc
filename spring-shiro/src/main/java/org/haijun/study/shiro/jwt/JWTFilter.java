@@ -1,5 +1,6 @@
 package org.haijun.study.shiro.jwt;
 
+import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -56,6 +57,12 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
+        Subject subject = getSubject(request,response);// 获得认证主体：
+        //Subject subject = SecurityUtils.getSubject();// 获得认证主体：
+        String url = getPathWithinApplication(request);// 获得当前请求的 url
+        System.out.println("当前用户正在访问的 url => " + url);
+        System.out.println("Session ID:"+subject.getSession().getId().toString());
+        System.out.println("会话创建时间：" + subject.getSession().getStartTimestamp());
         if (isLoginAttempt(request, response)) {
             try {
                 executeLogin(request, response);

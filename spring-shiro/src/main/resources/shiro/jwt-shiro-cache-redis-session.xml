@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>Shiro的session共享配置：https://blog.csdn.net/zcyhappy1314/article/details/71270937</description>
+
+<!--    <import resource="classpath:shiro/applicationContext-shiro.xml"/>-->
+
+    <!--配置缓存管理器-->
+    <bean id="nativeEhCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:shiro/shiro-ehcache.xml" />
+        <property name="shared" value="true"></property>
+    </bean>
+    <!-- 缓存管理器 使用Ehcache实现 -->
+    <bean id="shiroEhCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManager" ref="nativeEhCacheManager" />
+    </bean>
+
+    <bean id="localCaCheSessionDao" class="org.haijun.study.shiro.session.LocalCaCheSessionDao">
+        <property name="redisSessionDao" ref="shiroRedisSessionDAO"></property> <!-- (给localSessionDAO注入原先redisSessionDAO的bean)-->
+        <property name="cacheManager" ref="shiroEhCacheManager"></property>
+        <property name="activeSessionsCacheName" value="shiroSessionCache"></property><!-- (在这里指定ehCache的缓存名)-->
+        <property name="sessionIdGenerator" ref="jwtSessionIdGenerator" /> <!--生成session方式-->
+    </bean>
+
+    <!-- session会话存储的实现类 -->
+    <bean id="shiroRedisSessionDAO" class="org.haijun.study.shiro.session.RedisSessionDao">
+        <!--引用通过@Component 注解交由 Spring IOC 管理-->
+        <property name="redisManager" ref="redisManager"/>
+    </bean>
+
+    <!-- 自定义session管理器 可以使用cache增加一层https://blog.csdn.net/s674334235/article/details/78974707-->
+    <bean id="defaultWebSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <!-- session存储的实现 -->
+        <property name="sessionDAO" ref="localCaCheSessionDao" />
+        <property name="cacheManager" ref="shiroEhCacheManager" />
+        <!-- sessionIdCookie的实现,用于重写覆盖容器默认的JSESSIONID -->
+        <property name="sessionIdCookie" ref="jwtSimpleCookie" />
+        <!-- 设置全局会话超时时间，默认30分钟(1800000) -->
+        <property name="globalSessionTimeout" value="1800000" />
+        <!-- 是否在会话过期后会调用SessionDAO的delete方法删除会话 默认true -->
+        <property name="deleteInvalidSessions" value="true" />
+        <!-- 会话验证器调度时间，在毫秒之间检查有效会议（检测扫描信息时间间隔,单位为毫秒） -->
+        <property name="sessionValidationInterval" value="1809000" />
+        <!-- 是否开启扫描，定时检查失效的session -->
+        <property name="sessionValidationSchedulerEnabled" value="true" />
+        <!-- 去掉URL中的JSESSIONID -->
+        <property name="sessionIdUrlRewritingEnabled" value="false" />
+
+        <property name="sessionIdCookieEnabled" value="true"/>
+    </bean>
+
+    <!-- sessionIdCookie的实现,用于重写覆盖容器默认的JSESSIONID -->
+    <bean id="jwtSimpleCookie" class="org.haijun.study.shiro.jwt.JWTSimpleCookie">
+        <!-- cookie的name,对应的默认是 JSESSIONID（ShiroHttpSession.DEFAULT_SESSION_ID_NAME） -->
+        <!-- 设置Cookie名字, 默认为: JSESSIONID 问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID,
+                                当跳出SHIRO SERVLET时如ERROR-PAGE容器会为JSESSIONID重新分配值导致登录会话丢失! -->
+        <!--<constructor-arg name="name" value="HAIJUNJSESSIONID" />-->
+        <property name="name" value="Token" />
+        <!-- JSESSIONID的path为/用于多个系统共享JSESSIONID -->
+        <property name="path" value="/" />
+        <!-- 浏览器中通过document.cookie可以获取cookie属性，设置了HttpOnly=true,在脚本中就不能的到cookie，可以避免cookie被盗用 -->
+        <property name="httpOnly" value="true"/>
+    </bean>
+
+    <bean class="org.haijun.study.shiro.jwt.JWTSessionIdGenerator" id="jwtSessionIdGenerator"></bean>
+</beans>

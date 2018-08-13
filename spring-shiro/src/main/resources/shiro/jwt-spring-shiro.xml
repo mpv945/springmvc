@@ -30,7 +30,8 @@
 		<property name="filters">
 			<map>
 				<!-- 将自定义 的FormAuthenticationFilter注入shiroFilter中-->
-				<entry key="authc" value-ref="formAuthenticationFilter" />
+				<!--<entry key="authc" value-ref="formAuthenticationFilter" />-->
+				<entry key="jwt" value-ref="jwtFilter" />
 			</map>
 		</property>
 
@@ -44,6 +45,7 @@
 				/js/** = anon
 				/css/** = anon
 				/favicon.ico = anon
+				/401 = anon
 				<!-- 验证码，可匿名访问 -->
 				/kaptcha/getKaptchaImage = anon
 				/kaptcha/checkmCode = anon
@@ -60,7 +62,7 @@
 				/first.action = user
 				/welcome.jsp = user
 				<!-- /** = authc 所有url都必须认证通过才可以访问-->
-				/** = authc
+				/** = jwt
 				<!-- /** = anon所有url都可以匿名访问 -->
 
 			</value>
@@ -70,7 +72,7 @@
 
 <!-- securityManager安全管理器 -->
 <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
-		<property name="realm" ref="customRealm" />
+		<property name="realm" ref="jwtTokenRealm" />
 		<!-- 注入缓存管理器 -->
 		<!--<property name="cacheManager" ref="cacheManager"/>-->
 		<!-- 注入session管理器 -->
@@ -83,12 +85,14 @@
 
 	<!-- 自定义一个权限匹配器 然后在定义Realm里面的授权设置改成存放url：info.setStringPermissions(new HashSet<>(urlList))-->
 	<bean id="urlPermissionResolver" class="org.haijun.study.shiro.UrlPermissionResolver"/>
+
+
 <!-- realm -->
-<bean id="customRealm" class="org.haijun.study.shiro.CustomRealm">
+<bean id="jwtTokenRealm" class="org.haijun.study.shiro.jwt.JWTTokenRealm">
 	<!-- 将凭证匹配器设置到realm中，realm按照凭证匹配器的要求进行散列 -->
-	<property name="credentialsMatcher" ref="credentialsMatcher"/>
-	<!-- 将自定义的权限匹配器注入到自定义 Realm 中 -->
-	<property name="permissionResolver" ref="urlPermissionResolver"/>
+	<!--<property name="credentialsMatcher" ref="credentialsMatcher"/>
+	&lt;!&ndash; 将自定义的权限匹配器注入到自定义 Realm 中 &ndash;&gt;
+	<property name="permissionResolver" ref="urlPermissionResolver"/>-->
 
 	<!-- 配置缓存相关 -->
 	<!-- 启用缓存 -->
@@ -126,15 +130,15 @@
 
 <!-- 自定义form认证过虑器 -->
 <!-- 基于Form表单的身份验证过滤器，不配置将也会注册此过虑器，表单中的用户账号、密码及loginurl将采用默认值，建议配置 -->
-	<bean id="formAuthenticationFilter" class="org.haijun.study.shiro.CustomFormAuthenticationFilter">
+	<bean id="jwtFilter" class="org.haijun.study.shiro.jwt.JWTFilter">
 		<!-- 表单中账号的input名称 -->
-		<property name="usernameParam" value="username" />
-		<!-- 表单中密码的input名称 -->
+<!--		<property name="usernameParam" value="username" />
+		&lt;!&ndash; 表单中密码的input名称 &ndash;&gt;
 		<property name="passwordParam" value="password" />
-		<!-- 记住我input的名称 -->
+		&lt;!&ndash; 记住我input的名称 &ndash;&gt;
 		<property name="rememberMeParam" value="rememberMe"/>
 
-		<property name="loginUrl" value="/login"/>
+		<property name="loginUrl" value="/login"/>-->
 	</bean>
 
 <!-- rememberMeManager管理器，写cookie，取出cookie生成用户信息 -->
