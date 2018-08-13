@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
        default-autowire="no" default-lazy-init="false">
 
-    <!-- 集群方式（同时只有一台服务器在执行任务）跑批任务列表 -->
+    <!-- 集群方式（同时只有一台服务器在执行任务）跑批任务列表，依赖spring-context-support -->
     <bean id="clusterQuartzTriggers" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
@@ -34,7 +34,7 @@
         <property name="jobDetail">
             <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
                 <property name="jobClass"
-                          value="com.cpic.cmp.admin.jobDetail.ProxyJobDetail" />
+                          value="org.haijun.study.jobDetail.ProxyJobDetail" />
                 <!--允许持久化 -->
                 <property name="durability" value="true" />
                 <property name="jobDataAsMap">

@@ -75,4 +75,28 @@ public class TestHandlerQuartz implements org.quartz.Job {
         }
         System.out.println("quartz调度完成");
     }
+
+    public JobLauncher getJobLauncher() {
+        return jobLauncher;
+    }
+
+    public void setJobLauncher(JobLauncher jobLauncher) {
+        this.jobLauncher = jobLauncher;
+    }
+
+    public JobRepository getJobRepository() {
+        return jobRepository;
+    }
+
+    public void setJobRepository(JobRepository jobRepository) {
+        this.jobRepository = jobRepository;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
 }

@@ -30,8 +30,8 @@
    spring-batch本身job运行需要的表的创建脚本，spring-batch.jar中默认提供了各种数据库的DDL语句
     -->
     <jdbc:initialize-database data-source="dataSource">
-        <jdbc:script location="${batch.schema.script.drop}" />
-        <jdbc:script location="${batch.schema.script}" />
+        <jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-mysql.sql" />
+        <jdbc:script location="classpath:/org/springframework/batch/core/schema-mysql.sql" />
     </jdbc:initialize-database>
 
     <!-- 数据源：spring batch 本身所依赖的数据源，记录运行参数及过程信息，配置参考https://www.cnblogs.com/weizhxa/p/6548413.html -->
