@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--配置spring batch 基础的bean -->
+
+    <!-- 定义jobRepository 该bean用于spring batch操作本身的表数据时使用。 -->
+    <bean id="jobRepository"
+          class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="transactionManager" ref="transactionManager" />
+        <!--设置数据库隔离级别 -->
+        <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT" />
+    </bean>
+
+    <!--定义启动job的bean,该bean可以用于spring mvc或quartz启动job使用 ，默认是使用主线程启动job -->
+    <bean id="jobLauncher"
+          class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository" />
+    </bean>
+
+    <!--定义一个可以异步启动的jobLauncher，使用该启动器后，会新建线程执行job,不影响主线程的调度 -->
+    <bean id="asyncJobLauncher"
+          class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository" />
+        <property name="taskExecutor" ref="asyncTaskExecutor" />
+    </bean>
+
+    <!-- 定义异步线程池，可以根据业务场景定义不同的线程池 -->
+    <task:executor id="asyncTaskExecutor" pool-size="20"
+                   rejection-policy="ABORT" queue-capacity="5000" />
+
+    <!--job注册机，系统启动的时候会将所有定义好的job注册到内存当中，用于校验job是否定义重复等操作。 -->
+    <bean id="jobRegistry"
+          class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+
+</beans>

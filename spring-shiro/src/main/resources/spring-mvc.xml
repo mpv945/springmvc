@@ -48,6 +48,7 @@
     <!--开启新的注解驱动，可以手动指定validator=""-->
     <!-- 通过annotation-driven可以替代下边的处理器映射器和适配器 -->
     <!--<mvc:annotation-driven conversion-service="conversionService" validator="validator" />-->
+    <!--配置自定义转换器https://blog.csdn.net/m0_38016299/article/details/78338048-->
     <mvc:annotation-driven />
 
     <!-- 配置视图解析器 要求将jstl的包加到classpath -->

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 每个job定义了一套执行的步骤流 -->
+    <batch:job id="caPdfHandlerJob">
+        <batch:description>CA签名文件发影像系统</batch:description>
+        <batch:validator>
+            <!-- 启动JOB参数验证，list当中填写的参数是在启动job时必须填写的 -->
+            <bean class="org.springframework.batch.core.job.DefaultJobParametersValidator">
+                <property name="requiredKeys">
+                    <list>
+                        <value>jobParamUUID</value>
+                    </list>
+                </property>
+            </bean>
+        </batch:validator>
+
+        <!-- CA签名文件发影像系统 step  -->
+        <batch:step id="caPdfHandlerStep">
+            <batch:description>CA签名文件发影像系统</batch:description>
+            <!-- 定义当前步骤具体执行的tasklet,并声明事务管理器 -->
+            <batch:tasklet  transaction-manager="transactionManager" ref="caPdfHandlerTaskLet">
+            </batch:tasklet>
+        </batch:step>
+
+    </batch:job>
+    <!--job 定义 end -->
+
+
+    <!-- 定义job的第一步，注意作用域为step,防止出现线程不安全 -->
+    <bean id="caPdfHandlerTaskLet" class="org.haijun.study.job.TestHandlerTaskLet" scope="step"/>
+
+</beans>

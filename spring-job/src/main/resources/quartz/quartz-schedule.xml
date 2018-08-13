@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-autowire="no" default-lazy-init="false">
+
+    <!-- 集群方式（同时只有一台服务器在执行任务）跑批任务列表 -->
+    <bean id="clusterQuartzTriggers" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="caPdfHandlerJobDetail" />
+            </list>
+        </property>
+        <property name="waitForJobsToCompleteOnShutdown" value="true" />
+        <property name="applicationContextSchedulerContextKey" value="applicationContext" />
+        <property name="configLocation" value="classpath:quartz.properties" />
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 非集群方式（允许多台同时运行）跑批任务列表 -->
+    <!-- <bean id="noClusterQuartzTriggers"
+    class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <property name="triggers">
+        <list>
+            <ref bean="assembleUserInfoJobDetail" />
+        </list>
+    </property>
+    <property name="waitForJobsToCompleteOnShutdown" value="true" />
+    </bean> -->
+
+    <!-- CA签名文件发影像系统  -->
+    <bean id="caPdfHandlerJobDetail"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                <property name="jobClass"
+                          value="com.cpic.cmp.admin.jobDetail.ProxyJobDetail" />
+                <!--允许持久化 -->
+                <property name="durability" value="true" />
+                <property name="jobDataAsMap">
+                    <map>
+                        <!--实际调用的任务实现类，必须实现org.quartz.Job接口 -->
+                        <entry key="targetObject" value="caPdfHandlerQuartz"></entry>
+                    </map>
+                </property>
+            </bean>
+        </property>
+        <property name="cronExpression">
+            <value>0 */5  *  * * ?</value>
+        </property>
+    </bean>
+</beans>

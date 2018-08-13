@@ -31,6 +31,7 @@
     <module>spring-cxf</module>
     <module>springmvcxml</module>
       <module>spring-shiro</module>
+      <module>spring-job</module>
   </modules>
 
   <name>springmvc</name>
