@@ -13,9 +13,9 @@ public class ProxyJobDetail implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap jobDataMap =jobExecutionContext.getJobDetail().getJobDataMap();
         String targetObject = (String) jobDataMap.get("targetObject");
-        System.out.println("####开始执行:{}任务###"+targetObject);
+        System.out.println("####开始执行:"+targetObject+"任务###");
         Job job = (Job) ApplicationContextUtil.getBean(targetObject);
         job.execute(jobExecutionContext);
-        System.out.println("####{},任务执行完成####"+targetObject);
+        System.out.println("####"+targetObject+",任务执行完成####");
     }
 }

@@ -3,8 +3,12 @@ package org.haijun.study.utils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 // https://www.cnblogs.com/shipengzhi/articles/2361333.html
+@Component
+@Lazy(false)
 public class ApplicationContextUtil implements ApplicationContextAware {
 
     private static ApplicationContext context;
@@ -19,13 +23,13 @@ public class ApplicationContextUtil implements ApplicationContextAware {
         this.context=applicationContext;
     }
 
-    public final static Object getBean(String beanName){
-        return context.getBean(beanName);
+    public static Object getBean(String name) {
+        return context.getBean(name);
     }
-    public final static Object getBean(String beanName, Class<?> requiredType) {
-        return context.getBean(beanName, requiredType);
+    public static <T> T getBean(Class<T> clazz) {
+        return context.getBean(clazz);
     }
-    /*public static <T> T getBean(Class<T> clazz) throws BeansException {
-        return (T) context.getBean(clazz);
-    }*/
+    public static <T> T getBean(String name, Class<T> clazz) {
+        return context.getBean(name, clazz);
+    }
 }

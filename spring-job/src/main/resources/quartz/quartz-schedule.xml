@@ -28,25 +28,23 @@
     <property name="waitForJobsToCompleteOnShutdown" value="true" />
     </bean> -->
 
-    <!-- CA签名文件发影像系统  -->
-    <bean id="caPdfHandlerJobDetail"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    <!-- 测试处理  -->
+    <bean id="caPdfHandlerJobDetail" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail">
             <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-                <property name="jobClass"
-                          value="org.haijun.study.jobDetail.ProxyJobDetail" />
+                <property name="jobClass" value="org.haijun.study.jobDetail.ProxyJobDetail" />
                 <!--允许持久化 -->
                 <property name="durability" value="true" />
                 <property name="jobDataAsMap">
                     <map>
                         <!--实际调用的任务实现类，必须实现org.quartz.Job接口 -->
-                        <entry key="targetObject" value="caPdfHandlerQuartz"></entry>
+                        <entry key="targetObject" value="testHandlerQuartz"></entry>
                     </map>
                 </property>
             </bean>
         </property>
         <property name="cronExpression">
-            <value>0 */5  *  * * ?</value>
+            <value>0 */1  *  * * ?</value>
         </property>
     </bean>
 </beans>

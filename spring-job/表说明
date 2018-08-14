@@ -1,0 +1,77 @@
+Quartz表结构说明；（表脚本下载：http://www.quartz-scheduler.org/downloads/ 在Quartz 的 distribution 包已提供了建表语句，放在\docs\dbTables目录中
+一、表信息解析：
+1.1. qrtz_blob_triggers : 以Blob 类型存储的触发器。
+1.2. qrtz_calendars：存放日历信息， quartz可配置一个日历来指定一个时间范围。
+1.3. qrtz_cron_triggers：存放cron类型的触发器。
+1.4. qrtz_fired_triggers：存放已触发的触发器。
+1.5. qrtz_job_details：存放一个jobDetail信息。
+1.6. qrtz_job_listeners：job监听器。
+1.7. qrtz_locks： 存储程序的悲观锁的信息(假如使用了悲观锁)。
+1.8. qrtz_paused_trigger_graps：存放暂停掉的触发器。
+1.9. qrtz_scheduler_state：调度器状态。
+1.10. qrtz_simple_triggers：简单触发器的信息。
+1.11. qrtz_trigger_listeners：触发器监听器。
+1.12. qrtz_triggers：触发器的基本信息。
+二、Quartz的触发时间的配置的三种方式：
+2.1. cron 方式：采用cronExpression表达式配置时间。
+2.2. simple 方式：和JavaTimer差不多，可以指定一个开始时间和结束时间外加一个循环时间。
+2.3. calendars 方式：可以和cron配合使用，用cron表达式指定一个触发时间规律，用calendar指定一个范围。
+注意：cron方式需要用到的4张数据表： qrtz_triggers，qrtz_cron_triggers，qrtz_fired_triggers，qrtz_job_details。
+
+SpringBatch框架进行元数据的管理共有九张表:
+BATCH_JOB_INSTANCE(作业实例表,存放JOB的实例信息)
+        JOB_INSTANCE_ID  主键 ，作业实例编号,根据BATCH_JOB_SEQ自动生成
+        VERSION  版本号
+        JOB_NAME  作业名称 即在配置文件定义的JobId字段内容
+        JOB_KEY   作业标识,根据作业参数序列化生成的标识,需要注意通过JOB_NAME+JOB_KEY能够唯一区分一个作业实例;JOB_KEY------如果同一个Job,则JOB_KEY一定不能相同,籍作业参数不能相同,如果不是同一个Job,JOB_KEY可以相同,也就是作业参数可以相同
+BATCH_JOB_EXECUTION_PARAMS(作业参数表,用于存放每个JOB执行的时候的参数信息,即对于的JOB实例)
+        JOB_EXECUTION_ID  外键ID,作业执行器ID编号，一个作业实例可能又会多行参数记录
+        TYPE_CD  参数的类型，总共有四种 String、Date、Double、Long
+        KEY_NAME  参数的名字
+        STRING_VAL  参数如果是String,就存放String类型的参数值
+        DATE_VAL  参数如果是Date,就存放Date类型的参数值
+        LONG_VAL  参数如果是Long,就存放Long类型的参数值
+        DOUBLE_VAL 参数如果是Double,就存放Double类型的参数值
+        IDENTIFYING 用于标识作业参数是否标识作业实例
+BATCH_JOB_EXECUTION(作业执行器表,存放当前作业的执行信息,创建时间、执行时间、执行结束时间、执行状态、执行Job实例等信息)
+        JOB_EXECUTION_ID 主键
+        VERSION  版本号
+        JOB_INSTANCE_ID 作业实例ID
+        CREATE_TIME  作业执行器创建时间
+        START_TIME  作业执行器开始执行时间
+        END_TIME  作业执行器结束时间
+        STATUS  作业执行器执行的状态:COMPLETED、FAILED、STARTING、UNKNOW等
+        EXIT_CODE  作业执行器退出代码 如：UNKNOW、EXECUTING、COMPLETED等
+        EXIT_MESSAGE  作业执行器退出信息,通常存放异常信息
+        LAST_UPDATED  本条记录上次更新时间
+        JOB_CONFIGURATION_LOCATION  作业配置文件的位置  (运用BATCH_JOB_INSTANCE和BATCH_JOB_EXECUTION两张表联合查询Job信息,关联JOB_INSTANCE_ID)
+BATCH_JOB_EXECUTION_CONTENXT(作业执行上下文表,存放上下文信息)
+        JOB_EXECUTION_ID 外键ID,作业执行器编号
+        SHORT_CONTEXT  作业执行器上下文字符串格式
+        SERIALIZED_CONTEXT  序列化的作业执行上下文
+        注意：BATCH_JOB_EXECUTION_SEQ表（用于BATCH_JOB_EXECUTION和BATCH_JOB_EXECUTION_CONTEXT提供主键生成）
+              BATCH_JOB_SEQ表（用于BATCH_JOB_INSTNCE和BATCH_JOB_EXECUTION_PARAMS提供主键生成）
+BATCH_STEP_EXECUTION(作业步执行器，存放每个Step执行器的信息：开始时间、执行完成时间、读/写次数等)
+        STEP_EXECUTION_ID 主键
+        VERSION 版本
+        STEP_NAME 作业步的名称
+        JOB_EXECUTION_ID 作业执行器ID
+        START_TIME 作业步执行器执行开始时间
+        END_TIME  作业步执行器执行结束时间
+        STATUS  作业步执行器执行状态 ：存在于org.springframework.batch.core.BatchStatus
+        COMMIT_COUNT 事务提交次数
+        READ_COUNT 读数据次数
+        FILTER_COUNT 过滤掉的数据次数
+        WRITE_COUNT 写数据次数
+        READ_SKIP_COUNT 读数据跳过的次数
+        WRITE_SKIP_COUNT 写数据跳过的次数
+        PROCESS_SKIP_COUNT 处理数据跳过的次数
+        ROLLBACK_COUNT 事务回滚的次数
+        EXIT_CODE 作业步执行器退出编码，状态码存在于org.springframework.batch.core.ExitStauts
+        EXIT_MESSAGE 作业步执行器退出描述,一般是异常信息
+        LAST_UPDATED 本条记录上次更新时间
+BATCH_STEP_EXECUTION_CONTEXT(作业步执行器上下文,存放作业步执行的上下文信息)
+        STEP_EXECUTION_ID 作业步执行器ID
+        SHORT_CONTEXT 作业步执行器上下文字符串格式
+        SERIALIZED_CONTEXT 序列化作业步执行器上下文
+        注意：BATCH_STEP_EXECUTION_SEQ（用于BATCH_STEP_EXECUTION和BATCH_STEP_EXECUTION_CONTEXT提供主键）

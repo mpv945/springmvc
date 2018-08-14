@@ -3,9 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- CA签名文件发影像系统  -->
-    <bean id="caPdfHandlerQuartz" class="org.haijun.study.quartz.TestHandlerQuartz">
+    <bean id="testHandlerQuartz" class="org.haijun.study.quartz.TestHandlerQuartz">
         <property name="jobRepository" ref="jobRepository"/>
         <property name="jobLauncher" ref="jobLauncher"/>
-        <property name="Job" ref="caPdfHandlerJob"/>
+        <property name="Job" ref="testHandlerJob"/>
     </bean>
 </beans>

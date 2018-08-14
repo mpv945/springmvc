@@ -9,12 +9,12 @@
     <!--配置spring batch 基础的bean -->
 
     <!-- 定义jobRepository 该bean用于spring batch操作本身的表数据时使用。 -->
-    <bean id="jobRepository"
-          class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
         <property name="dataSource" ref="dataSource" />
         <property name="transactionManager" ref="transactionManager" />
         <!--设置数据库隔离级别 -->
         <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT" />
+        <property name="tablePrefix" value="BATCH_" />
     </bean>
 
     <!--定义启动job的bean,该bean可以用于spring mvc或quartz启动job使用 ，默认是使用主线程启动job -->
@@ -35,7 +35,6 @@
                    rejection-policy="ABORT" queue-capacity="5000" />
 
     <!--job注册机，系统启动的时候会将所有定义好的job注册到内存当中，用于校验job是否定义重复等操作。 -->
-    <bean id="jobRegistry"
-          class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+    <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
 
 </beans>

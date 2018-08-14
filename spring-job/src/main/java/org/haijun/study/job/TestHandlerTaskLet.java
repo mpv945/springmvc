@@ -16,6 +16,8 @@ public class TestHandlerTaskLet implements Tasklet {
      */
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        return RepeatStatus.FINISHED; // 返回true和false 来表示成功或者失败
+        System.out.println("TestHandlerTaskLet 执行");
+        //return RepeatStatus.FINISHED; // 返回true和false 来表示成功或者失败
+        return RepeatStatus.CONTINUABLE;
     }
 }
