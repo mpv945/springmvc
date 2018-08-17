@@ -1,3 +1,6 @@
+按月和周统计https://blog.csdn.net/qq_28056641/article/details/78306870
+            https://www.cnblogs.com/wangyongwen/p/6265126.html
+
 mysql中int、bigint、smallint 和 tinyint的区别详细介绍
 类型[(M)] [UNSIGNED] [ZEROFILL] 位字段类型，M表示每个值的位数，范围从1到64，M值只对ZEROFILL有效，标识不够补零几位，对类型实际位数无关
         ALTER TABLE `表` MODIFY COLUMN `字段名` tinyint UNSIGNED ; 标识没有符号，就是没有负数

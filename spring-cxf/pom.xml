@@ -33,6 +33,12 @@
 
     <dependencies>
 
+<!--        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>62.1</version>
+        </dependency>-->
+
         <!-- servlet -->
         <dependency>
             <groupId>javax.servlet</groupId>

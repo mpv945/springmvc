@@ -33,6 +33,11 @@ public class LambdaExample3 {
                 .reversed()).forEachOrdered(e -> finalMap.put(e.getKey(), e.getValue()));
         System.out.println(finalMap);
 
+/*        Map<Integer, String> result1 = list.stream().collect(
+                Collectors.toMap(Hosting::getId, Hosting::getName));
+        Map<Integer, String> result3 = list.stream().collect(
+                Collectors.toMap(x -> x.getId(), x -> x.getName()));*/
+
         // 分组count条数
         // Map<String ,Long> counting = items.stream().collect(Collectors.groupingBy(Item::getName, Collectors.counting()));
 
