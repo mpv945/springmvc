@@ -22,12 +22,18 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <spring.batch.version>4.0.1.RELEASE</spring.batch.version>
         <!-- spring batch 3.0.1.RELEASE最高支持 spring 4.0.5.RELEASE -->
-        <spring.framework.version>5.0.7.RELEASE</spring.framework.version>
+        <spring.framework.version>5.0.0.RELEASE</spring.framework.version>
 
     </properties>
 
     <dependencies>
-        <!--批处理任务-->
+        <!--批处理任务  https://github.com/shailesh1001/springBatch4/tree/master/SpringBatchDatabaseToCsv/src/main
+        书上例子 https://github.com/jxtaliu/SpringBatchSample/tree/master/spring-batch-example/src
+        https://github.com/SharryShuai/learning-springbatch
+        https://blog.csdn.net/smartdt/article/details/78962814
+        https://github.com/getgitashok/SpringBatch-CSV-PostgreSQL/blob/master/pom.xml
+        https://github.com/kwon37xi/springboot2-batch-example
+        https://github.com/itmrchen/SpringBatch-DataMigration-->
         <dependency>
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-core</artifactId>
