@@ -2,10 +2,9 @@ package org.haijun.study.lambda;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,8 +39,127 @@ public class LambdaExample {
     //list.stream().forEach(map -> map.forEach((k,v) -> System.out.println("key:value = " + k + ":" + v)));
     public static void main(String[] args) {
         // 基本使用说明 https://my.oschina.net/lizaizhong/blog/1814267
+
+
+        String[] str11 = {"08:00", "09:00", "10:00", "18:00", "21:00"};
+        String[] str22 = {"12:00", "09:00", "10:00", "11:00"};
+        String[] str33 = Stream.concat(Stream.of(str11), Stream.of(str22)) //合并
+                .distinct()     //去重
+                .sorted()       //排序
+                .peek(System.out::println).toArray(String[]::new);
+        // 额外记录reduce用法
+        String[] temp = Stream.concat(Stream.of(str11), Stream.of(str22)) //合并
+                .distinct()     //去重
+                .sorted()       //排序
+                .reduce((a, b) -> {     //拼接
+                    a = a + "-" + b + "," + b;
+                    return a;
+                }).get().toString().split(",");
+        //去掉垃圾数据
+        str33 = Arrays.asList(temp)
+                .stream()
+                .filter(v -> v.contains("-"))
+                //.peek(System.out::println)
+                // 生成一个包含原Stream的所有元素的新Stream，同时会提供一个消费函数（Consumer实例），新Stream每个元素被消费的时候都会执行给定的消费函数
+                .peek(p -> {p = p.toUpperCase(); System.out.println(p);}) // 类似forEach，但比forEach灵活，可以做备份，不会破坏流的结构参与后期处理
+                .toArray(String[]::new);
+
+        if(true){
+            return;
+        }
         // 初始化
+        // 1. Individual values
+        Stream<String> s = Stream.of("a", "b", "c");
+        // 2. Arrays
+        String [] strArray = new String[] {"a", "b", "c"};
+        Stream<String> arrs = Stream.of(strArray);
+        // 3. Collections
+        List<String> list1 = Arrays.asList(strArray);
+        Stream<String> lists = list1.stream();
+        String joinStr = Stream.generate(() -> "test").limit(10).collect(Collectors.joining(","));
+        System.out.println(joinStr);
+        // 6. From Popular APIs
+        String sentence = "Program creek is a Java site.";
+        Stream<String> wordStream = Pattern.compile("\\W").splitAsStream(sentence);
+        String[] wordArr = wordStream.toArray(String[]::new);
+        System.out.println(Arrays.toString(wordArr));
         //Stream<LocalDate> date = Stream.iterate(LocalDate.now(), n->n.plusDays(1)).limit(20);
+
+        //去除重复 distinct
+        lists.distinct().forEach(p -> System.out.print(p + "\t"));  //1   2  3  follow wind   followwwind
+        System.out.println();
+
+        //过滤元素 filter
+        lists.filter(p -> p.length() > 1).forEach(p -> System.out.print(p + "\t")); //follow  wind   followwwind
+        System.out.println();
+
+        // sorted 流排序,中间操作返回流本身
+        lists.filter(str -> str.contains("w"))
+                .sorted((str1, str2) -> {
+                    if (str1.length() == str2.length()) {
+                        return 0;
+                    } else if (str1.length() > str2.length()) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }).forEach(System.out::println);  //wind follow followwwind
+
+        //limit 对一个Stream进行截断操作，获取其前N个元素，如果原Stream中包含的元素个数小于N，那就获取其所有的元素；
+        lists.limit(5).forEach(p -> System.out.print(p + "\t")); //1  2  3  3  follow
+        System.out.println();
+
+        //skip 返回一个丢弃原Stream的前N个元素后剩下元素组成的新Stream，如果原Stream中包含的元素个数小于N，那么返回空Stream；
+        lists.skip(5).forEach(p -> System.out.print(p + "\t")); //wind    followwwind
+        System.out.println();
+
+        //peek 生成一个包含原Stream的所有元素的新Stream，同时会提供一个消费函数（Consumer实例）
+        // ，新Stream每个元素被消费的时候都会执行给定的消费函数；
+        lists.peek(p -> {p = p.toUpperCase(); System.out.println(p);}).forEach(System.out::println);
+        System.out.println();
+        //转换元素 map
+        lists.map(p -> p + "-->").forEach(System.out::print); // 1-->2-->3-->3-->follow-->wind-->followwwind-->
+        lists.map(p -> p.split(" ")).map(p -> p[0] + "\t").forEach(System.out::print);//1 2  3  3  follow wind   followwwind
+        lists.map(p -> p.split("")).map(p -> {
+            String tmp = "";
+            if(p.length > 1){
+                tmp = p[1];
+            }else{
+                tmp = p[0];
+            }
+            return tmp + "\t";
+        }).forEach(System.out::print); //1 2  3  3  o  i  o
+        lists.filter(p -> p.matches("\\d+")).mapToInt(p -> Integer.valueOf(p)).forEach(p -> System.out.print(p + "\t"));//1   2  3  3
+        //  // flatMap 和map类似，不同的是其每个元素转换得到的是Stream对象，会把子Stream中的元素压缩到父集合中
+        lists.flatMap(p -> Stream.of(p.split("www"))).forEach(p -> System.out.print(p + "\t"));////1     2 3  3  follow wind   follo  ind
+        Stream<List<Integer>> inputStream = Stream.of(
+                Arrays.asList(1),
+                Arrays.asList(2, 3),
+                Arrays.asList(4, 5, 6)
+        );
+        Stream<Integer> outputStream = inputStream.flatMap((childList) -> childList.stream());
+        outputStream.forEach(p -> System.out.print(p + "\t")); //1 2  3  4  5  6
+        // 终端操作(Terminal) Stream
+        //forEach
+        lists.forEach(System.out::print);
+        //match 流匹配,终结操作
+        System.out.println(lists.allMatch(str -> str.length() == 3));// false
+        System.out.println(lists.anyMatch(str -> str.length() > 5));// true
+        System.out.println(lists.noneMatch(str -> str.length() > 5));// false
+        //count
+        System.out.println(lists.count());  //7
+        //reduce
+        Optional<String> reOptional = lists.reduce((str, str2) -> str + "-->" + str2);
+        reOptional.ifPresent(System.out::println); //1-->2-->3-->3-->follow-->wind-->followwwind
+        lists.filter(p -> p.matches("\\d+")).mapToInt(p -> Integer.valueOf(p)).reduce(Integer::sum).ifPresent(System.out::println);
+        //collect
+        lists.collect(Collectors.maxBy((p1, p2) -> p1.compareTo(p2))).ifPresent(System.out::println); //wind
+        lists.collect(Collectors.minBy((p1, p2) -> p1.compareTo(p2))).ifPresent(System.out::println); //1
+        int s11 = lists.filter(p -> p.matches("\\d+")).collect(Collectors.summingInt(p -> Integer.valueOf(p)));
+        String liString = lists.collect(Collectors.joining(","));
+        // //sum
+        int sum = lists.filter(p -> p.matches("\\d+")).mapToInt(p -> Integer.valueOf(p)).sum(); //9
+
         Stream<BigInteger> integers = Stream.iterate(BigInteger.ONE, n->n.add(BigInteger.ONE)).limit(1);//.collect(Collectors.toList());;
         integers.forEach(System.out::println);
         System.out.println("测试");
@@ -53,14 +171,27 @@ public class LambdaExample {
                 .limit(4)
                 .collect(Collectors.toList());
 
+        List<String> strs = Arrays.asList("d", "b", "a", "c", "a");
+        Optional<String> min = strs.stream().min(Comparator.comparing(Function.identity()));
+        Optional<String> max = strs.stream().max((o1, o2) -> o1.compareTo(o2));
+        System.out.println(String.format("min:%s; max:%s", min.get(), max.get()));// min:a; max:d
+        Optional<String> aa = strs.stream().filter(obj -> !obj.equals("a")).findFirst();
+        Optional<String> bb = strs.stream().filter(obj -> !obj.equals("a")).findAny();
+        // 在串行的流中，findAny和findFirst返回的，都是第一个对象；而在并行的流中，
+        // findAny返回的是最快处理完的那个线程的数据，所以说，在并行操作中，对数据没有顺序上的要求，那么findAny的效率会比findFirst要快的；
+        Optional<String> aa1 = strs.parallelStream().filter(obj -> !obj.equals("a")).findFirst();
+        Optional<String> bb1 = strs.parallelStream().filter(obj -> !obj.equals("a")).findAny();
+        System.out.println(aa.get() + "===" + bb.get());// d===d
+        System.out.println(aa1.get() + "===" + bb1.get());// d===b or d===c
+
         //1.第一种:通过collection集合提供的stream方法生成
         /*List<String> list = Arrays.asList("1","2","3","4");
         Stream<String> stream = list.stream();
         stream.forEach(System.out::print);*/
 
         //2.第二种:通过Arrays提供的stream方法生成
-        String[] s = new String[]{"1","2","3","4"};
-        Stream<String> stream2 = Arrays.stream(s);
+        String[] s1 = new String[]{"1","2","3","4"};
+        Stream<String> stream2 = Arrays.stream(s1);
         stream2.forEach(System.out::print);
 
         //3.第三种：利用steam的静态方法of

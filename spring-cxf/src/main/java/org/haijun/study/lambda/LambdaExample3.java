@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  */
 public class LambdaExample3 {
 
-    // 参考  http://www.cnblogs.com/CarpenterLee/p/6550212.html
+    // 参考  http://www.cnblogs.com/CarpenterLee/p/6550212.html 和 https://blog.csdn.net/qq_18416057/article/details/70143475
     public static void main(String[] args) {
 
         //list 转 map

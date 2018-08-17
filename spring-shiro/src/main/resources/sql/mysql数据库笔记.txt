@@ -1,6 +1,11 @@
 按月和周统计https://blog.csdn.net/qq_28056641/article/details/78306870
             https://www.cnblogs.com/wangyongwen/p/6265126.html
 
+分组后取最新的数据，加上该字段倒序：
+SELECT share_time,course_id,count(0) FROM
+(SELECT share_time,course_id FROM course_share ORDER BY share_time DESC) t GROUP BY t.course_id  ORDER BY share_time DESC
+这个不行SELECT share_time,course_id,count(0) FROM course_share GROUP BY course_id ORDER BY share_time DESC
+
 mysql中int、bigint、smallint 和 tinyint的区别详细介绍
 类型[(M)] [UNSIGNED] [ZEROFILL] 位字段类型，M表示每个值的位数，范围从1到64，M值只对ZEROFILL有效，标识不够补零几位，对类型实际位数无关
         ALTER TABLE `表` MODIFY COLUMN `字段名` tinyint UNSIGNED ; 标识没有符号，就是没有负数
