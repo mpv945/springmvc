@@ -38,6 +38,16 @@ public class LambdaExample3 {
         Map<Integer, String> result3 = list.stream().collect(
                 Collectors.toMap(x -> x.getId(), x -> x.getName()));*/
 
+        //收集成实体本身map
+        //account -> account是一个返回本身的lambda表达式，其实还可以使用Function接口中的一个默认方法代替，使整个方法更简洁优雅：Function.identity()
+        // 代码如下：
+        /*public Map<Long, Account> getIdAccountMap(List<Account> accounts) {
+            return accounts.stream().collect(Collectors.toMap(Account::getId, account -> account));
+        }*/
+        // 重复key的情况 toMap有个重载方法，可以传入一个合并的函数来解决key冲突问题;也可以指定一个Map的具体实现，来收集数据：
+        /*public Map<String, Account> getNameAccountMap(List<Account> accounts) {
+            return accounts.stream().collect(Collectors.toMap(Account::getUsername, Function.identity(), (key1, key2) -> key2,LinkedHashMap::new));
+        }*/
         // 分组count条数
         // Map<String ,Long> counting = items.stream().collect(Collectors.groupingBy(Item::getName, Collectors.counting()));
 
