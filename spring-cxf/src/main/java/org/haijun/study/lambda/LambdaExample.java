@@ -123,8 +123,15 @@ public class LambdaExample {
         System.out.println(Stream.of(1, 2, 3, 4).reduce(Integer::max).orElse(0));
         System.out.println("无初始值，求min");
         System.out.println(Stream.of(1, 2, 3, 4).reduce(Integer::min).orElse(0));
-        // 对对象的Code进行分组，然后对Count字段进行求和
+        // 对对象的Code进行分组，然后对Count字段进行求和（averagingDouble 求平均
         // Map<Integer, IntSummaryStatistics> collect = list.stream().collect(Collectors.groupingBy(Foo::getCode, Collectors.summarizingInt(Foo::getCount)));
+
+        // map 排序
+        Map<String, Long> result44 = null;
+        Map<String, Long> finalMap = new LinkedHashMap<>();
+        result44.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue()
+                        .reversed()).forEachOrdered(e -> finalMap.put(e.getKey(), e.getValue()));
 
         if(true){
             return;
