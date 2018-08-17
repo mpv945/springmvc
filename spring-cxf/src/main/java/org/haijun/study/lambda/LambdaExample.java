@@ -104,6 +104,27 @@ public class LambdaExample {
                 // 生成一个包含原Stream的所有元素的新Stream，同时会提供一个消费函数（Consumer实例），新Stream每个元素被消费的时候都会执行给定的消费函数
                 .peek(p -> {p = p.toUpperCase(); System.out.println(p);}) // 类似forEach，但比forEach灵活，可以做备份，不会破坏流的结构参与后期处理
                 .toArray(String[]::new);
+        System.out.println(Arrays.stream(str33).skip(1).collect(Collectors.joining("  "))+""+(5*0));
+        // 各个参数用法以及说明 https://www.cnblogs.com/litaiqing/p/6026682.html
+        //T reduce(T identity, BinaryOperator<T> accumulator); //identity：它允许用户提供一个循环计算的初始值。accumulator：计算的累加器，
+        System.out.println("给定个初始值，求和");
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(100, (sum, item) -> sum + item));
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(100, Integer::sum));
+        System.out.println("给定个初始值，求min");
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(100, (min, item) -> Math.min(min, item)));
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(100, Integer::min));
+        System.out.println("给定个初始值，求max");
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(100, (max, item) -> Math.max(max, item)));
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(100, Integer::max));
+        System.out.println("无初始值，求和");
+        //注意返回值，上面的返回是T,泛型，传进去啥类型，返回就是啥类型。 下面的返回的则是Optional类型
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(Integer::sum).orElse(0));
+        System.out.println("无初始值，求max");
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(Integer::max).orElse(0));
+        System.out.println("无初始值，求min");
+        System.out.println(Stream.of(1, 2, 3, 4).reduce(Integer::min).orElse(0));
+        // 对对象的Code进行分组，然后对Count字段进行求和
+        // Map<Integer, IntSummaryStatistics> collect = list.stream().collect(Collectors.groupingBy(Foo::getCode, Collectors.summarizingInt(Foo::getCount)));
 
         if(true){
             return;
