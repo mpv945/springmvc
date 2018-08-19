@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--导入job的上下文配置-->
+    <import resource="job-context.xml" />
+
+    <!--定义作业的名字，由多个job组成，封装整个批处理操作-->
+    <batch:job id="billJob">
+        <batch:description>第一个测试例子</batch:description>
+        <!--定义一个作业步-->
+        <batch:step id="billStep"><!--Job的一个执行环节，可以定义具体执行逻辑-->
+            <!--tasklet定义step具体执行逻辑操作，可以重复执行，可设置同步，异步等-->
+            <batch:tasklet transaction-manager="transactionManager"><!--指定负责批处理处理的事务管理器-->
+                <!--chunk 给定数量Item的集合，可以定义读，处理，写操作，提交间隔.......-->
+                <!--commit-interval表示提交间隔大小，本例子表示每处理两条写入一次-->
+                <batch:chunk reader="csvTtemReader" processor="creditBillProcessor"
+                             writer="csvItemWriter" commit-interval="2" /><!--处理步骤为先reader读取文件数据，processor负责处理每一行数据，writer将处理的数据写入到文件-->
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--配置读数据 从文件系统，数据库，队列读取Item（一条数据记录）-->
+    <bean id="csvTtemReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="job">
+        <!--定义要读取的文件资源-->
+        <property name="resource" value="classpath:" />
+        <!--每行数据映射操作配置-->
+        <property name="lineMapper" ref="lineMapper" />
+    </bean>
+    <bean id="lineMapper" class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+        <property name="lineTokenizer" ref="lineTokenizer" />
+        <property name="fieldSetMapper">
+            <bean class="org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper">
+                <property name="prototypeBeanName" value="creditBill" /><!--属性映射的类名-->
+            </bean>
+        </property>
+    </bean>
+    <bean id="lineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <property name="delimiter" value="," /><!--每行数据分隔符-->
+        <property name="names"><!--映射到实体bean属性名称-->
+            <list>
+                <value>accountId</value>
+                <value>name</value>
+                <value>amount</value>
+                <value>date</value>
+                <value>address</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--配置批处理操作，在写之前对数据进行处理，例如数据清洗，数据转换，数据过滤，数据校验 等-->
+    <bean id="creditBillProcessor" class="org.haijun.study.processor.CreditBillProcessor" scope="step">
+    </bean>
+
+    <!--配置写数据 将Item（一条数据记录）写入到数据库，文件系统，队列等-->
+    <bean id="csvItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+        <!--定义要写入的文件-->
+        <!--<property name="resource" value="file:target/outputFile.csv" />-->
+        <property name="resource" value="classpath:" />
+        <!--每行数据转成文件的规则-->
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value="," /><!--文本每行数据字段之间使用的分隔符-->
+                <property name="fieldExtractor">
+                    <bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <property name="names" value="accountId,name,amount,date,address" /><!--要转换输出数据属性的名称-->
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+</beans>
