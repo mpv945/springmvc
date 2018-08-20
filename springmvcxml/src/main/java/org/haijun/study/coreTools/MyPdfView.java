@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * itext 官网教程https://developers.itextpdf.com/content/itext-7-examples/itext-7-converting-html-pdf/pdfhtml-responsive-design 或者https://itextpdf.com/ja
+ * http://www.importnew.com/27220.html  https://www.cnblogs.com/0201zcr/p/4952174.html
  * 导出pdf
  */
 @Component
