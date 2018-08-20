@@ -1,12 +1,16 @@
 package org.haijun.study.coreTools;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.XMLReader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.SAXParserFactory;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +70,5 @@ public class MyExcelView extends AbstractXlsxStreamingView {
             userRow.createCell(3).setCellValue("测试" + rowCount);
             userRow.createCell(4).setCellValue("测试" + rowCount);
         }
-
     }
 }
