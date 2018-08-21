@@ -3,10 +3,15 @@ package org.haijun.study.utils.file;
 import info.monitorenter.cpdetector.io.*;
 import org.apache.commons.io.IOUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileEncoding {
 
@@ -99,6 +104,33 @@ public class FileEncoding {
             return null;
         }
         return null;
+    }
+
+    /**
+     * 图片信息字段枚举
+     */
+    public enum ImageInfo {
+        Height, Width
+    }
+
+    /**
+     * 获取图片信息
+     * @param strSrc
+     * @return
+     */
+    public static Map<ImageInfo,Integer> getImgInfo(String strSrc){
+
+        File picture=new File(strSrc);
+        BufferedImage sourceImg=null;
+        try {
+            sourceImg=ImageIO.read(new FileInputStream(picture)); // 获取网路图片ImageIO.read(new URL(strSrc).openStream());
+        } catch (IOException e) {
+            return null;
+        }
+        Map<ImageInfo,Integer> ret = new HashMap<>();
+        ret.put(ImageInfo.Height,sourceImg.getHeight());
+        ret.put(ImageInfo.Width,sourceImg.getWidth());
+        return ret;
     }
     /*public static String getFileEncode(File f) {
         *//*
