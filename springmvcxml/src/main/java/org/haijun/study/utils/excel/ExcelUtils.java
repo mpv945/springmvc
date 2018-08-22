@@ -24,6 +24,8 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -36,9 +38,10 @@ public class ExcelUtils {
 
     public static void main(String[] args) {
         try {
-            wirteExcel();// 写文件
+            //wirteExcel();// 写文件
 
             //readExcel();// 读文件
+            templateWrite();// 模板替换
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,7 +76,7 @@ public class ExcelUtils {
      * @throws IOException
      */
     public static boolean wirteExcel() throws Exception{
-        String fileName = "sxssf.xls";
+        String fileName = "sxssf.xlsx";
         String path = "D:\\data\\";
         try(Workbook workbook = getWorkBook(fileName,true,null);
             FileOutputStream out = new FileOutputStream(path+fileName);) {
@@ -82,6 +85,8 @@ public class ExcelUtils {
             CellStyle style = workbook.createCellStyle();
 
             Sheet sheet = workbook.createSheet("sheet1");// 创建第一个sheet页
+            //如果这行没有了，整个公式都不会有自动计算的效果的
+            //sheet.setForceFormulaRecalculation(true);
             // workbook.setSheetName(2, "1234");//重命名工作表
             //sheet.setZoom(200);//显示比例(表示放大200%）
             //workbook.setActiveSheet(2);//设置默认工作表
@@ -290,6 +295,7 @@ public class ExcelUtils {
                 for(int rowNum = firstRowNum;rowNum <= lastRowNum;rowNum++){
                     //获得当前行
                     Row row = sheet.getRow(rowNum);
+                    //System.out.println("行数据="+row.toString());
                     //Iterator<Cell> cells = row.cellIterator();
                     short firstCellIndex = row.getFirstCellNum();
                     short lastCellIndex = row.getLastCellNum();
@@ -304,6 +310,62 @@ public class ExcelUtils {
                 .peek(p -> { System.out.println("每行数据="+ Arrays.stream(p).collect(Collectors.joining("-","[","]")));})
                 .flatMap(subItem->Arrays.stream(subItem)).collect(Collectors.joining(","));
         //System.out.println(dataStr);
+    }
+
+    public static void templateWrite() throws Exception{
+        Map<String, String> params = new HashMap<>();
+        params.put("reportDate", "2014-02-28");
+        params.put("appleAmt", "100.00");
+        params.put("bananaAmt", "200.00");
+        params.put("totalAmt", "300.00");
+
+        String[][] data = null;
+        String readfileName = "template.xlsx";
+        String wirtefileName = "templateWrite.xlsx";
+        String path = "D:\\data\\";
+        File excelFile = new File(path+readfileName);
+        try(InputStream is = new FileInputStream(excelFile);
+            Workbook readWorkbook = getWorkBook(readfileName,false,is);
+            //Workbook writeWorkbook = getWorkBook(wirtefileName,true,null);
+            FileOutputStream out = new FileOutputStream(path+wirtefileName);
+        ){
+            // 简单模板替换
+            /*sheet.getRow(12).getCell(6).setCellValue(12);
+            sheet.getRow(12).getCell(7).setCellValue(12);*/
+
+            // 动态模板替换
+            Sheet sheet =  readWorkbook.getSheetAt(0);
+            Iterator<Row> rows = sheet.rowIterator();
+            Matcher matcher;
+            while (rows.hasNext()){
+                Row row = rows.next();
+                // 如果改行没有${} 这样的占位，立即下次循环
+                /*if(!matcher(row.toString()).find()){
+                    continue;
+                }*/
+                Iterator<Cell> cells = row.cellIterator();
+                while (cells.hasNext()){
+                    Cell cell =  cells.next();
+                    String val = cell.getStringCellValue();
+                    if(val != null && (matcher =matcher(val)).find()){
+                        val = matcher.replaceFirst(params.get(matcher.group(1)));
+                        cell.setCellValue(val);
+                    }
+                }
+            }
+            readWorkbook.write(out);
+        }
+    }
+
+    /**
+     * 正则匹配字符串
+     * @param str
+     * @return
+     */
+    private static Matcher matcher(String str) {
+        Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(str);
+        return matcher;
     }
 
     /**
