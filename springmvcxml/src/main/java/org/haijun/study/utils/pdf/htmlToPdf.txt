@@ -1,3 +1,5 @@
+// itext7学习笔记 https://blog.csdn.net/u012397189/article/details/77540464（有好几章）
+
 wkhtmltopdf 包含两个工具：wkhtmltopdf 和 wkhtmltoimage :https://www.cnblogs.com/xiangxiong/p/7645679.html
 页面大小参考：http://doc.qt.io/archives/qt-4.8/qprinter.html#PaperSize-enum
 

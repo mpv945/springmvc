@@ -20,6 +20,7 @@ import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 public class Word2Html {
@@ -120,8 +121,10 @@ public class Word2Html {
         com.itextpdf.text.Document document1 = new com.itextpdf.text.Document();
         PdfWriter writer = PdfWriter.getInstance(document1,new FileOutputStream(filePdfName2));
         document1.open();
+        URL url = new URL("https://www.cnblogs.com/shuilangyizu/p/6595588.html");
         XMLWorkerHelper.getInstance().parseXHtml(writer,document1,
                 new FileInputStream(fileOutName),
+                //url.openStream(),
                 //XMLWorkerHelper.class.getResourceAsStream("/dd.css"),
                 Charset.forName("UTF-8"),
                 myfont);
