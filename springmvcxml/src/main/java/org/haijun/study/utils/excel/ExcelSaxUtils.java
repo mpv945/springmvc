@@ -16,22 +16,40 @@ import org.xml.sax.XMLReader;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-public class ExampleEventUserModel {
+public class ExcelSaxUtils {
 
     // 处理类
-    private static ThreadLocal<XSSFSheetXMLHandler.SheetContentsHandler> handlerThreadLocal = new ThreadLocal<>();
+    private ThreadLocal<XSSFSheetXMLHandler.SheetContentsHandler> handlerThreadLocal = new ThreadLocal<>();
+
+    //内部类
+    private static class SingletonHandler {
+        private static ExcelSaxUtils instance = new ExcelSaxUtils();
+    }
 
     /**
-     * 构造注入处理类
+     * 初始化对象
      * @param handler
+     * @return
      */
-    public ExampleEventUserModel(XSSFSheetXMLHandler.SheetContentsHandler handler) {
-        handlerThreadLocal.set(handler);
+    public static ExcelSaxUtils getInstance(XSSFSheetXMLHandler.SheetContentsHandler handler) {
+        ExcelSaxUtils init = SingletonHandler.instance;
+        init.handlerThreadLocal.set(handler);
+        return init;
     }
+
+    // 构造注入处理类
+    /*public ExcelSaxUtils(XSSFSheetXMLHandler.SheetContentsHandler handler) {
+        handlerThreadLocal.set(handler);
+    }*/
+
+    private ExcelSaxUtils(){};
 
 
     /**
@@ -45,12 +63,16 @@ public class ExampleEventUserModel {
             throw new Exception("文件不存在或者不能读取该文件");
         }
         try(OPCPackage pkg =  OPCPackage.open(file, PackageAccess.READ);
-            //OPCPackage pkg = OPCPackage.open(filename);
-        ){
+             //OPCPackage pkg = OPCPackage.open(filename);
+            ){
             XSSFReader r = new XSSFReader( pkg );
             //SharedStringsTable sst = r.getSharedStringsTable();
             StylesTable styles = r.getStylesTable();
-            XMLReader parser = processSheet(styles,new ReadOnlySharedStringsTable(pkg));
+            XSSFSheetXMLHandler.SheetContentsHandler sheetContentsHandler = handlerThreadLocal.get();
+            if(sheetContentsHandler == null){
+                throw new ParserConfigurationException("SheetContentsHandler 转换器未找到");
+            }
+            XMLReader parser = processSheet(styles,new ReadOnlySharedStringsTable(pkg),sheetContentsHandler);
             Iterator<InputStream> sheets = r.getSheetsData();
             while(sheets.hasNext()) {
                 System.out.println("第一个sheet 页读取开始:\n");
@@ -60,18 +82,16 @@ public class ExampleEventUserModel {
                 sheet.close();
             }
         }
-
+        // 处理完回收资源
+        handlerThreadLocal.remove();
     }
     // 获取SAX 读取对象
-    public XMLReader processSheet(StylesTable styles, ReadOnlySharedStringsTable strings)
+    private static XMLReader processSheet(StylesTable styles, ReadOnlySharedStringsTable strings,
+                                          XSSFSheetXMLHandler.SheetContentsHandler sheetContentsHandler)
             throws SAXException, ParserConfigurationException {
         /*SAXParserFactory saxFactory = SAXParserFactory.newInstance();
         XMLReader sheetParser = saxFactory.newSAXParser().getXMLReader();*/
         XMLReader sheetParser = SAXHelper.newXMLReader();
-        XSSFSheetXMLHandler.SheetContentsHandler sheetContentsHandler = handlerThreadLocal.get();
-        if(sheetContentsHandler == null){
-            throw new ParserConfigurationException("SheetContentsHandler 转换器未找到");
-        }
         ContentHandler handler1 = new XSSFSheetXMLHandler(styles, strings, sheetContentsHandler,false);
         sheetParser.setContentHandler(handler1);
         return sheetParser;
@@ -89,23 +109,35 @@ public class ExampleEventUserModel {
         MON3, TUE3, WED3, THU3, FRI3, SAT3, SUN3,POP3,GG3,OU3;
     }
     public static void main(String[] args) throws Exception {
-        /*SimpleSheetContentsHandler handler = new SimpleSheetContentsHandler(EnumTest1.values(),true);
-        ExampleEventUserModel example = new ExampleEventUserModel(handler);
+/*        SimpleSheetContentsHandler handler = new SimpleSheetContentsHandler(EnumTest1.values(),true);
+        ExcelSaxUtils example = ExcelSaxUtils.getInstance(handler);
         example.processAllSheets("D:\\data\\sxssf.xlsx");
         handler.getData().forEach(
                 item -> {
                     System.out.println(JSON.toJSONString(item));
                 }
         );*/
-        ReadExcelThreadTest test1 = new ReadExcelThreadTest(ExcelSaxUtils.EnumTest1.values(),"D:\\data\\sxssf.xlsx");
-        ReadExcelThreadTest test2 = new ReadExcelThreadTest(ExcelSaxUtils.EnumTest2.values(),"D:\\data\\sxssf.xlsx");
-        ReadExcelThreadTest test3 = new ReadExcelThreadTest(ExcelSaxUtils.EnumTest3.values(),"D:\\data\\sxssf.xlsx");
+
+        ReadExcelThreadTest test1 = new ReadExcelThreadTest(EnumTest1.values(),"D:\\data\\sxssf.xlsx");
+        ReadExcelThreadTest test2 = new ReadExcelThreadTest(EnumTest2.values(),"D:\\data\\sxssf.xlsx");
+        ReadExcelThreadTest test3 = new ReadExcelThreadTest(EnumTest3.values(),"D:\\data\\sxssf.xlsx");
         /*test1.run();
         test2.run();
         test3.run();*/
-        ExecutorService e = Executors.newScheduledThreadPool(3);
-        e.submit(test1);
-        e.submit(test2);
-        e.submit(test3);
+        ExecutorService e = Executors.newScheduledThreadPool(3);// 模拟多线程
+        Future future1 = e.submit(test1);
+        Future future2 = e.submit(test2);
+        Future future3 = e.submit(test3);
+        List<Future> futures = new ArrayList<>();
+        // future.isDone() //return true,false 无阻塞访问
+        // future.get() // return 返回值，阻塞直到该线程运行结束
+        futures.add(future1);
+        futures.add(future2);
+        futures.add(future3);
+        boolean exit = false;
+        while (!exit){
+            exit = futures.stream().allMatch(future -> future.isDone()==true);
+        }
+        e.shutdown();
     }
 }

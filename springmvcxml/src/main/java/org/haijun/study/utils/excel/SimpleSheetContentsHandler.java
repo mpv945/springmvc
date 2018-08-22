@@ -81,11 +81,19 @@ public class SimpleSheetContentsHandler implements XSSFSheetXMLHandler.SheetCont
     @Override
     public void cell(String cellReference, String formattedValue, XSSFComment xssfComment) {
         // 如果需要读取头部信息，跳过第0行开始的数据
+        String key = cellName.get(cellsIndex);
         if(isReadHeader && currentIndex ==0 ){
-            headerData.put(cellName.get(cellsIndex),formattedValue);
+            headerData.put(key,formattedValue);
         }else {
-            itemTemp.put(cellName.get(cellsIndex),formattedValue);
+            itemTemp.put(key,formattedValue);
         }
+        System.out.println("读取打印"+key+":"+formattedValue);
+        //线程休眠时间1-5秒，每间隔1-5秒开启一个线程，模拟一个用户进行访问
+        /*try {
+            Thread.sleep(1000*(new Random().nextInt(5)+1));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
         cellsIndex++;
     }
 

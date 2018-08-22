@@ -1,16 +1,11 @@
 package org.haijun.study.coreTools;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.XMLReader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.SAXParserFactory;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +40,8 @@ public class MyExcelView extends AbstractXlsxStreamingView {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
         font.setFontName("Arial");
-        style.setFillForegroundColor(IndexedColors.BLUE.getIndex());
-        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setFillForegroundColor(IndexedColors.BLUE.getIndex());//颜色
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);// 图案样式
         font.setBold(true);
         font.setColor(IndexedColors.WHITE.index);
         style.setFont(font);
