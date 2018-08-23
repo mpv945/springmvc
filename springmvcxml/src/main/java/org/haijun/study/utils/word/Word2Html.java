@@ -20,6 +20,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.*;
 import java.net.URL;
@@ -37,7 +38,8 @@ public class Word2Html {
 
     public static void main(String[] args) {
         try {
-            convert();
+            //convert();
+            convertHtmlToPdf("http://localhost:8081/index.php?db=&table=&token=%5CAUIt%27%40%7Dp%284R-8yy&lang=zh_cn","D:\\data\\flying-saucer.pdf");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,12 +221,13 @@ public class Word2Html {
         document1.addSubject("pdf主题");
         document1.addCreationDate();
         document1.addTitle("pdf标题,可在html中指定title");
-        //URL url = new URL("https://www.cnblogs.com/shuilangyizu/p/6595588.html");
+        URL url = new URL("http://localhost:8081");
         //Document docContext = Jsoup.connect("http://example.com/").get();
+        // https://darren.work/post/11样式设置
         XMLWorkerHelper.getInstance().parseXHtml(writer,document1,
-                new FileInputStream(fileOutName),// 读取html文件
+                //new FileInputStream(fileOutName),// 读取html文件
                 //new ByteArrayInputStream(docContext.html().getBytes("UTF-8")),//直接从html文本读取
-                //url.openStream(),// url读取流
+                url.openStream(),// url读取流
 
                 null,// 设置css
                 //new ByteArrayInputStream(("<style type=\"text/css\">"+css.toString()+"</style>").getBytes("UTF-8")),
@@ -249,5 +252,29 @@ public class Word2Html {
         Matcher matcher = pattern.matcher(str);
         return matcher;
     }
+
+    /**
+     * flying-saucer生成pdf
+     * @param inputFile
+     * @param outputFile
+     * @return
+     * @throws Exception
+     */
+    private static boolean convertHtmlToPdf(String inputFile, String outputFile) throws Exception {
+
+        OutputStream os = new FileOutputStream(outputFile);
+        ITextRenderer renderer = new ITextRenderer();
+        String url = new File(inputFile).toURI().toURL().toString();
+
+        renderer.setDocument(inputFile);
+
+        renderer.layout();
+        renderer.createPDF(os);
+
+        os.flush();
+        os.close();
+        return true;
+    }
+
     // itext7学习笔记 https://blog.csdn.net/u012397189/article/details/77540464（有好几章）
 }

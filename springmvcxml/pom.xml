@@ -84,6 +84,12 @@
             <version>7.1.2</version>
             <type>pom</type>
         </dependency>
+        <!--itext7 html转pdf-->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>2.0.2</version>
+        </dependency>
         <!--基于SAX解析xlsx https://myjeeva.com/read-excel-through-java-using-xssf-and-sax-apache-poi.html-->
         <!--<dependency>
             <groupId>com.myjeeva.poi</groupId>
@@ -129,6 +135,11 @@
             <groupId>com.itextpdf</groupId>
             <artifactId>itext-asian</artifactId>
             <version>5.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf-itext5</artifactId>
+            <version>9.1.15</version>
         </dependency>
 
         <!--java 图表绘制-->
