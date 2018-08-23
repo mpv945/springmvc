@@ -76,7 +76,7 @@ public class WordUtils {
      * @throws Exception
      */
     public static void readWord() throws Exception{
-        FileInputStream stream = new FileInputStream("D:\\data\\sample.doc");
+        FileInputStream stream = new FileInputStream("D:\\data\\sample.docx");
         XWPFDocument doc = new XWPFDocument(stream);// 创建Word文件
         // 输出CoreProperties信息
         XWPFWordExtractor extractor = new XWPFWordExtractor(doc);
