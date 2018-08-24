@@ -7,6 +7,7 @@ import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.DeviceCmyk;
+import com.itextpdf.kernel.colors.DeviceGray;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
 import com.itextpdf.kernel.events.PdfDocumentEvent;
@@ -49,71 +50,102 @@ public class Itext7HtmlToPdf {
     public static void simpleDome() throws Exception {
 
         // 指定生成的源
-        URL url = new URL("https://blog.csdn.net/u012397189/article/details/78742207");
+        URL url = new URL("http://www.runoob.com/linux/linux-install.html");
 
         PdfDocument doc = null;
         // 第一种 指定生成pdf路径
-        FileOutputStream fos = new FileOutputStream(new File("D:\\data\\output.pdf"));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos,"UTF-8"));
-        PdfWriter pdfWriter = new PdfWriter(fos);
-        doc = new PdfDocument(pdfWriter);
+        try(FileOutputStream fos = new FileOutputStream(new File("D:\\data\\output.pdf"));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos,"UTF-8"));
+            PdfWriter pdfWriter = new PdfWriter(fos);){
 
-        // 第二种 指定生成pdf路径
-        //doc = new PdfDocument(new PdfWriter("/xx/xx/output.pdf"));
+            doc = new PdfDocument(pdfWriter);
 
-        // 设置页面大小
-        doc.setDefaultPageSize(PageSize.A4.rotate());
+            // 第二种 指定生成pdf路径
+            //doc = new PdfDocument(new PdfWriter("/xx/xx/output.pdf"));
 
-        // 声明转换配置
-        ConverterProperties properties = new ConverterProperties();
-        // 声明字体 提供解析用的字体
-        FontProvider font = new FontProvider();
-        font.addSystemFonts();// 添加系统字体（font.addFont("/xx/xx/msyh.ttf");//你的字体文件）
-        //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        //font.addDirectory(classLoader.getResource("fonts").getPath()); // 自定义字体路径、解决中文,可先用绝对路径测试。
+            // 设置页面大小
+            doc.setDefaultPageSize(PageSize.A4);
 
-        properties.setFontProvider(font);// 设置字体到配置文件
-        // 获取字体列表中的第一个字体信息
-        //Optional<FontInfo> fontinfo = font.getFontSet().getFonts().stream().sorted(Comparator.comparing(FontInfo::getFontName).reversed()).findFirst();// .sorted(Comparator.reverseOrder())
-        Optional<FontInfo> fontinfo = font.getFontSet().getFonts().stream().filter(fontIn -> { String name = fontIn.getFontName();return name.toUpperCase().indexOf("YH")>=0;}).findFirst();
-        //font.getFontSet().getFonts().forEach(System.out::println); // 循环打印加载的字体
-        //Optional<FontInfo> fontinfo = font.getFontSet().get();
+            // 声明转换配置
+            ConverterProperties properties = new ConverterProperties();
+            // 声明字体 提供解析用的字体
+            FontProvider font = new FontProvider();
+            font.addSystemFonts();// 添加系统字体（font.addFont("/xx/xx/msyh.ttf");//你的字体文件）
+            //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            //font.addDirectory(classLoader.getResource("fonts").getPath()); // 自定义字体路径、解决中文,可先用绝对路径测试。
 
-        Header headerHandler = new Header();// 页眉
-        Footer footerHandler = new Footer();// 页脚
-        doc.addEventHandler(PdfDocumentEvent.START_PAGE, headerHandler);
-        doc.addEventHandler(PdfDocumentEvent.END_PAGE, footerHandler);
+            properties.setFontProvider(font);// 设置字体到配置文件
+            // 获取字体列表中的第一个字体信息
+            //Optional<FontInfo> fontinfo = font.getFontSet().getFonts().stream().sorted(Comparator.comparing(FontInfo::getFontName).reversed()).findFirst();// .sorted(Comparator.reverseOrder())
+            Optional<FontInfo> fontinfo = font.getFontSet().getFonts().stream().filter(fontIn -> { String name = fontIn.getFontName();return name.toUpperCase().indexOf("YH")>=0;}).findFirst();
+            //font.getFontSet().getFonts().forEach(System.out::println); // 循环打印加载的字体
+            //Optional<FontInfo> fontinfo = font.getFontSet().get();
 
-        // 水印
-        WatermarkingEventHandler watermarkingEventHandler = new WatermarkingEventHandler();
-        doc.addEventHandler(PdfDocumentEvent.INSERT_PAGE, watermarkingEventHandler);
+           /* Header headerHandler = new Header();// 页眉
+            Footer footerHandler = new Footer();// 页脚
+            doc.addEventHandler(PdfDocumentEvent.START_PAGE, headerHandler);
+            doc.addEventHandler(PdfDocumentEvent.END_PAGE, footerHandler);
 
-        // 指定字体 生成页脚等
-       /* doc.addEventHandler(PdfDocumentEvent.END_PAGE, new IEventHandler() {
-            @Override
-            public void handleEvent(Event event) {
-                PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
-                PdfDocument pdf = docEvent.getDocument();
-                PdfPage page = docEvent.getPage();
-                Rectangle pageSize = page.getPageSize();
-                PdfCanvas pdfCanvas = new PdfCanvas(
-                        page.getLastContentStream(), page.getResources(), pdf);
-                Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
-                float x = (pageSize.getLeft() + pageSize.getRight()) / 2;
-                float y = pageSize.getBottom() + 15;
-                try {
-                    Paragraph p =  new Paragraph();
-                    fontinfo.ifPresent(fontInfo -> p.setFont(font.getPdfFont(fontInfo)));// 指定字体
-                    p.add("第"+pdf.getPageNumber(page)+"页");
-                    canvas.showTextAligned(p, x, y, TextAlignment.CENTER);
-                    canvas.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+            // 水印
+            WatermarkingEventHandler watermarkingEventHandler = new WatermarkingEventHandler();
+            doc.addEventHandler(PdfDocumentEvent.INSERT_PAGE, watermarkingEventHandler);*/
+
+           // 设定画布大小
+            SetPageSize setPageSize = new SetPageSize();
+            doc.addEventHandler(PdfDocumentEvent.START_PAGE,setPageSize);
+
+            // 指定字体 生成页脚等
+           /* doc.addEventHandler(PdfDocumentEvent.END_PAGE, new IEventHandler() {
+                @Override
+                public void handleEvent(Event event) {
+                    PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
+                    PdfDocument pdf = docEvent.getDocument();
+                    PdfPage page = docEvent.getPage();
+                    Rectangle pageSize = page.getPageSize();
+                    PdfCanvas pdfCanvas = new PdfCanvas(
+                            page.getLastContentStream(), page.getResources(), pdf);
+                    Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+                    float x = (pageSize.getLeft() + pageSize.getRight()) / 2;
+                    float y = pageSize.getBottom() + 15;
+                    try {
+                        Paragraph p =  new Paragraph();
+                        fontinfo.ifPresent(fontInfo -> p.setFont(font.getPdfFont(fontInfo)));// 指定字体
+                        p.add("第"+pdf.getPageNumber(page)+"页");
+                        canvas.showTextAligned(p, x, y, TextAlignment.CENTER);
+                        canvas.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });*/
+            });*/
 
-        HtmlConverter.convertToPdf(url.openStream(),doc,properties);// 无法灵活设置页边距等
+            HtmlConverter.convertToPdf(url.openStream(),doc,properties);// 无法灵活设置页边距等
+            //changePageSize(doc);
+        }
+    }
+
+    /**
+     * 改变页面大小和方向
+     */
+    protected static class SetPageSize implements IEventHandler {
+        @Override
+        public void handleEvent(Event event) {
+            float margin = 22;// 间距
+            PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
+            PdfDocument pdf = docEvent.getDocument();
+            PdfPage page = docEvent.getPage();
+            // 改变每页大小
+            Rectangle mediaBox = page.getMediaBox();
+            Rectangle newMediaBox = new Rectangle(mediaBox.getLeft() - margin, mediaBox.getBottom() - margin,
+                    mediaBox.getWidth() + margin * 2, mediaBox.getHeight() + margin * 2);
+            page.setMediaBox(newMediaBox);
+            // add border（我们创了页面的PdfCanvas对象，然后使用灰色画笔画出了mediaBox的边界(行14-17)）
+            PdfCanvas over = new PdfCanvas(page);
+            over.setStrokeColor(DeviceGray.GRAY);// 灰色
+            over.rectangle(mediaBox.getLeft(), mediaBox.getBottom(), mediaBox.getWidth(), mediaBox.getHeight());
+            over.stroke();
+
+        }
     }
 
     // 页眉
@@ -122,11 +154,25 @@ public class Itext7HtmlToPdf {
         protected float height = 32f;
         protected float x = 42f;
         protected float y = 740f;
+        float margin = 72;
         @Override
         public void handleEvent(Event event) {
             PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
             PdfDocument pdf = docEvent.getDocument();
             PdfPage page = docEvent.getPage();
+
+            //PdfPage page = pdfDoc.getPage(i);
+            // 改变每页大小
+            Rectangle mediaBox = page.getMediaBox();
+            Rectangle newMediaBox = new Rectangle(mediaBox.getLeft() - margin, mediaBox.getBottom() - margin,
+                    mediaBox.getWidth() + margin * 2, mediaBox.getHeight() + margin * 2);
+            page.setMediaBox(newMediaBox);
+            // add border（我们创了页面的PdfCanvas对象，然后使用灰色画笔画出了mediaBox的边界(行14-17)）
+            PdfCanvas over = new PdfCanvas(page);
+            over.setStrokeColor(DeviceGray.GRAY);// 灰色
+            over.rectangle(mediaBox.getLeft(), mediaBox.getBottom(), mediaBox.getWidth(), mediaBox.getHeight());
+            over.stroke();
+
             Rectangle pageSize = page.getPageSize();
             PdfCanvas pdfCanvas = new PdfCanvas(
                     page.getLastContentStream(), page.getResources(), pdf);

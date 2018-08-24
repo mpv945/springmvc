@@ -136,10 +136,24 @@
             <artifactId>itext-asian</artifactId>
             <version>5.2.0</version>
         </dependency>
+        <!-- 支持css样式渲染 -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf-itext5</artifactId>
             <version>9.1.15</version>
+        </dependency>
+
+        <!--支持html转换成xhtml-->
+        <dependency>
+            <groupId>net.sf.jtidy</groupId>
+            <artifactId>jtidy</artifactId>
+            <version>r938</version>
+        </dependency>
+        <!--为了让系统freemarker转换pdf-->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.28</version>
         </dependency>
 
         <!--java 图表绘制-->

@@ -276,5 +276,4 @@ public class Word2Html {
         return true;
     }
 
-    // itext7学习笔记 https://blog.csdn.net/u012397189/article/details/77540464（有好几章）
 }
