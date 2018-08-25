@@ -62,13 +62,13 @@ public class Word2Html {
         //web 项目读取方式
         //XWPFDocument document = new XWPFDocument( Word2Html.class.getResourceAsStream( fileInName ) );
         XWPFDocument document = new XWPFDocument(in);
-
         // docx转html （解析XHTML配置，（这里设置setImageManager来设置图片存放的目录)
         XHTMLOptions options = XHTMLOptions.create();
         // Extract image
         options.setImageManager( new ImageManager( new File(filepath), "images" ) );
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         XHTMLConverter.getInstance().convert( document, baos, options );
+
 
        /* Options options1 = Options.getFrom(DocumentKind.DOCX);
         options1.setProperty("___URIResolver",picturesPath);
