@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CSVUtils {
 
@@ -39,6 +41,19 @@ public class CSVUtils {
     }
 
     public static void main(String[] args) {
+
+        try(OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream("D:\\data\\jobData1.csv"), "UTF-8");
+            CSVPrinter csvPrinter = new CSVPrinter(osw, CSVFormat.DEFAULT);) {
+            csvPrinter.printRecord(new Object[]{"accountId","name","amount","date","address"});//写CSV第一行
+            int max = 7;
+            for(int i=0;i<max;i++){
+                csvPrinter.printRecord(Stream.generate(Math::random).limit(5).collect(Collectors.toList()));
+            }
+        }catch (Exception e){
+            System.out.println("读写csv失败");
+        }
+    }
+    public static void main1(String[] args) {
         // 跨平台空格;File.pathSeparator指的是分隔多个路径字符串的分隔符
         String s = File.separator;
         try(CSVParser parser = CSVUtils.getCSVParser("D://demo01.csv");

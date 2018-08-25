@@ -47,7 +47,7 @@ public class AppTest
      *      通过className：class属性的值，class是给页面一批元素添加一类class属性
      *      通过LinkText：<a href>和</a>之间的内容
      *      通过PartialLinkText：部分文本值
-     *      通过XPATH：
+     *      通过XPATH：  如何从chrome浏览器获取Xpath F12打开开发者工具，点击开发者工具内的箭头 ;右击选中的代码，选择Copy-Copy XPath
      *      通过CSS选择器
      *      通过TagName：可以用TagName先缩小范围
      *      组合-连续查找：在findElement找的元素之后，在子元素下继续查询元素，缩小范围

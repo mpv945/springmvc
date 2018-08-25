@@ -6,5 +6,5 @@ package org.haijun.study;
  *  https://www.cnblogs.com/liwu/p/5113936.html
  *  https://www.cnblogs.com/dreamyu/p/6407814.html
  */
-public class TestNgStudent {
+public class  TestNgStudent {
 }

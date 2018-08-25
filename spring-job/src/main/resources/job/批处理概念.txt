@@ -1,0 +1,21 @@
+Spring Batch 框架基本概念
+    jobRepository :作业仓库 负责Job ，step 执行过程中的状态保存
+    JobLauncher :作业调度器 提供执行Job的入口
+    Job  :作业，由多个step组成，封装整个批处理操作
+        Step  :作业步 Job的一个执行环节，由多个或者一个step组成成job
+            Tasklet :Step种具体执行逻辑操作，可以重复执行，可以设置具体的同步，异步操作等
+                Chuuk :Tasklet在操作时给定Item 的集合，可以定义对Chuuk的读操作。处理操作，写操作，提交间隔。这是Spring Batch框架的一个重要特性
+                        Item ：（条目）Chuuk的读操作。处理操作，写操作，提交间隔的一条数据记录
+                        ItemReader ：（读取数据源）从数据源（文件系统，数据库，队列等）种读取Item; 一次读取一条
+                        ItemProcessor ：（处理读取的数据（Item条目））在Item写入数据源之前，对数据进行处理（例如，数据清洗，数据转换，数据过滤，数据校验等）
+                        ItemWriter ：（写入数据源）将处理好数据批量写入数据源（文件系统，数据库，队列等）；一次输出一批
+
+     Job  :作业是批处理的核心概念，是Batch操作的基础单元
+            Job Instance ：作业的实例，每次作业都会(由JobLauncher 入口)生成一个实例。存放在jobRepository（作业仓库）；如果作业失败，下次重新执行该作业的时候，会使用同一个作业实例，Job和Job Instance关系好像java的类定义和类new出来的类实例
+            Job Parameters ：作业参数，他是一组用来启动批处理的任务参数，在启动Job时候，可以设置任何需要的作业参数，作业参数会用来标识作业实例，不同的Job是通过Job参数来区分的
+            Job Execution ：作业执行器，其负责具体的Job的执行，每次运行job都会启动一个新的Job执行器
+            Job Repository ：作业仓库 负责Job ，step 执行过程中的状态保存，为JobLauncher ，Job，Step 提供标准的CRUD实现
+            Job Launcher :作业调度器 他根据指定的Job Parameters 参数来创建不同和相同的Job作业实例（有两种实例：一，根据Job Parameters从jobRepository获取，没有则创建）
+     Step ： 作业步，Job的执行环节 由多个或者一个step组成成job，封装批处理任务种的一个独立的连续阶段
+            Step Execution ：作业步执行器，他负责具体的Step的执行，每次运行Step都会启动一个新的作业步执行器
+            ......Step其他和上面类似
