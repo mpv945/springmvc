@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>简单数据库配置</description>
+
+    <!--加载配置文件，一个spring 只能加载一次，多次加载后面的不会成功，这种配置最后放在主配置或者最开始被加载的配置文件里-->
+    <context:property-placeholder location="classpath:batch.properties" />
+
+    <!--因为下面的bean依赖该文件的配置bean，所以放在引用的bean配置之上导入-->
+    <import resource="classpath:job/dataSource.xml" />
+
+    <!-- 定义jobRepository 该bean用于spring batch操作本身的表数据时使用。 -->
+    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+        <description>作业仓库</description>
+        <property name="dataSource" ref="dataSource" />
+        <property name="transactionManager" ref="transactionManager" />
+        <!--设置数据库隔离级别 -->
+        <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT" />
+        <property name="tablePrefix" value="BATCH_" /><!--表前缀-->
+        <property name="maxVarCharLength" value="1000" /><!--数据字段的字符串最大长度-->
+    </bean>
+
+    <!--定义启动job的bean,该bean可以用于spring mvc或quartz启动job使用 ，默认是使用主线程启动job -->
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <description>作业调度器</description>
+        <property name="jobRepository" ref="jobRepository" /><!--指定调动过程状态记录的数据仓库-->
+    </bean>
+
+    <!--相对路径导入-->
+    <import resource="classpath:/job/ch02/job.xml" /><!--因为job.xml依赖上面的bean，所以要在上面Bean创建完引入此文件-->
+    <!--&lt;!&ndash; 事务管理器 &ndash;&gt;
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    &lt;!&ndash; 数据源 &ndash;&gt;
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName">
+            <value>com.mysql.jdbc.Driver</value>
+        </property>
+        <property name="url">
+            <value>jdbc:mysql://127.0.0.1:3306/test1289</value>
+        </property>
+        <property name="username" value="root"></property>
+        <property name="password" value="000000"></property>
+    </bean>-->
+</beans>

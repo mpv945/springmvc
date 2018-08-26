@@ -12,18 +12,6 @@
        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-
-
-    <!--获得jenkins 的编译号，可以通过设定job任务时把jenkins 设定到项目的配置变量或者文件，通过控制器获取，
-    jenkins内置变量参考https://www.cnblogs.com/ceshisanren/p/5639869.html-->
-    <!-- 加载配置文件 -->
-    <context:property-placeholder location="classpath:batch.properties" />
-
-    <!-- 扫描的包名 -->
-   <context:component-scan base-package="org.haijun.study" />
-
-
-
     <!-- 数据源：spring batch 本身所依赖的数据源，记录运行参数及过程信息，配置参考https://www.cnblogs.com/weizhxa/p/6548413.html -->
     <!--配置别的数据源实例https://my.oschina.net/xinxingegeya/blog/340302-->
     <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
@@ -42,10 +30,9 @@
         <property name="dataSource" ref="dataSource"></property>
     </bean>
 
-    <!-- 使用annotation定义事务 -->
+<!--    &lt;!&ndash; 使用annotation定义事务 &ndash;&gt;
     <tx:annotation-driven transaction-manager="transactionManager" />
-
-<!--    <tx:advice id="serviceAdvice" transaction-manager="transactionManager">
+    <tx:advice id="serviceAdvice" transaction-manager="transactionManager">
         <tx:attributes>
             <tx:method name="add*" propagation="REQUIRED" />
             <tx:method name="save*" propagation="REQUIRED" />
@@ -59,7 +46,6 @@
             <tx:method name="*" rollback-for="Exception" />
         </tx:attributes>
     </tx:advice>
-
     <aop:config proxy-target-class="true">
         <aop:pointcut id="serviceMethod"
                       expression="execution(* com.cpic.caf.*.service.impl.*Impl.*(..))" />
@@ -70,15 +56,13 @@
      初始化脚本，主要用来创建spring-batch运行时的数据，应用生成环境时应该去掉此配置，手工创建下对应的表
      spring-batch本身job运行需要的表的创建脚本，spring-batch.jar中默认提供了各种数据库的DDL语句
       -->
-    <jdbc:initialize-database data-source="dataSource">
-        <jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-mysql.sql" />
+    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL"><!--ignore-failures 忽略错误，保证程序后面的处理继续执行-->
+        <!--<jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-mysql.sql" />-->
         <jdbc:script location="classpath:/org/springframework/batch/core/schema-mysql.sql" />
+        <!--清除batch仓库的数据-->
+        <!--<jdbc:script location="classpath:dbTables/my/mysql-truncate-all-table.sql" />-->
         <!--数据库引擎的区别https://www.cnblogs.com/zhengah/p/4664297.html-->
-        <jdbc:script location="classpath:dbTables/tables_mysql_innodb.sql" />
+        <!--<jdbc:script location="classpath:dbTables/tables_mysql_innodb.sql" />--><!--QRTZ 数据库-->
     </jdbc:initialize-database>
 
-    <!-- 引入batch目录下所有xml文件-->
-    <import resource="classpath:batch/*.xml"/>
-    <!-- 引入quartz配置文件 -->
-    <import resource="classpath:quartz/*.xml"/>
 </beans>

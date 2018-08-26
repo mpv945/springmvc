@@ -32,7 +32,7 @@ public class JobLaunchTest {
 	
 	@Test
 	public void billJob() throws Exception {
-		JobExecution result = jobLauncher.run(job, new JobParameters());          
+		JobExecution result = jobLauncher.run(job, new JobParameters());//jobParameters=[{}]
 		System.out.println(result.toString());     
 	}
 }

@@ -33,7 +33,7 @@ BATCH_JOB_EXECUTION_PARAMS(作业参数表,用于存放每个JOB执行的时候�
         LONG_VAL  参数如果是Long,就存放Long类型的参数值
         DOUBLE_VAL 参数如果是Double,就存放Double类型的参数值
         IDENTIFYING 用于标识作业参数是否标识作业实例
-BATCH_JOB_EXECUTION(作业执行器表,存放当前作业的执行信息,创建时间、执行时间、执行结束时间、执行状态、执行Job实例等信息)
+BATCH_JOB_EXECUTION(作业执行器表,存放当前作业的执行信息,创建时间、执行时间、执行结束时间、执行状态、执行Job实例等信息，)
         JOB_EXECUTION_ID 主键
         VERSION  版本号
         JOB_INSTANCE_ID 作业实例ID
@@ -45,7 +45,7 @@ BATCH_JOB_EXECUTION(作业执行器表,存放当前作业的执行信息,创建�
         EXIT_MESSAGE  作业执行器退出信息,通常存放异常信息
         LAST_UPDATED  本条记录上次更新时间
         JOB_CONFIGURATION_LOCATION  作业配置文件的位置  (运用BATCH_JOB_INSTANCE和BATCH_JOB_EXECUTION两张表联合查询Job信息,关联JOB_INSTANCE_ID)
-BATCH_JOB_EXECUTION_CONTENXT(作业执行上下文表,存放上下文信息)
+BATCH_JOB_EXECUTION_CONTENXT(作业执行上下文表,存放上下文信息，)
         JOB_EXECUTION_ID 外键ID,作业执行器编号
         SHORT_CONTEXT  作业执行器上下文字符串格式
         SERIALIZED_CONTEXT  序列化的作业执行上下文

@@ -59,7 +59,7 @@ public class AppTest
     public void testOpenHtml() throws Exception{
         WebDriver driver = null;
         // 谷歌
-        System.setProperty("webdriver.chrome.driver", "\\drivers\\chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "\\drivers\\chromedriver.exe");// 自己测试在windows下，要创建C:\drivers,然后再复制一份
         ChromeOptions options = new ChromeOptions();
         //options.setHeadless(true);//在后台打开浏览器
         driver = new ChromeDriver(options);//InternetExplorerDriver();//ChromeDriver();//FirefoxDriver();

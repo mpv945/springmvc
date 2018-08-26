@@ -24,15 +24,13 @@
     </bean>
 
     <!--定义一个可以异步启动的jobLauncher，使用该启动器后，会新建线程执行job,不影响主线程的调度 -->
-    <bean id="asyncJobLauncher"
-          class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+    <bean id="asyncJobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
         <property name="jobRepository" ref="jobRepository" />
         <property name="taskExecutor" ref="asyncTaskExecutor" />
     </bean>
 
     <!-- 定义异步线程池，可以根据业务场景定义不同的线程池 -->
-    <task:executor id="asyncTaskExecutor" pool-size="20"
-                   rejection-policy="ABORT" queue-capacity="5000" />
+    <task:executor id="asyncTaskExecutor" pool-size="20" rejection-policy="ABORT" queue-capacity="5000" />
 
     <!--job注册机，系统启动的时候会将所有定义好的job注册到内存当中，用于校验job是否定义重复等操作。 -->
     <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />

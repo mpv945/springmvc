@@ -7,8 +7,7 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!--导入job的上下文配置-->
-    <!--<import resource="classpath:job/ch02/job-context.xml"/>-->
-    <import resource="job-context.xml" />
+    <!--<import resource="classpath:/job/job-context.xml" />-->
 
     <!--定义作业的名字，由多个job组成，封装整个批处理操作-->
     <batch:job id="billJob">
