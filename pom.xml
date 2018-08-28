@@ -32,6 +32,7 @@
     <module>springmvcxml</module>
       <module>spring-shiro</module>
       <module>spring-job</module>
+      <module>spring-activiti</module>
   </modules>
 
   <name>springmvc</name>
