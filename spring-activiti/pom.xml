@@ -24,6 +24,7 @@
         <logVer>1.7.25</logVer>
     </properties>
 
+    <!--官方玩文档https://www.activiti.org/userguide/  和 https://www.activiti.org/javadocs/-->
     <dependencies>
         <dependency>
             <groupId>org.activiti</groupId>
