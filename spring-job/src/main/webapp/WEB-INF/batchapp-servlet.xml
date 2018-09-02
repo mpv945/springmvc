@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--<mvc:annotation-driven/>-->
+   <!-- <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+    &lt;!&ndash; 扫描的包名 &ndash;&gt;
+    <context:component-scan base-package="org.haijun.study.controller" />-->
+
+    <!--xml方式注入bean,通过bean直接注入，就不要上面的包扫描了-->
+    <bean class="org.haijun.study.controller.JobLauncherController">
+        <constructor-arg ref="jobLauncher" /><!--引用spring root父上下文的bean对象-->
+        <constructor-arg ref="jobRegistry" /><!--引用spring root父上下文的bean对象-->
+        <constructor-arg ref="jobOperator" />
+    </bean>
+
+</beans>

@@ -9,8 +9,15 @@
     <!--导入job的上下文配置-->
     <!--<import resource="classpath:/job/job-context.xml" />-->
 
+    <!--抽象job-->
+    <batch:job id="abstractJob" abstract="true">
+        <batch:listeners><batch:listener ref="systemOut" /></batch:listeners>
+    </batch:job>
+
     <!--定义作业的名字，由多个job组成，封装整个批处理操作-->
-    <batch:job id="billJob">
+    <batch:job id="billJob" parent="abstractJob">
+    <!--<batch:job id="billJob" restartable="true">--><!--job的唯一标识，在整个运行上下文中不运行重复，job-repository 默认使用名为jobRepository，restartable 表示当前作业是否支持重启，默认true-->
+        <!--incrementer作业参数递增器，只有在JobOperator的startNextnIcrementer方法中使用，parent 指定当前job继承其他Job，abstract使用true表示当前job是否抽象，不能实例-->
         <batch:description>第一个测试例子</batch:description>
         <batch:step id="billStep"><!--定义一个作业步--><!--Job的一个执行环节，可以定义具体执行逻辑-->
             <!--tasklet定义step具体执行逻辑操作，可以重复执行，可设置同步，异步等-->
@@ -22,14 +29,49 @@
                 </batch:chunk>
             </batch:tasklet>
         </batch:step>
+        <!--<batch:split id=""></batch:split>--> <!--定义并行的step步-->
+        <!--<batch:flow id="" parent=""></batch:flow>--> <!--引用独立配置的作业步流程-->
+        <!--<batch:decision id="" decider=""></batch:decision>--><!--Step执行的条件判断-->
+        <batch:listeners merge="true"><!--多个监听器执行顺序从上到下，before方法按照顺序执行，after方法相反的顺序,merge="true"会对父类子类的拦截器进行合并，相反子类定义的会覆盖掉父类的-->
+            <!--<batch:listener ref="systemOut" />-->
+            <batch:listener ref="systemOutJobExecutionListener" />
+        </batch:listeners><!--定义Job执行时的拦截器-->
+        <batch:validator ref="validatorTset"></batch:validator><!--定义JobParamenters 的验证器-->
+
     </batch:job>
+
+    <!--自定义拦截器-->
+    <bean class="org.haijun.study.listener.SystemOutJobExecutionListener" id="systemOutJobExecutionListener" />
+    <bean class="org.haijun.study.listener.SystemOut" id="systemOut" />
+
+    <!--参数检验 不存在必须的参数名返回异常，如果超出下面的参数也会报错-->
+    <bean class="org.springframework.batch.core.job.DefaultJobParametersValidator" id="validatorTset">
+        <property name="requiredKeys"><!--定义必须输入的参数-->
+            <set>
+                <value>jobInstanceKey</value>
+                <value>inputResourse</value>
+            </set>
+        </property>
+        <property name="optionalKeys"><!--可选参数列表-->
+            <set>
+                <value>name</value>
+                <!--<value type="java.lang.Long">23</value>
+                <value type="java.lang.Double">31</value>-->
+            </set>
+        </property>
+    </bean>
 
     <!-- 读取信用卡账单文件,CSV格式 -->
     <!--配置读数据 从文件系统，数据库，队列读取Item（一条数据记录）-->
+    <!--scope="step" IOC容器在对象进入相应的Scope之前生成并装配这些对象，在该对象不再处于Scope的限定范围之后，容器通常会销毁这些对象，scope="step" 作业范围在执行的step步-->
     <bean id="csvItemReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
-        <!--定义要读取的文件资源-->
-        <property name="resource" value="classpath:job/ch02/data/credit-card-bill-201303.csv"/>
+        <!--定义要读取的文件资源，硬编码方式-->
+        <!--<property name="resource" value="classpath:job/ch02/data/credit-card-bill-201303.csv"/>-->
         <!--<property name="resource" value="classpath:jobTestData/jobData1.csv" />-->
+        <!--通过确定 scope="step"，可以支持属性的Late Binging（属性后绑定）的能力。绑定对象包含：1.jobParameters(作业参数)，
+                                2 . job/stepExecutionContext(当前job/step的执行器上下文)-->
+        <property name="resource" value="#{jobParameters['inputResourse']}"/>
+
         <!--每行数据映射操作配置-->
         <property name="lineMapper" ref="defaultLineMapper" />
     </bean>

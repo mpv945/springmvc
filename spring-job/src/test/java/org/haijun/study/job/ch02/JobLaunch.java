@@ -3,7 +3,10 @@
  */
 package org.haijun.study.job.ch02;
 
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,6 +33,7 @@ public class JobLaunch {
 		// 构建参数
 		JobParametersBuilder parametersBuilder = new JobParametersBuilder().
 				addString("jobInstanceKey",LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));// 设置调用Job时候的参数名jobInstanceKey，以时间来区分唯一
+		parametersBuilder.addString("inputResourse","classpath:job/ch02/data/credit-card-bill-201303.csv");
 		// 此次可以模拟运行多次请求，主要验证Job 不同参数会创建不同的Job 实例(Instance)，任务失败，通过启动相同的参数再次执行该Job，并且获取实例还是失败的那个实例
 		/* 执行步骤和说明
 		1 . 以参数为 new JobParametersBuilder().addString("20180826");
@@ -42,6 +46,20 @@ public class JobLaunch {
 		*/
 		// BatchStatus.FAILED
 		parameteerRunJob(jobConfgPath, jobName, parametersBuilder);// 带参数运行，结果日志会输出jobParameters=[{jobInstanceKey=2018-08-26T01:20:51.98}]，不带 new JobParameters());//jobParameters=[{}]
+
+		// 命令行的方式运行
+		// 进入target目录。找到jar 文件，语法java -classpath "./dependency/*;batch-example-1.0.jar" CommandLineJobRunner jobpath <option> jobIdentifier (jobParameters)
+		//        java -classpath "./dependency/*;batch-example-1.0.jar" 表示当前执行的classpath
+		//        jobpath 默认使用ClassPathXmlApplicationContext从当前classpath加载配置文件，可以通过指定加载路径，例如file:./job.xml 表示从当前目录下面的job.xml文件
+		//        option 可选参数（根据jobIdentifier参数）：-restart 启动指定作业名最后一次失败的作业，-stop 停止正在执行的作业，-abandon 废弃stopped的作业，
+		// 				-next 根据JobParametersIncrementer 执行下个作业；
+		//        jobIdentifier 正常启动是作业的名字，即xml的<Job 配置的id> .如果是option参数操作。需要指定job execution 的id
+		//		  jobParameters 启动Job参数inputPath(String)=/ch02/job.xml或者createTile(date)=2018/09/01或者timeOut(long)=5000或者account(double)=100.26
+		// 命令实例：
+		//  java -classpath "./dependency/*;batch-example-1.0.jar"
+		//      org.springframework.batch.core.launch.support.CommandLineJobRunner job/job-context-db.xml(job 配置) billJob（job名称） timeOut(long)=5000（job参数）
+		// 获取登陆状态 CommandLineJobRunner的退出状态值由ExitCodeMapper的实现类SimpleJvmExitCodeMapper定义返回（0 正常状态为COMPLETED；1 失败，状态FAILED；2 作业失败，例如没有此作业）
+		// 可以自定义实现ExitCodeMapper，例如CustomerExitCodeMapper类（需要注解或者在xml注入该bean）
 	}
 
 	/**

@@ -1,0 +1,85 @@
+Spring Batch 框架基本概念(一个正常的Job 由一个以上的step组成，作用域从step开始，Step->Tasklet（可以自己实现逻辑，也可以定义块）->(执行块)Chunk{read,process,write})
+    jobRepository :作业仓库 负责Job ，step 执行过程中的状态保存
+    JobLauncher :作业调度器 提供执行Job的入口
+    Job  :作业，由多个step组成，封装整个批处理操作
+        Step  :作业步 Job的一个执行环节，由多个或者一个step组成成job
+            Tasklet :Step的具体执行逻辑操作，可以重复执行，可以设置具体的同步，异步操作等
+                Chuuk :Tasklet在操作时给定Item 的集合，可以定义对Chuuk的读操作。处理操作，写操作，提交间隔。这是Spring Batch框架的一个重要特性
+                        Item ：（条目）Chuuk的读操作。处理操作，写操作，提交间隔的一条数据记录
+                        ItemReader ：（读取数据源）从数据源（文件系统，数据库，队列等）种读取Item; 一次读取一条
+                        ItemProcessor ：（处理读取的数据（Item条目））在Item写入数据源之前，对数据进行处理（例如，数据清洗，数据转换，数据过滤，数据校验等）
+                        ItemWriter ：（写入数据源）将处理好数据批量写入数据源（文件系统，数据库，队列等）；一次输出一批
+
+     Job  :作业是批处理的核心概念，是Batch操作的基础单元
+            Job Instance ：作业的实例，每次作业都会(由JobLauncher 入口)生成一个实例。存放在jobRepository（作业仓库）；如果作业失败，下次重新执行该作业的时候，会使用同一个作业实例，Job和Job Instance关系好像java的类定义和类new出来的类实例
+            Job Parameters ：作业参数，他是一组用来启动批处理的任务参数，在启动Job时候，可以设置任何需要的作业参数，作业参数会用来标识作业实例，不同的Job是通过Job参数来区分的
+            Job Execution ：作业执行器，其负责具体的Job的执行，每次运行job都会启动一个新的Job执行器
+            Job Repository ：作业仓库 负责Job ，step 执行过程中的状态保存，为JobLauncher ，Job，Step 提供标准的CRUD实现
+            Job Launcher :作业调度器 他根据指定的Job Parameters 参数来创建不同和相同的Job作业实例（有两种实例：一，根据Job Parameters从jobRepository获取，没有则创建）
+     Step ： 作业步，Job的执行环节 由多个或者一个step组成成job，封装批处理任务种的一个独立的连续阶段
+            Step Execution ：作业步执行器，他负责具体的Step的执行，每次运行Step都会启动一个新的作业步执行器
+            ......Step其他和上面类似
+
+    运行Job ：spring batch提供了一组运行Job的接口API（JobLauncher，JobExplorer，JobOperator），JobOperator 通过JobExplorer在jobRepository 找到运行的各个结果和实例，
+         然后 调用JobLauncher 执行Job实例，JobLauncher运行前通过jobRepository做运行检查，以后后续运行状态跟新写入等
+            JobLauncher     执行作业类（主要方法 run）
+            JobExplorer     作业状态查询。返回作业的复杂对象，如Job Execution ； Job Instance ； Step Execution 等（方法：
+                    getJobInstances, getJobExecution,getStepExecution, getJobInstance,getJobExecutions,findRuningJobInstances,getJobNames）
+            JobOperator     作业状态查询，作业执行类，返回作业状态的简单类型，例如Job Execution的id。Job Instance 的id ； Step Execution 的id 等（方法：
+                    getExecutions，getJobInstances,getRunningExecutions,getParameters,start,restart,startMextInstance,stop,getSummary,getStepExecutionSummarites,getJobNames)
+
+
+
+    Job Launchar(作业调度器)是batch框架提供运行job的能力的接口。通过给定job名称和 job parameters 让Job Launchar执行（run方法的实现）job，
+                    框架简单实现为SimpleJobLaunchar，批处理任务可以通过Launchar和外部系统交互，可以让外部系统通过同步或者异步调用批处理
+
+    ItemReader 组件是Step中对资源的读取处理，spirng batch提供多种以下默认实现（实现ItemReader接口的read方法读取资源）
+            ListItemReader                      读取List类型数据，只能读一次
+            IteratorItemReader                  迭代方式读组件
+            ItemReaderAdapter                   ItemReader适配器，可以复用现有的读操作
+            FlatFileItemReader                  读取Flat类型文件
+            StaxEventItemReader                 读取xml文件、
+            JdbcCursorItemReader                基于JDBC游标方式读取数据库
+            HibernateCursorItemReader           基于Hibernate游标方式读取数据库
+            StoredProcedureItemReader           基于存储过程方式读取数据库
+            IbatisPagingItemReader              基于Ibatis分页方式读取数据库
+            JpaPagingItemReader                 基于JPA分页方式读取数据库
+            JdbcPagingItemReader                基于Jdbc分页方式读取数据库
+            HibernatePagingItemReader           基于Hibernate分页方式读取数据库
+            JmsItemReader                       基于JMS队列
+            MultiResourceItemReader             多文件读组件
+            ResourceItemReader                  基于批量资源读组件，每次读取返回资源对象
+            MongoItemReader                     基于分布式文件存储的数据库MongoDB读组件
+            Neo4jItemReader                     基于网络的数据库Neo4j读组件
+            AmqpItemReader                      基于AMPQP队列
+            RepositoryItemReader                基于Spring Data的读组件
+
+    ItemProcessor 对ItemReader读取的数据进行处理，可以实现业务操作对数据的处理（实现process 接口，返回O是交给ItemWriter处理），以下是系统的默认实现
+            CompositeItemProcessor              组合处理器，可以分装多个业务处理服务
+            ItemProcessorAdapter                ItemProcessor适配器，可以复用现有的ItemProcessor实现处理业务服务
+            PassThroughItemProcessor            不做任何业务处理，直接返回读到的数据
+            ValidatingItemProcessor             数据校验处理器，支持对数据的校验吗，不通过的数据可以进行过滤或者skip的方式跳过对记录的处理
+
+    ItemWriter 对step的资源进行写处理（接口方法write实现，没有返回），以下框架默认实现
+            FlatFileItemWriter                  写Flat类型文件
+            MultiResourceItemWriter             多文件写组件
+            StaxEventItemWriter                 写xml类型文件
+            AmqpItemWriter                      写AMQP类型消息
+            ClassifierCompositeItemWriter       根据Classifier路由不同的Itenm到特定的ItemWriter处理器
+            HibernateItemWriter                 基于Hibernate写入item到数据库
+            IbatisBatchItemWriter               基于Ibatis的写入方式
+            ItemWriterAdapter                   ItemWriter适配器，可以复用现有的写服务
+            JdbcBatchItemWriter                 基于jdbc的写入方式
+            JmsItemWriter                       写JMS队列
+            JpaItemWriter                       基于JPA写入item到数据库
+            GemfireItemWriter                   基于分布式数据库Gemfire的写组件
+            SpELMappingGemfireItemWriter        基于spring 表达式语言的分布式数据库Gemfire的写组件
+            MimeMessageItemWriter               发送邮件的写组件
+            MongoItemWriter                     基于分布式文件储存的数据库MongoDB写组件
+            Neo4jItemWriter                     基于网络的数据库Neo4j的写组件
+            PropertyExtractingDelegatingItemWriter属性抽取代理写组件，通过调用给定的Spring bean方法执行写入，参数由Item中指定的属性字段获取作为参数
+            RepositoryItemWriter                基于Spring Data的写组件
+            simpleMailMessageItemWriter         发送邮件的写组件
+            CompositeItemWriter                 条目写的组合模式，支持组装多个ItemWriter
+
+

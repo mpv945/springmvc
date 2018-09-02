@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+        <description>作业仓库</description>
+        <property name="dataSource" ref="dataSource" />
+        <property name="transactionManager" ref="transactionManager" />
+        <!--设置数据库隔离级别 -->
+        <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT" /><!--默认使用SERIALIZABLE，使用REPEATABLE_READ 也可以很好的工作-->
+        <property name="tablePrefix" value="BATCH_" /><!--表前缀-->
+        <property name="maxVarCharLength" value="1000" /><!--数据字段的字符串最大长度 默认2500-->
+        <!--<property name="lobHandler" ref="defaultLobHandler"/>--><!--Oracle中的lob字段处理-->
+    </bean>
+
+    <!--定义启动job的bean,该bean可以用于spring mvc或quartz启动job使用 ，默认是使用主线程启动job -->
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <description>作业调度器，同步调度器</description>
+        <property name="jobRepository" ref="jobRepository" /><!--指定调动过程状态记录的数据仓库-->
+    </bean>
+
+    <!--定义任务的线程池，大小为20-->
+    <task:executor id="asyncTaskExecutor" pool-size="20" rejection-policy="ABORT" queue-capacity="5000" />
+    <bean id="jobLauncherAsyn" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <description>异步作业调度器，该调度器不会阻塞线程执行</description>
+        <property name="jobRepository" ref="jobRepository" />
+        <property name="taskExecutor" ref="asyncTaskExecutor"/>
+    </bean>
+
+    <!--定时任务线程池定义-->
+    <task:scheduler id="scheduler" pool-size="10" />
+
+    <!-- 任务列表  -->
+    <task:scheduled-tasks scheduler="scheduler">
+        <!--每10秒钟，执行对象schedulerLauncher的launch方法一次-->
+        <task:scheduled ref="schedulerLauncher" method="launch" fixed-rate="10000" />
+    </task:scheduled-tasks>
+
+    <!-- 抽象基础Job -->
+    <batch:job id="baseJob" abstract="true">
+        <batch:listeners>
+            <batch:listener ref="sysoutListener"></batch:listener>
+        </batch:listeners>
+    </batch:job>
+
+    <!--监听器配置-->
+    <bean class="org.haijun.study.listener.SystemOut" id="sysoutListener" />
+    <bean class="org.haijun.study.listener.SystemOutJobExecutionListener" id="jobExecutionListener" />
+
+    <!--定义Job自动注册功能-->
+    <bean class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+        <property name="jobRegistry" ref="jobRegistry" />
+    </bean>
+    <!--jobRegistry 存放了所有的Job对象-->
+    <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+
+    <!--定义作业的浏览接口，可以通过数据库查询Job执行的元数据信息-->
+    <bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!--定义jobOperator，可以对作业实例进行CURD和控制处理-->
+    <bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
+        <property name="jobRepository" ref="jobRepository" />
+        <property name="jobLauncher" ref="jobLauncherAsyn" /><!--异步调度器方便后面在同一个线程中终止job-->
+        <property name="jobRegistry" ref="jobRegistry" />
+        <property name="jobExplorer" ref="jobExplorer" />
+    </bean>
+
+    <!--JMX 浏览控制方式
+        在java 按照目录找到C:\Program Files\Java\jdk1.8.0_172\bin\jconsole.exe ,双击运行
+        如果是本地java运行 ，选择运行的程序目录，如果是远程请选择远程的主机名和端口访问，
+        在进入控制台后找到MBean页，找到<entry key的字符串包路径，打开操作-》选择stop，
+        在上方输入框输入数据库对应的作业的执行器ID[job_execution的JOB_INSTANCE_ID]，点击sotp按钮就可以停止任务
+    -->
+<!--    <bean class="org.springframework.jmx.export.MBeanExporter">
+        <property name="beans">
+            <map>
+                <entry key="org.haijun.study.job_jmx:name=jobOperator" value-ref="jobOperator" />
+            </map>
+        </property>
+    </bean>-->
+
+</beans>

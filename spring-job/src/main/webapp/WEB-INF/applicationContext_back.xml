@@ -16,44 +16,34 @@
 
     <!--获得jenkins 的编译号，可以通过设定job任务时把jenkins 设定到项目的配置变量或者文件，通过控制器获取，
     jenkins内置变量参考https://www.cnblogs.com/ceshisanren/p/5639869.html-->
-
-
-    <!--加载配置文件，一个spring 只能加载一次，多次加载后面的不会成功，这种配置最后放在主配置或者最开始被加载的配置文件里-->
+    <!-- 加载配置文件 -->
     <context:property-placeholder location="classpath:batch.properties" />
 
     <!-- 扫描的包名 -->
-    <!--若使用include-filter去定制扫描内容，要在use-default-filters="false"的情况下，不然会“失效”，被默认的过滤机制所覆盖-->
-    <!--同样注意的是：在use-default-filters="false"的情况下，exclude-filter是针对include-filter里的内容进行排除。-->
-   <!--<context:component-scan base-package="org.haijun.study" />-->
-    <context:component-scan base-package="org.haijun.study">
-        <!-- annotation是对注解进行扫描 -->
-        <!--<context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>-->
-        <!-- assignable是对类或接口进行扫描 过滤器扫描派生于expression属性所指定类型的那些类 -->
-        <!--<context:include-filter type="assignable" expression="com.wjx.betalot.performer.Performer"/>
-        <context:include-filter type="assignable" expression="com.wjx.betalot.performer.impl.Sonnet"/>-->
-        <!--regex过滤器扫描类的名称与expression属性所指定正则表示式所匹配的那些类-->
-        <!--<context:exclude-filter type="regex" expression=".service.*"/>-->
-        <!--custom 使用自定义的org.springframework.core.type.TypeFliter实现类，该类由expression属性指定-->
-        <!--<context:exclude-filter type="custom" expression="Colle"-->
-        <!--aspectj过滤器扫描与expression属性所指定的AspectJ表达式所匹配的那些类-->
-        <context:exclude-filter type="regex" expression=".controller.*"/>
-    </context:component-scan>
+   <context:component-scan base-package="org.haijun.study" />
 
-    <!--导入数据库连接配置-->
-    <import resource="classpath:database/db-connection.xml" />
+
+
+    <!-- 数据源：spring batch 本身所依赖的数据源，记录运行参数及过程信息，配置参考https://www.cnblogs.com/weizhxa/p/6548413.html -->
+    <!--配置别的数据源实例https://my.oschina.net/xinxingegeya/blog/340302-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${batch.jdbc.driver}"></property>
+        <property name="url" value="${batch.jdbc.url}"></property>
+        <property name="username" value="${batch.jdbc.user}"></property>
+        <property name="password" value="${batch.jdbc.password}"></property>
+        <!--当建立新连接时被发送给JDBC驱动的连接参数,格式必须是 [propertyName=property;]*-->
+        <!--<property name="connectionProperties">
+            <array></array>
+        </property>-->
+    </bean>
 
     <!-- spring batch 本身所依赖的事务管理,使用spring batch命名空间，transactional advice（事务AOP）会被自动创建 -->
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"></property>
     </bean>
 
-    <!--导入job的共同配置-->
-    <import resource="job/job-context.xml"/>
-    <!--导入job实例配置-->
-    <import resource="job/job-sample1.xml" />
-
     <!-- 使用annotation定义事务 -->
-    <!--<tx:annotation-driven transaction-manager="transactionManager" />-->
+    <tx:annotation-driven transaction-manager="transactionManager" />
 
 <!--    <tx:advice id="serviceAdvice" transaction-manager="transactionManager">
         <tx:attributes>
@@ -80,15 +70,15 @@
      初始化脚本，主要用来创建spring-batch运行时的数据，应用生成环境时应该去掉此配置，手工创建下对应的表
      spring-batch本身job运行需要的表的创建脚本，spring-batch.jar中默认提供了各种数据库的DDL语句
       -->
-    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
+    <jdbc:initialize-database data-source="dataSource">
         <jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-mysql.sql" />
-        <jdbc:script location="${batch.schema.script}" />
+        <jdbc:script location="classpath:/org/springframework/batch/core/schema-mysql.sql" />
         <!--数据库引擎的区别https://www.cnblogs.com/zhengah/p/4664297.html-->
         <jdbc:script location="classpath:dbTables/tables_mysql_innodb.sql" />
     </jdbc:initialize-database>
 
     <!-- 引入batch目录下所有xml文件-->
-    <!--<import resource="classpath:batch/*.xml"/>
-    &lt;!&ndash; 引入quartz配置文件 &ndash;&gt;
-    <import resource="classpath:quartz/*.xml"/>-->
+    <import resource="classpath:batch/*.xml"/>
+    <!-- 引入quartz配置文件 -->
+    <import resource="classpath:quartz/*.xml"/>
 </beans>

@@ -2,7 +2,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:batch="http://www.springframework.org/schema/batch"
        xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -20,19 +24,50 @@
         <property name="dataSource" ref="dataSource" />
         <property name="transactionManager" ref="transactionManager" />
         <!--设置数据库隔离级别 -->
-        <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT" />
+        <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT" /><!--默认使用SERIALIZABLE，使用REPEATABLE_READ 也可以很好的工作-->
         <property name="tablePrefix" value="BATCH_" /><!--表前缀-->
-        <property name="maxVarCharLength" value="1000" /><!--数据字段的字符串最大长度-->
+        <property name="maxVarCharLength" value="1000" /><!--数据字段的字符串最大长度 默认2500-->
+        <!--<property name="lobHandler" ref="defaultLobHandler"/>--><!--Oracle中的lob字段处理-->
+    </bean>
+
+    <bean id="defaultLobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler">
+
     </bean>
 
     <!--定义启动job的bean,该bean可以用于spring mvc或quartz启动job使用 ，默认是使用主线程启动job -->
     <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
-        <description>作业调度器</description>
+        <description>作业调度器，同步调度器</description>
         <property name="jobRepository" ref="jobRepository" /><!--指定调动过程状态记录的数据仓库-->
+    </bean>
+
+    <!--定义任务的线程池，大小为20-->
+    <task:executor id="asyncTaskExecutor" pool-size="20" rejection-policy="ABORT" queue-capacity="5000" />
+    <bean id="jobLauncherAsyn" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <description>异步作业调度器，该调度器不会阻塞线程执行</description>
+        <property name="jobRepository" ref="jobRepository" />
+        <property name="taskExecutor" ref="asyncTaskExecutor"/>
     </bean>
 
     <!--相对路径导入-->
     <import resource="classpath:/job/ch02/job.xml" /><!--因为job.xml依赖上面的bean，所以要在上面Bean创建完引入此文件-->
+
+    <!--与定时任务的集成-->
+    <task:scheduler id="myscheduler" pool-size="10" /><!--定义一个执行定时任务的线程池-->
+    <task:scheduled-tasks scheduler="myscheduler">
+        <task:scheduled ref="schedulerLauncher" method="launch" fixed-rate="10000"/><!--fixed-rate 表示毫秒 支持cron=""-->
+    </task:scheduled-tasks>
+    <bean class="org.haijun.study.scheduler.SchedulerLauncher" id="schedulerLauncher">
+        <property name="job" ref="helloWorldJob" />
+        <property name="jobLauncher" ref="jobLauncher" />
+    </bean>
+    <batch:job id="helloWorldJob">
+        <batch:step id="helloWorldStep">
+            <batch:tasklet>
+                <bean class="org.haijun.study.tasklet.HelloWorldTasklet" />
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
     <!--&lt;!&ndash; 事务管理器 &ndash;&gt;
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />

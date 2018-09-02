@@ -18,7 +18,7 @@ Quartz表结构说明；（表脚本下载：http://www.quartz-scheduler.org/dow
 2.3. calendars 方式：可以和cron配合使用，用cron表达式指定一个触发时间规律，用calendar指定一个范围。
 注意：cron方式需要用到的4张数据表： qrtz_triggers，qrtz_cron_triggers，qrtz_fired_triggers，qrtz_job_details。
 
-SpringBatch框架进行元数据的管理共有九张表:
+SpringBatch框架进行元数据的管理共有6张表，3个序列:
 BATCH_JOB_INSTANCE(作业实例表,存放JOB的实例信息)
         JOB_INSTANCE_ID  主键 ，作业实例编号,根据BATCH_JOB_SEQ自动生成
         VERSION  版本号
