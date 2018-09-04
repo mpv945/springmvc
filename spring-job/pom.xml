@@ -50,6 +50,12 @@
             <version>${spring.batch.version}</version>
             <scope>test</scope>
         </dependency>
+        <!--xml转java-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>${spring.batch.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
