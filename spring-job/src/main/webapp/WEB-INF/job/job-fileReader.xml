@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <batch:job id="simpleSplitJob">
+        <batch:step id="simpleSplitStep">
+            <tasklet>
+                <chunk reader="flatFileItemReader" writer="csvItemWriter" processor="creditBillProcessor" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--FlatFileItemReader 核心作用是将Flat文件中的记录转换成java对象
+    实现步骤，根据recordSeparatorPolicy从文件中确定一条记录，然后通过lineMapper 将一条记录转换成java对象
+    -->
+    <bean id="flatFileItemReader" scope="step" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <!--定义读取的文件资源-->
+        <property name="resource" value="classpath:data/flat/credit-card-bill-201303-complex.csv"/>
+        <!--定义如何从文件中确定一条记录的策略，记录可能是一行，可能是跨多行-->
+        <property name="recordSeparatorPolicy" ref="simpleRecordSeparatorPolicy" />
+        <!--根据指定的resource创建BufferedReader实例，默认使用DefaultBufferedReaderFactory 创建文本类型的BufferedReader实例-->
+        <!--<property name="bufferedReaderFactory" ref="" />-->
+        <!--读取文件的编码类型 默认UTF-8-->
+        <property name="encoding" value="UTF-8" />
+        <!--将一条记录转换为java数据对象-->
+        <property name="lineMapper" ref="lineMapper" />
+        <!--读取文件时，跳过文件的行数，跳过的行数记录将会传递给skippedLinesCallback，执行跳过行的回调操作-->
+        <property name="linesToSkip" value="1"/>
+        <!--定义文件中记录跳过时执行的回调操作，通常与linesToSkip一起使用-->
+        <property name="skippedLinesCallback" ref="lineCallbackHandler"/>
+        <!--读取文件不存在时候的策略，true表示文件不存在抱出异常，false不会，默认true-->
+        <property name="strict" value="true"/>
+        <!--定义注释行的前缀，当某行以这些字符串组的任意一组开头。都会被当作注释忽略-->
+        <property name="comments">
+            <list>
+                <value>##</value>
+                <value>$$</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="csvItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+        <property name="resource" value="file:target/outputFile.csv"/>
+        <property name="headerCallback" ref="copyHeaderLineCallbackHandler"/>
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value=","></property>
+                <property name="fieldExtractor">
+                    <bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <property name="names" value="accountID,name,amount,date,address">
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!--自定义实现WrappedJsonLineMapper-->
+    <bean id="lineMapper" class="org.springframework.batch.item.file.mapping.DefaultLineMapper" >
+        <!--将一行记录根据策略转换成java对象-->
+        <property name="lineTokenizer" ref="delimitedLineTokenizer" />
+        <!--fieldSet在读取时，支持大部分类型数据直接转换获取，将多个字段值转化为java对象-->
+        <!--<property name="fieldSetMapper" ref="creditBillFieldSetMapper"/>-->
+        <property name="fieldSetMapper" ref="creditBillBeanWrapperFieldSetMapper"/>
+    </bean>
+
+    <!--通过Bean直接和FieldSet映射-->
+    <bean id="creditBillBeanWrapperFieldSetMapper" class="org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper" >
+        <property name="prototypeBeanName" value="creditBill" /><!--指定映射的javabena对象-->
+    </bean>
+
+    <!--LineTokenizer 行转换接口，系统提供实现如下
+    DelimitedLineTokenizer 基于分隔符的行转换，根据给定的分隔符将一条记录转换成FieldSet对象
+    FixedLengthTokenizer 基于定长数据行的转换，根据给定的数据长度将一条记录转成为FieldSet对象
+    RegexLineTokenizer 根据正则表达式的条件将一条记录转换为FieldSet对象
+    PatternMatchingCompositeLineTokenizer 可以为不同的记录定义不同的LineTokenizer，在执行中根据给定的标识与每条记录比对，如果满足则用指定的LineTokenizer
+    -->
+    <bean id="delimitedLineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <!--分隔符-->
+        <property name="delimiter" value=","/>
+        <!--分割后隐射的字段名-->
+        <property name="names" value="accountID,name,amount,date,address" />
+    </bean>
+
+    <bean id="dingchangLineTokenizer" class="org.springframework.batch.item.file.transform.FixedLengthTokenizer">
+        <!--分隔符-->
+        <property name="columns" value="1-16,17-26,27-34,35-53"/><!--从1开始，多少段长度的字符串分割-->
+        <!--分割后隐射的字段名-->
+        <property name="names" value="accountID,name,amount,date,address" />
+    </bean>
+
+    <!--简单行读取策略-->
+    <bean id="simpleRecordSeparatorPolicy" class="org.springframework.batch.item.file.separator.SimpleRecordSeparatorPolicy"></bean>
+
+    <!--FieldSet转换领域对象-->
+    <bean id="creditBillFieldSetMapper" class="org.haijun.study.handler.CreditBillFieldSetMapper"></bean>
+
+    <!--跳过行的回调处理方法-->
+    <bean id="lineCallbackHandler" class="org.haijun.study.handler.DefaultLineCallbackHandler"></bean>
+    <!--行跳过，通知支持在写入时把跳过的行写入到新文件 ItemReader 要name="skippedLinesCallback" ref= 然后在 ItemWriter 需要 name="headerCallback" ref="-->
+    <bean id="copyHeaderLineCallbackHandler" class="org.haijun.study.handler.CopyHeaderLineCallbackHandler"></bean>
+
+    <!--领域对象-->
+    <bean id="creditBill" scope="prototype" class="org.haijun.study.model.bo.CreditBill"></bean>
+
+    <!--处理对象-->
+    <bean id="creditBillProcessor" scope="step" class="org.haijun.study.processor.CreditBillProcessor"></bean>
+
+
+    <!--JSON读取策略-->
+    <bean id="jsonRecordSeparatorPolicy" class="org.springframework.batch.item.file.separator.JsonRecordSeparatorPolicy"/>
+    <!--通过代理模式增加JsonLineMapper的自定义实现-->
+    <bean id="wrappedJsonLineMapper" class="org.haijun.study.handler.WrappedJsonLineMapper">
+        <property name="delegate" ref="jsonLineMapper"/>
+    </bean>
+    <bean id="jsonLineMapper" class="org.springframework.batch.item.file.mapping.JsonLineMapper"/>
+
+    <!--多行记录读取 (适应第一行数据不是一条数据结束，-->
+    <bean id="multiLineRecordSeparatorPolicy" class="org.haijun.study.handler.MultiLineRecordSeparatorPolicy">
+        <property name="delimiter" value=","/>
+        <property name="count" value="4"/>
+    </bean>
+
+    <!--混合模式-->
+    <bean id="customLineMapper" class="org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper">
+        <property name="tokenizers">
+            <map>
+                <entry key="40*" value-ref="creditBillRecordTokenizer"/>
+                <entry key="30*" value-ref="debitBillRecordTokenizer"/>
+            </map>
+        </property>
+        <property name="fieldSetMappers">
+            <map>
+                <entry key="40*" value-ref="creditBillFieldSetMapper"/>
+                <entry key="30*" value-ref="debitBillFieldSetMapper"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="creditBillRecordTokenizer" parent="parentLineTokenizer">
+        <property name="names" value="accountID,name,amount,date,address" />
+    </bean>
+    <bean id="debitBillRecordTokenizer" parent="parentLineTokenizer">
+        <property name="names" value="accountID,amount,name,date" />
+    </bean>
+    <bean id="parentLineTokenizer" abstract="true"
+               class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <property name="delimiter" value=","/>
+    </bean>
+
+    <bean id="creditBillFieldSetMapper" class="org.haijun.study.handler.CreditBillFieldSetMapper"></bean>
+    <bean id="debitBillFieldSetMapper" class="org.haijun.study.handler.DebitBillFieldSetMapper"></bean>
+</beans>

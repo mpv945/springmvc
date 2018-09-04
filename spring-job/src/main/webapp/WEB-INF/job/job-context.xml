@@ -37,10 +37,10 @@
     <task:scheduler id="scheduler" pool-size="10" />
 
     <!-- 任务列表  -->
-    <task:scheduled-tasks scheduler="scheduler">
-        <!--每10秒钟，执行对象schedulerLauncher的launch方法一次-->
+    <!--<task:scheduled-tasks scheduler="scheduler">
+        &lt;!&ndash;每10秒钟，执行对象schedulerLauncher的launch方法一次&ndash;&gt;
         <task:scheduled ref="schedulerLauncher" method="launch" fixed-rate="10000" />
-    </task:scheduled-tasks>
+    </task:scheduled-tasks>-->
 
     <!-- 抽象基础Job -->
     <batch:job id="baseJob" abstract="true">

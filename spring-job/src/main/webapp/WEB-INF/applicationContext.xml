@@ -50,7 +50,9 @@
     <!--导入job的共同配置-->
     <import resource="job/job-context.xml"/>
     <!--导入job实例配置-->
-    <import resource="job/job-sample1.xml" />
+    <!--<import resource="job/job-sample1.xml" />-->
+    <import resource="job/job-fileReader.xml" />
+
 
     <!-- 使用annotation定义事务 -->
     <!--<tx:annotation-driven transaction-manager="transactionManager" />-->

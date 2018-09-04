@@ -36,16 +36,7 @@
     <batch:job id="chunkBusinessJob" parent="baseJob"><!--通过继承，拥有父类特性-->
         <batch:step id="chunkBusinessStep">
             <batch:tasklet>
-                <batch:chunk reader="reader" writer="writer" commit-interval="10">
-
-
-
-
-                </batch:chunk>
-
-                <batch:listeners>
-                    <batch:listener ref="stopListener"></batch:listener>
-                </batch:listeners>
+                <batch:chunk reader="reader" writer="writer" commit-interval="10" />
             </batch:tasklet>
         </batch:step>
         <batch:listeners merge="true"><!--表示合并父类的监听器，否则只执行自己的监听器，合并时，父类监听器排在前面-->
