@@ -1,0 +1,135 @@
+<batch:job id="说明" job唯一标识
+               parent="baseJob" 指定父job，类似java继承，通过父job抽取共性，子job继承，如果子类再声明，类似重写
+               job-repository="jobRepository" job运行期间的使用的job仓库（默认值jobRepository）
+               incrementer="2" 作业递增器，只有在JobOperator的startNextInstance的方法中使用
+               restartable="true" 定义当前作业是否支持重启 （默认true）
+               abstract="false"> 定义当前job是否时抽象。true表示时抽象，不能实例化，只能被继承
+        定义Job的作业步
+        <batch:step id="dfs" >
+                id="step"<!--step的唯一标识，在整个作业运行上下文不运行重复-->
+                next="" <!--当前step执行完，next元素指定当前作业的需要下一个执行的step-->
+                parent="" <!--继承，子类只定义特有属性，如果子类定义和父类相同属性，子类属性会覆盖父类的属性-->
+                job-repository=""<!--step运行期间的使用的job仓库（默认值jobRepository）-->
+                abstract="" <!--true标识为抽象，不能实例，只能被继承使用；该属性只有在step为顶层元素时才有效-->
+            <batch:tasklet
+                    ref="taskletAdapter" 自定义Tasklet接口的Bean使用ref引用
+                    method="" 自定义业务bean，需要调用的操作，参数要和Tasklet.execute具有相同的参数（默认execute方法）
+                    start-limit="" Step能启动的最大次数，超过最大报异常（默认Integer.MAX_VALUE）
+                    allow-start-if-complete="" 是否允许完成状态为"COMPLETED" 的Step重新启动(默认false)
+                    transaction-manager="" 配置事物管理器，控制业务的处理操作，保证chunkStep业务操作在一个事物内完成
+                    task-executor="taskExecutor" 任务执行处理器，定义后表示采用多线程执行任务，需要考虑多线程任务的安全性.taskExecutor在下面定义
+                    throttle-limit="5" 最大使用线程池的数目(默认6）
+            ><!--具体作业部的执行逻辑-->
+                    面向chunk的元素
+                    <batch:chunk reader="reader" writer="writer" commit-interval="10" />定义面向批的业务操作，可以复用框架提供的基础设施
+                    <batch:chunk reader="reader" 读取bean的名字，实现ItemReader接口
+                                                 writer="writer" 实现ItemWriter
+                                                 processor="sdf" 实现ItemProcessor
+                                                 commit-interval="10" 提交间隔，读取和处理指定数据后，通过writer批量写入，并提交事物
+                                                 skip-limit="3" 异常发生时，跳过的最大错误次数(超过次数就报错)
+                                                 skip-policy="fs" 跳过的策略Bean，该bean需要实现SkipPolicy
+                                                 retry-limit="4" 任务执行重试的最大次数
+                                                 retry-policy="" 重试策略，需要实现RetryPolicy
+                                                 cache-capacity="" 默认4096。retry-policy缓存的大小，缓存用于存放重试上下文RetryContext，超过会RetryCacheCapacity异常
+                                                 reader-transactional-queue="false"默认false一般读JMS。true：表示从队列读取数据，一旦发生异常，从队列读取数据放回读队列，false表示没有启动读取队列，没有异常消费回滚
+                                                 processor-transactional="true" 默认true，如果发生重试，会再次循环读取在处理缓存中的Item数据，true表示processor处理的结果放在缓存中，当执行重试或者跳过可以看到缓存中处理的数据
+                                                                                false不会把processor处理的结果放在缓存中，即processor在chunk每条记录执行一次（reader-transactional-queue为true，该设置也必须为true
+                                                 chunk-completion-policy="" 批处理完成策略，需实现CompletionPolicy接口(和commit-interval二选一配置）
+                                    />
+                            <batch:reader><bean class="org.haijun.study.item.AutoReader"></bean></batch:reader>定义读的Bean
+                            <batch:processor></batch:processor>定义处理Bean
+                            <batch:writer ></batch:writer>定义写的Bean
+                            <batch:skip-policy></batch:skip-policy>跳过策略
+                            <batch:retry-policy></batch:retry-policy>重试策略
+                            <batch:retry-listeners></batch:retry-listeners>重试操作监听器，需实现RetryListener
+                            <batch:streams>定义一组实现ItemStream的对象，实现该接口的读，处理，写对象能够在任务重启的时候从正确点恢复，如果没有实现读写处理的类，需要在此显式注册
+                                <batch:stream ref="reader" />
+                            </batch:streams>
+                            <batch:listeners></batch:listeners>定义一组chunk的拦截器，需要实现ChunkListener接口
+                            <batch:skippable-exception-classes>定义一组触发跳过的异常
+                                <batch:include class="java.lang.RuntimeException" />发生该异常会跳过，指导跳过最大次数
+                                <batch:exclude class="java.io.FileNotFoundException" />发生该异常不会跳过（排除）
+                            </batch:skippable-exception-classes>
+                            <batch:retryable-exception-classes>重试异常定义
+                                <batch:include class="java.lang.RuntimeException" />发生该异常会跳过，指导跳过最大次数
+                                <batch:exclude class="java.io.FileNotFoundException" />发生该异常不会跳过（排除）
+                            </batch:retryable-exception-classes>
+                    </batch:chunk>
+                    <batch:transaction-attributes > 定义任务具体的事物属性，例如隔离级别，事物传播方式，超时时间等
+                        实例   <batch:transaction-attributes isolation="DEFAULT" propagation="REQUIRED" timeout="30" />超时单位为秒
+                        事物属性
+                            SERIALIZABLE 最严格的事物，事物串行执行，资源消耗最大
+                            REPEATABLE_READ 保证一个事物不会修改已经由另一个事物读取但未提交(回滚)的数据。避免了脏读和不可重复读取的情况，也有很大性能损失
+                            READ_COMMITTED 默认的事物级别，避免了脏读，适应于大多数系统
+                            READ_UNCOMMITTED 保证读取过程中不会读取非法数据
+                        事物传播方式
+                            REQUIRED 支持当前事物，如果没有就创建一个新事物，有就加入到当前事物中
+                            SUPPORTS 如果当前有事物，就加入到该事物，如果没有就以非事物方式运行
+                            MANDATORY 如果当前没有事物，就发生异常
+                            REQUIRES_NEW 新建一个事物，如果当前存在事物，会把当前事物挂起，等新建事物提交或者回滚再执行挂起的事物
+                            NOT_SUPPORTED 以非事物方式执行操作，如果当前存在事物，会挂起事物，等非法操作执行完再放开挂起的事物
+                            NEVER 以非事物方式执行操作，如果存在事物抱出异常
+                    </batch:transaction-attributes>
+                    <batch:no-rollback-exception-classes>定义不会触发事物回滚的异常
+                        <batch:include class="org.springframework.batch.item.validator.ValidationException" />指定ValidationException以及子类异常不会触发回滚
+                    </batch:no-rollback-exception-classes>
+                    <batch:listeners></batch:listeners> 定义具体任务级别的拦截器
+            </batch:tasklet>
+            <batch:partition><!--定义当前任务是分区执行的，需要使用partition元素来声明Step-->
+
+            </batch:partition>
+            <batch:job>引用独立的配置的Job作业任务
+
+            </batch:job>
+            <batch:flow parent="sdf">引用独立配置的Flow作为任务
+
+            </batch:flow>
+            <batch:next on="" to=""></batch:next>根据退出状态定义下一个需要执行的Step
+            <batch:stop on="" restart=""></batch:stop>根据退出状态决定是否退出当前的任务，同时job也会停止，作业状态为"STOPPED"
+            <batch:end on=""></batch:end>根据退出状态决定是否结束当前的任务，同时job也会停止，作业状态为"COMPLETED"
+            <batch:fail on=""></batch:fail>根据退出状态决定是否当前的任务失败，同时job也会停止，作业状态为"FAILED"
+
+            merge="true" 表示合并父Step的拦截器，父拦截器优先执行
+            <batch:listeners merge="true">Step执行拦截器，实现StepExecutionListener接口(beforeStep（Step执行前）和afterStep（Step执行完之后）方法，
+                用法和Job监听器类似,支持注解，也支持自定义实现，框架默认实现有：1.CompositeStepExecutionListener(拦截器组合模式，支持一组拦截器调用)
+                2.StepExecutionListenerSupport（StepExecutionListener）空实现，可以继承，重写自己关心的操作，3.StepListenerSupport，同时实现StepExecutionListener，
+                ChunkListener，ItemReadListener，ItemProcessListener，ItemWriteListener，SkipListener接口的空实现，可以直接继承，重写自己关心的方法
+                4.MulticasterBacthListener 同时实现StepListenerSupport描述的监听的组合模式，支持一组拦截器的调用
+
+
+            </batch:listeners>
+
+        </batch:step>
+
+        <batch:split id="split"></batch:split>定义并行的step
+
+        <batch:flow id="flow"></batch:flow>引用独立配置的作业步流程
+
+        <batch:decision id="" decider=""></batch:decision>Step执行的条件判断器，根据decider可以动态地决定后续执行的Step
+
+        <batch:listeners ></batch:listeners>定义job的拦截器，JobExecutionListener接口:系统两个实现参考自定义SystemOutJobExecutionListener类上说明
+
+        系统JobParametersValidator接口的实现CompositeJobParametersValidator(组合模式，支持一组参数校验)和DefaultJobParametersValidator(支持必须和可选参数校验)
+        <batch:validator></batch:validator>定义JobParameters的验证器；
+
+        属性Late Binding ：通过指定Step下子处理对象的 Scope，可以在子对象使用和访问scope作用域中的数据。支持的对象上下文数据包含： 1.jobParameters作业参数，
+        2.jobExecutionContext 当前job的执行器上下文；3.stepExecutionContext 当前Step的执行器上下文
+        写法 #{支持的对象上下文[对象中的参数名]}：#{jobParameters['dateName']}
+
+</batch:job>
+
+    多线程Step的线程池定义
+    <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" id="taskExecutor">
+        <property name="corePoolSize" value="5" /><!--默认5个-->
+        <property name="maxPoolSize" value="15" /><!--最大15-->
+    </bean>
+
+    tasklet 默认实现：
+    CallableTaskletAdapter ：Callable接口适配器
+    ChunkOrientedTasklet ：面向批的任务处理器，用于Chunk的处理操作
+    MethodInvokingTaskletAdapter ：用于适配已有服务，通过代理的方式调用已存在的服务
+    SystemCommandTasklet ： 系统命令任务类，可以调用执行的命令
+    <bean class="org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter" id="taskletAdapter">
+        <property name="targetObject" ref="jobRegistry"/> 代理类
+        <property name="targetMethod" value="getJobNames" /> 代理类的方法
+    </bean>

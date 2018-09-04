@@ -36,7 +36,13 @@
     <batch:job id="chunkBusinessJob" parent="baseJob"><!--通过继承，拥有父类特性-->
         <batch:step id="chunkBusinessStep">
             <batch:tasklet>
-                <batch:chunk reader="reader" writer="writer" commit-interval="10" />
+                <batch:chunk reader="reader" writer="writer" commit-interval="10">
+
+
+
+
+                </batch:chunk>
+
                 <batch:listeners>
                     <batch:listener ref="stopListener"></batch:listener>
                 </batch:listeners>
@@ -59,64 +65,13 @@
     <!-- 定义自定义的job任务 HelloWorld Job -->
     <batch:job id="helloworldJob">
 
-        <batch:step id="helloworldStep" >
+        <batch:step id="helloworldStep">
             <batch:tasklet>
                 <bean class="org.haijun.study.tasklet.HelloWorldTasklet"></bean>
             </batch:tasklet>
         </batch:step>
     </batch:job>
 
-    <batch:job id="说明" job唯一标识
-               parent="baseJob" 指定父job，类似java继承，通过父job抽取共性，子job继承，如果子类再声明，类似重写
-               job-repository="jobRepository" job运行期间的使用的job仓库（默认值jobRepository）
-               incrementer="2" 作业递增器，只有在JobOperator的startNextInstance的方法中使用
-               restartable="true" 定义当前作业是否支持重启 （默认true）
-               abstract="false"> 定义当前job是否时抽象。true表示时抽象，不能实例化，只能被继承
-        定义Job的作业步
-        <batch:step id="dfs" >
-                id="step"<!--step的唯一标识，在整个作业运行上下文不运行重复-->
-                next="" <!--当前step执行完，next元素指定当前作业的需要下一个执行的step-->
-                parent="" <!--继承，子类只定义特有属性，如果子类定义和父类相同属性，子类属性会覆盖父类的属性-->
-                job-repository=""<!--step运行期间的使用的job仓库（默认值jobRepository）-->
-                abstract="" <!--true标识为抽象，不能实例，只能被继承使用；该属性只有在step为顶层元素时才有效-->
-            <batch:tasklet ><!--具体作业部的执行逻辑-->
 
-            </batch:tasklet>
-            <batch:partition><!--定义当前任务是分区执行的，需要使用partition元素来声明Step-->
-
-            </batch:partition>
-            <batch:job>引用独立的配置的Job作业任务
-
-            </batch:job>
-            <batch:flow parent="sdf">引用独立配置的Flow作为任务
-
-            </batch:flow>
-            <batch:next on="" to=""></batch:next>根据退出状态定义下一个需要执行的Step
-            <batch:stop on="" restart=""></batch:stop>根据退出状态决定是否退出当前的任务，同时job也会停止，作业状态为"STOPPED"
-            <batch:end on=""></batch:end>根据退出状态决定是否结束当前的任务，同时job也会停止，作业状态为"COMPLETED"
-            <batch:fail on=""></batch:fail>根据退出状态决定是否当前的任务失败，同时job也会停止，作业状态为"FAILED"
-
-            <batch:listeners>Step执行拦截器
-
-            </batch:listeners>
-
-        </batch:step>
-
-        <batch:split id="split"></batch:split>定义并行的step
-
-        <batch:flow id="flow"></batch:flow>引用独立配置的作业步流程
-
-        <batch:decision id="" decider=""></batch:decision>Step执行的条件判断器，根据decider可以动态地决定后续执行的Step
-
-        <batch:listeners ></batch:listeners>定义job的拦截器，JobExecutionListener接口:系统两个实现参考自定义SystemOutJobExecutionListener类上说明
-
-        系统JobParametersValidator接口的实现CompositeJobParametersValidator(组合模式，支持一组参数校验)和DefaultJobParametersValidator(支持必须和可选参数校验)
-        <batch:validator></batch:validator>定义JobParameters的验证器；
-
-        属性Late Binding ：通过指定Step下子处理对象的 Scope，可以在子对象使用和访问scope作用域中的数据。支持的对象上下文数据包含： 1.jobParameters作业参数，
-        2.jobExecutionContext 当前job的执行器上下文；3.stepExecutionContext 当前Step的执行器上下文
-        写法 #{支持的对象上下文[对象中的参数名]}：#{jobParameters['dateName']}
-
-    </batch:job>
 
 </beans>
