@@ -58,6 +58,7 @@
     <import resource="job/job-hibernate.xml"/>
     <import resource="job/job-jpa.xml"/>
     <import resource="job/job-mybatis.xml"/>
+    <import resource="job/job-jms.xml"/>
 
 
     <!-- 使用annotation定义事务 -->

@@ -1,9 +1,14 @@
 package org.haijun.study.model.bo;
 
+import java.io.Serializable;
+
 /**
  * 信用卡账单
  */
-public class CreditBill {
+public class CreditBill implements Serializable {
+
+    // 添加序列号版本号
+
     private String accountID = "";	/** 银行卡账户ID */
     private String name = "";		/** 持卡人姓名 */
     private double amount = 0;		/** 消费金额 */

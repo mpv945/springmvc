@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--JMS消息发送测试类DefaultTextMessageSenderIntegrationTest-->
+    <!--消息持久化：服务器down了，消息不会丢失的机制。activeMq和rabbitMq都支持-->
+    <!-- 定义 ActiveMQ Broker useJmx表示是否开启jmx监控 persistent=false消息不持久化，useShutdownHook=false禁掉延迟发送功能 -->
+    <amq:broker id="broker" useJmx="false" persistent="false" useShutdownHook="false">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="tcp://localhost:61616" />
+        </amq:transportConnectors>
+    </amq:broker>
+
+    <!-- JmsTemplate 定义 -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory" /><!--配置JMS连接工厂-->
+        <!--<property name="defaultDestination" ref="destinationQueue" />-->
+        <!--配合下面的reader读取测试-->
+        <property name="defaultDestination" ref="userDestination" /><!--指定需要读取的目标消息队列-->
+        <property name="messageConverter" ref="myMessageConverter" />
+        <!--读取消息的超时时间，receiveTimeout属性指定了接收器在放弃等待一条消息前应该等待的时间。JmsTemplate的接收是阻塞式的接收，默认会一直阻塞等待，
+        直到接收到了消息。也可以设置一个最长的等待时间参数，超过这个时间，接收的方法将得到null的结果。毫秒单位-->
+        <property name="receiveTimeout" value="500"/>
+        <!--sessionTransacted标示激活。每个消息监听调用将在一个活性的JMS事物中执行，并在监听执行失败时，消息接受会回滚。-->
+        <property name="sessionTransacted" value="true" />
+        <!--<property name="timeToLive" value="" />设置消息的存活时间，毫秒单位-->
+    </bean>
+
+    <bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <constructor-arg index="0" value="tcp://localhost:61616" />
+    </bean>
+
+    <!-- ConnectionFactory Definition -->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <constructor-arg ref="amqConnectionFactory" />
+    </bean>
+
+    <bean id="destinationQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="IN_QUEUE" />
+    </bean>
+
+
+   <!-- 自定义转换器-->
+    <bean id="myMessageConverter" class="org.haijun.study.activemq.SampleMessageConverter" />
+
+    <!-- 自定义简单接收消息 -->
+    <bean id="messageListener" class="org.haijun.study.activemq.SampleListener">
+        <property name="jmsTemplate" ref="jmsTemplate" />
+        <property name="queue" ref="destinationQueue" />
+    </bean>
+
+    <!-- 消息监听 -->
+    <bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="destinationName" value="IN_QUEUE" />
+        <property name="messageListener" ref="messageListener" />
+    </bean>
+
+    <!--JMSItemReader 测试类在JobLaunchJMSTransaction。通过往队列发送消息。读JMS组件能读取消息数据-->
+    <batch:job id="jmsTransactionReadJob">
+        <batch:step id="jmsTransactionReadStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="jmsItemReader" processor="processor" writer="creditItemWriter"
+                       reader-transactional-queue="true" processor-transactional="true"
+                       commit-interval="5" retry-limit="3">
+                    <retryable-exception-classes>
+                        <include class="java.lang.RuntimeException" />
+                    </retryable-exception-classes>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!-- 读取jms -->
+    <bean id="jmsItemReader" class="org.springframework.batch.item.jms.JmsItemReader">
+        <property name="itemType" value="org.haijun.study.model.bo.CreditBill"/><!--Item对象类型-->
+        <property name="jmsTemplate" ref="jmsTemplate"/><!--消息发送模板-->
+    </bean>
+    <!--队列的名称-->
+    <amq:queue id="userDestination" physicalName="destination.creditBill" />
+
+    <bean id="processor" class="org.haijun.study.activemq.TransactionItemProcessor">
+        <property name="errorCount" value="3"></property>
+    </bean>
+
+    <bean id="creditItemWriter" class="org.haijun.study.item.DummyCreditItemWriter"/>
+
+</beans>

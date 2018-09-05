@@ -6,35 +6,62 @@
        http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <batch:job id="ibatisPagingReadJob">
+    <batch:job id="mybatisPagingReadJob">
         <batch:step id="ibatisPagingReadStep">
             <tasklet transaction-manager="transactionManager">
-                <chunk reader="ibatisPagingItemReader" processor="creditBillProcessor"
+                <chunk reader="mybatisPagingItemReader" processor="creditBillProcessor"
                        writer="creditItemWriter" commit-interval="2"></chunk>
             </tasklet>
         </batch:step>
     </batch:job>
 
-    <!-- Ibatis分页读取数据库 -->
-    <bean id="ibatisPagingItemReader" scope="step" class="org.springframework.batch.item.database.My">
+    <!-- mybatis分页读取数据库 需要引入mybatis和mybatis-spring -->
+    <bean id="mybatisPagingItemReader" scope="step" class="org.mybatis.spring.batch.MyBatisCursorItemReader">
         <!-- <bean:property name="queryId" value="getAllCredits" /> -->
-        <bean:property name="queryId" value="getCreditsById" />
-        <bean:property name="sqlMapClient" ref="sqlMapClient" />
-        <bean:property name="parameterValues">
-            <bean:map>
-                <bean:entry key="begin" value="#{jobParameters['id_begin']}" />
-                <bean:entry key="end" value="#{jobParameters['id_end']}" />
-            </bean:map>
-        </bean:property>
+        <property name="queryId" value="deleteByPrimaryKey" /><!--命名SQL定义的id-->
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" /><!--指定执行命名空间SQL的配置文件和数据源-->
+        <property name="parameterValues"><!--定义sql参数，类型Map<String,Object>-->
+            <map>
+                <entry key="begin" value="#{jobParameters['id_begin']}" />
+                <entry key="end" value="#{jobParameters['id_end']}" />
+            </map>
+        </property>
     </bean>
 
-    <bean:bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
-        <bean:property name="dataSource" ref="dataSource" />
-        <bean:property name="configLocation" value="classpath:/ch06/ibatis/ibatis-config.xml" />
-    </bean:bean>
 
-    <bean:bean id="creditBillProcessor" scope="step"
-               class="com.juxtapose.example.ch06.ibatis.CreditBillProcessor">
-    </bean:bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!--扫描映射文件-->
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:mapper/*.xml</value>
+            </array>
+        </property>
+        <!-- 自动扫描mapping.xml文件，**表示迭代查找,也可在sqlMapConfig.xml中单独指定xml文件-->
+        <!--<property name="mapperLocations" value="classpath:com/hua/saf/**/*.xml" />-->
+        <property name="typeAliasesPackage" value="org.haijun.study.mybatis" /><!--实体包路径-->
+        <!--暂时不要分页-->
+<!--        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <value>
+                            helperDialect=mysql
+                            reasonable=true
+                            supportMethodsArguments=true
+                            params=count=countSql
+                            autoRuntimeDialect=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>-->
+    </bean>
+    <!-- 配置事务管理器，注意这里的dataSource和SqlSessionFactoryBean的dataSource要一致，不然事务就没有作用了 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="creditBillProcessor" scope="step" class="org.haijun.study.processor.CreditBillProcessor"></bean>
 
 </beans>
