@@ -45,7 +45,7 @@
     </bean>
 
 
-    <!--多文件读取-->
+    <!--多文件读取，-->
     <batch:job id="fileSetsJob">
         <batch:step id="fileSetsStep">
             <tasklet transaction-manager="transactionManager">
@@ -55,6 +55,7 @@
         </batch:step>
     </batch:job>
 
+    <!--MultiResourceItemReader 自身实现不是线程安全，不能在多线程并发使用该组件，如果要使用，应该使用分区功能-->
     <bean id="multiResourceReader" class="org.springframework.batch.item.file.MultiResourceItemReader">
         <property name="resources" value="classpath:data/flat/files/credit-card-bill-*.csv"/><!--可以定义多个或者通配符-->
         <property name="strict" value="true" /><!--是否允许文件为空-->

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.haijun.study.hibernate">
+<class name="HibernateCreditBill" table="t_credit"><!--类名和表面映射-->
+    <id name="id" column="id"><!--column为id值在数据库对应的列名-->
+        <!--generator标签用来设定主键生成策略，hibernate内置的几种主键生成策略
+        1.increment 适用于代理主键。由Hibernate自动以递增的方式生成主键，每次增量为1 ，会执行两个sql语句，先从表中查找出最大的id，然后加一，插入当前数据
+        2.identity  适用于代理主键。由底层数据库生成主键，依赖数据库的主键自增功能
+        3.sequence  适用于代理主键。由底层数据库的序列来生成主键，前提是数据库支持序列。（mysql不支持，oracle支持）
+        4.hilo      适用于代理主键。Hibernate根据hilo算法来自己生成主键。
+        5.native    适用于代理主键。根据底层数据库对自动生成主键的支持能力选择 identity|sequence|hilo
+        6.uuid      适用于代理主键。采用UUID算法生成主键。
+        7.assigned  适用于自然主键。由我们自己指定主键值。例如指定身份证号为主键值-->
+        <generator class="native"/> <!--  //字段自增-->
+    </id>
+    <!--数据类型映射关系https://www.cnblogs.com/Renyi-Fan/p/6922422.html-->
+    <property name="name" column="p_username" type="java.lang.String" />
+</class>
+</hibernate-mapping>

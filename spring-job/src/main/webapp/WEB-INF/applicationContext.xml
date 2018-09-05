@@ -47,12 +47,17 @@
         <property name="dataSource" ref="dataSource"></property>
     </bean>
 
+
     <!--导入job的共同配置-->
     <import resource="job/job-context.xml"/>
     <!--导入job实例配置-->
     <!--<import resource="job/job-sample1.xml" />-->
     <import resource="job/job-fileReader.xml" />
     <import resource="job/job-xmlItem.xml" />
+    <import resource="job/job-jdbc.xml" />
+    <import resource="job/job-hibernate.xml"/>
+    <import resource="job/job-jpa.xml"/>
+    <import resource="job/job-mybatis.xml"/>
 
 
     <!-- 使用annotation定义事务 -->

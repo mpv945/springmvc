@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="classpath:data/ddl/create-tables-mysql.sql" />
+    </jdbc:initialize-database>
+
+    <!--比较老的方式创建sessionFactory-->
+<!--    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        &lt;!&ndash;<property name="configurationClass" value="org.hibernate.cfg.AnnotationConfiguration"/>&ndash;&gt;
+        <property name="configLocation" value="WEB-INF/job/hibernate/hibernate.cfg.xml"/>
+        <property name="hibernateProperties">
+            <value>
+                hibernate.dialect=org.hibernate.dialect.MySQLDialect
+                hibernate.show_sql=true
+            </value>
+        </property>
+    </bean>-->
+
+    <bean id="sessionFactoryNew" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="org.haijun.study.hibernate"/><!--扫描实体包路径-->
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">
+                    create-drop
+                </prop>
+                <prop key="hibernate.dialect">
+                    org.hibernate.dialect.H2Dialect
+                </prop>
+            </props>
+        </property>
+    </bean>
+    <!--配置事物-->
+    <bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactoryNew"/>
+    </bean>
+
+    <batch:job id="hibernateReadJob">
+        <batch:step id="hibernateReadStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="hibernateItemReader" processor="creditBillProcessor"
+                       writer="creditItemWriter" commit-interval="2"></chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!-- hibernate读取数据库 -->
+    <bean id="hibernateItemReader" class="org.springframework.batch.item.database.HibernateCursorItemReader" scope="step">
+        <property name="fetchSize" value="-1" /><!--设置ResultSet每次向数据库取的行数，和jdbc类似-->
+        <!--<property name="maxItemCount" value="" />--><!--设置结果最大行数，默认Integer.MAX_VALUE-->
+        <property name="sessionFactory" ref="sessionFactoryNew"/><!--hibernate负责与数据库进行交互的工厂-->
+        <property name="queryString" value="from CreditBill where id between :begin and :end "/><!--HQL查询语句-->
+        <property name="parameterValues"><!--Statement的参数值-->
+            <map>
+                <entry key="begin" value="#{jobParameters['begin']}" />
+                <entry key="end" value="#{jobParameters['end']}" />
+            </map>
+        </property>
+        <!--<property name="queryProvider" ref="" />--><!--生成HQL的查询类，HibernateQueryProvider-->
+        <property name="useStatelessSession" value="true" /><!--是否使用无状态的会话，默认true-->
+    </bean>
+
+    <bean id="creditBillProcessor" scope="step" class="org.haijun.study.processor.CreditBillProcessor"></bean>
+
+    <bean id="creditItemWriter" class="org.haijun.study.item.DummyCreditItemWriter"/>
+
+
+    <!-- hibernate分页读取数据库，和jdbc分页+ hibernate基本参数属性 -->
+    <bean id="hibernatePagingItemReader" scope="step" class="org.springframework.batch.item.database.HibernatePagingItemReader">
+        <property name="sessionFactory" ref="sessionFactoryNew"/>
+        <property name="queryString" value="from CreditBill where id between :begin and :end"/>
+        <property name="parameterValues">
+            <map>
+                <entry key="begin" value="#{jobParameters['id_begin']}" />
+                <entry key="end" value="#{jobParameters['id_end']}" />
+            </map>
+        </property>
+        <property name="pageSize" value="2"/><!-- 每页默认10条-->
+        <!--<property name="queryProvider" ref="" />--><!--生成HQL的查询类，HibernateQueryProvider-->
+    </bean>
+
+</beans>

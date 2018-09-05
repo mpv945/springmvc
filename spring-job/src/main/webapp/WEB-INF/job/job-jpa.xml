@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--指定使用本地容器管理EntityManagerFactory，从而进行细粒度控制-->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <!-- 指定数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!--persistenceUnitName指定持久化单元名字，即JPA配置文件中指定的;-->
+        <!--<property name="persistenceUnitName" value="persistenceUnit"/>-->
+        <!--指定JPA持久化提供商，此处使用Hibernate实现HibernatePersistence类-->
+        <property name="persistenceProvider" ref="persistenceProvider" />
+        <!-- 指定Jpa持久化实现厂商类,这里以Hibernate为例 -->
+        <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>
+        <!-- 指定Entity实体类包路径 -->
+        <property name="packagesToScan" >
+            <array>
+                <value>org.haijun.study.entity</value>
+            </array>
+        </property>
+<!--        <property name="persistenceProvider">
+            <bean class="org.hibernate.ejb.HibernatePersistence" />
+        </property>-->
+        <!-- 指定JPA属性-->
+        <property name="jpaPropertyMap">
+            <map>
+                <entry key="hibernate.query.substitutions" value="true 1, false 0" />
+                <entry key="hibernate.default_batch_fetch_size" value="16" />
+                <entry key="hibernate.max_fetch_depth" value="2" />
+                <entry key="hibernate.generate_statistics" value="false" />
+                <entry key="hibernate.bytecode.use_reflection_optimizer" value="true" />
+
+                <entry key="hibernate.cache.use_query_cache" value="false" />
+                <entry key="hibernate.cache.use_second_level_cache" value="false" />
+
+                <entry key="hibernate.enable_lazy_load_no_trans" value="true"/>
+                <!--数据库字段名称映射规则 acb_id自动转abcId-->
+                <entry key="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy" />
+                <!--<entry key="hibernate.hbm2ddl.auto" value="validate"/>-->
+            </map>
+        </property>
+        <!--jpaDialect：如果指定jpaVendorAdapter此属性可选，此处为HibernateJpaDialect；-->
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+        </property>
+    </bean>
+
+    <bean id="persistenceProvider" class="org.hibernate.jpa.HibernatePersistenceProvider"/>
+    <!-- Hibernate对Jpa的实现 指定实现厂商专用特性，即generateDdl= false表示不自动生成DDL，database= HSQL表示使用hsqldb数据库； -->
+    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="generateDdl" value="false" />
+        <property name="database" value="MYSQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.MySQL57Dialect" />
+        <!-- <property name="showSql" value="true" /> -->
+
+    </bean>
+    <!-- Jpa 事务管理器  -->
+    <bean id="transactionManagerJpa" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <!-- dao包-->
+    <!-- 重要配置：启用扫描并自动创建代理的功能 ,repository-impl-postfix 默认自定义实现的结尾字符 -->
+    <jpa:repositories base-package="org.haijun.study.jpa" repository-impl-postfix="Impl"
+                      transaction-manager-ref="transactionManagerJpa" entity-manager-factory-ref="entityManagerFactory"/>
+
+    <!-- 开启注解事务 -->
+    <tx:annotation-driven transaction-manager="transactionManagerJpa" proxy-target-class="true" />
+
+    <batch:job id="jpaPagingReadJob">
+        <batch:step id="jpaPagingReadStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="jpaPagingItemReader" processor="creditBillProcessor"
+                       writer="creditItemWriter" commit-interval="2"></chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!-- jpa分页读取数据库 -->
+    <bean id="jpaPagingItemReader" scope="step" class="org.springframework.batch.item.database.JpaPagingItemReader">
+        <property name="entityManagerFactory" ref="entityManagerFactory" /><!--引入实体管理器，负责创建EntityManager-->
+        <property name="queryString" value="select c from CreditBill c where id between :begin and :end" />
+        <property name="parameterValues">
+            <map>
+                <entry key="begin" value="#{jobParameters['id_begin']}" />
+                <entry key="end" value="#{jobParameters['id_end']}" />
+            </map>
+        </property>
+        <property name="pageSize" value="2"/><!--默认10条-->
+    </bean>
+
+
+
+<!--    &lt;!&ndash; 事务 &ndash;&gt;
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" />
+            <tx:method name="get*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+            <tx:method name="select*" read-only="true" />
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="insert*" propagation="REQUIRED" />
+        </tx:attributes>
+    </tx:advice>
+    &lt;!&ndash; 事务入口 &ndash;&gt;
+    <aop:config>
+        <aop:pointcut id="allServiceMethod" expression="execution(* your service implements package.*.*(..))" />
+        <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice" />
+    </aop:config>-->
+</beans>

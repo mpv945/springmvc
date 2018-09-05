@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!--驱动程序，各种数据库的连接配置-->
+        <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+        <!--JDBC URL-->
+        <property name="connection.url">jdbc:mysql://localhost:3306/hxj</property>
+        <!--数据库账户名-->
+        <property name="connection.username">root</property>
+        <!--数据库密码-->
+        <property name="connection.password">root</property>
+        <!--JDBC连接池容量上线数目-->
+        <property name="connection.pool_size">1</property>
+        <!--SQL方言，这里设置为MySQL-->
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        <!-- 使用的是本地事务（jdbc事务） -->
+        <property name="current_session_context_class">thread</property>
+        <!--Hibernate的连接加载类-->
+        <property name="cache.provider_class">org.hibernate.cache.NoCacheRegionFactoryAvailableException</property>
+        <!-- 为true表示将Hibernate发送给数据库的sql显示出来 -->
+        <property name="show_sql">true</property>
+        <!--是否对要执行的语句格式化 -->
+        <property name="format_sql">true</property>
+        <!--给数据库中的所有表加上前缀 -->
+        <property name="hibernate.default_schema">hibernate</property>
+        <!--Update：也可以用create/create-drop/update/validate代替,
+        Create：表示可以根据实体配置文件来自动生成表（只能生成表）；
+        create-drop：表示加载Hibernate时创建表，退出时，删除表；
+        update：表示加载时自动更新数据库结构（即如果没有该表，则创建；有则不再创建，只更新）；
+        validate：表示加载Hibernate验证创建数据库表结构；-->
+        <property name="hbm2ddl.auto">update</property>
+        <!--以下示例是通过hibernate.cfg.xml做的注解配置和xml的ORM配置，两个二选一，如果使用xml配置，HibernateCreditBill注解可以全去掉-->
+        <!--<mapping package="org.haijun.study.hibernate" />&lt;!&ndash; 扫描包&ndash;&gt;-->
+        <mapping class="org.haijun.study.hibernate.HibernateCreditBill"/><!--注解配置：可以通过这种方式配置-->
+        <mapping resource="org/haijun/study/hibernate/HibernateCreditBill.hbm.xml"/><!--如果通过xml配置：请引入-->
+    </session-factory>
+</hibernate-configuration>

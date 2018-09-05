@@ -34,6 +34,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
+ * hibernate 配置使用 ：https://www.boraji.com/spring-mvc-5-spring-security-5-hibernate-5-example
+ * https://www.baeldung.com/hibernate-5-spring
  * 需要引入spring-data-jpa和hibernate-core;hibernate 5参考https://howtodoinjava.com/spring5/webmvc/spring5-mvc-hibernate5-example/
  * @author zhenx
  *

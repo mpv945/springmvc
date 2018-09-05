@@ -10,6 +10,14 @@ public class CreditBill {
     private String date;			/** 消费日期 ，格式YYYY-MM-DD HH:MM:SS*/
     private String address;			/** 消费场所 **/
 
+    public CreditBill(String accountID, String name, double amount, String date, String address){
+        this.accountID = accountID;
+        this.name = name;
+        this.amount = amount;
+        this.date = date;
+        this.address = address;
+    }
+
     public String getAccountID() {
         return accountID;
     }

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="classpath:data/ddl/create-tables-mysql.sql" />
+        <!--创建存储过程-->
+        <jdbc:script location="classpath:data/ddl/create-stored-procedure-mysql.sql" />
+    </jdbc:initialize-database>
+
+    <!--数据源配置-->
+<!--    <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="dataSource2">
+        <property name="driverClassName" value="" />
+        <property name="url" value=""/>
+        <property name="username" value=""/>
+        <property name="password" value=""/>
+    </bean>-->
+
+    <batch:job id="dbReadJob">
+        <batch:step id="dbReadStep">
+            <batch:tasklet transaction-manager="transactionManager">
+                <batch:chunk reader="jdbcParameterItemReader" processor="creditBillProcessor"
+                             writer="creditItemWriter" commit-interval="2"></batch:chunk>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+    <!-- 参数化读取db -->
+    <bean id="jdbcParameterItemReader" scope="step" class="org.springframework.batch.item.database.JdbcCursorItemReader" >
+        <property name="dataSource" ref="dataSource"/><!--核心1 .提供数据库的数据源信息-->
+        <property name="sql" value="select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS from t_credit where id between 1 and ? "/><!--需要执行的sql-->
+        <property name="preparedStatementSetter" ref="paramStatementSetter"/><!--核心2 .sql语句动态参数准备，负责为preparedStatement中的sql提供参数支持-->
+        <!-- <bean:property name="preparedStatementSetter" ref="custPreparedStatementSetter"/> --><!--自定义sql参数注入-->
+        <property name="rowMapper" ref="custCreditRowMapper" /><!--核心3 .负责将结果集ResultSet转换为java对象-->
+        <property name="driverSupportsAbsolute" value="false" /><!--默认false，数据库驱动是否支持结果集的绝对定位-->
+        <property name="fetchSize" value="-1" /> <!--默认-1，不限制，设置ResultSet每次向数据库取的行数，如果设置正数，表示rs.next时先读取回来的结果集，没有再取，然后再读-->
+        <property name="ignoreWarnings" value="true" /><!--默认true，是否忽略SQL执行期间的警告信息，true表示忽略警告，false表示会抱出异常-->
+        <property name="maxItemCount" value="-1" /><!--设置结果集最大行数，默认-1表示不限制，-->
+        <property name="queryTimeout" value="-1"/><!--查询超时时间，超时，会抱出异常，默认-1表示永不超时-->
+        <property name="saveState" value="true" /><!--默认true，是否将当前Reader的状态保存到Job Respository中，即当前读取到数据库的行数，在操作ItemStream#update持久化-->
+        <property name="useSharedExtendedConnection" value="false"/><!--不同游标间是否共享数据库连接，如果共享则必须在同一个事物中，否则使用不同事务，默认false-->
+        <property name="verifyCursorPosition" value="true"/><!--处理完当前行后，是否校验游标位置，默认true-->
+    </bean>
+
+    <!--参数设置，也可以自定义实现（参考custPreparedStatementSetter）-->
+    <bean id="paramStatementSetter" scope="step" class="org.springframework.batch.item.database.support.ListPreparedStatementSetter">
+        <constructor-arg>
+            <list>
+                <value>#{jobParameters['id']}</value>
+            </list>
+        </constructor-arg>
+        <!--属性注入已过期。改用上面的构造函数注入参数-->
+<!--        <property name="parameters">
+            <list>
+                <value>#{jobParameters['id']}</value>
+            </list>
+        </property>-->
+    </bean>
+    <!--自定义ResultSet转Pojo对象，默认可以使用框架的实现类BeanPropertyRowMapper参考下面的jdbcItemReader-->
+    <bean id="custCreditRowMapper" class="org.haijun.study.jdbc.CreditBillRowMapper"/>
+    <!--自定义Sql参数设置-->
+    <bean id="custPreparedStatementSetter" class="org.haijun.study.jdbc.CreditBillPreparedStatementSetter"/>
+
+    <!--动态写入到集合-->
+    <bean id="creditItemWriter" class="org.haijun.study.item.DummyCreditItemWriter"/>
+    <!--自定义处理Item-->
+    <bean id="creditBillProcessor" scope="step" class="org.haijun.study.processor.CreditBillProcessor"></bean>
+
+    <!-- End参数化读取db -->
+
+    <!-- 读取db -->
+    <bean id="jdbcItemReader" scope="step" class="org.springframework.batch.item.database.JdbcCursorItemReader" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS from t_credit where id between 1 and 5 "/>
+        <property name="rowMapper">
+            <bean class="org.springframework.jdbc.core.BeanPropertyRowMapper">
+                <property name="mappedClass" value="org.haijun.study.model.bo.CreditBill"/>
+            </bean>
+        </property>
+    </bean>
+    <!-- End 读取db -->
+
+    <!--存储过程-->
+    <batch:job id="storedProcedureReadJob">
+        <batch:step id="storedProcedureReadStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="storedProcedureItemReader" processor="creditBillProcessor"
+                       writer="creditItemWriter" commit-interval="2"></chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--除了拥有JdbcCursorItemReader的属性，还有一些特有属性：function-->
+    <bean id="storedProcedureItemReader" scope="step" class="org.springframework.batch.item.database.StoredProcedureItemReader" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="procedureName" value="query_credit"/>
+        <!--SQL Server,Sybase,DB2,Derby,MySql 中存储过程支持直接返回结果-->
+        <property name="rowMapper">
+            <bean class="org.springframework.jdbc.core.BeanPropertyRowMapper">
+                <property name="mappedClass" value="org.haijun.study.model.bo.CreditBill"/>
+            </bean>
+        </property>
+        <property name="function" value="false" /><!--是否调用存储过程的function。默认为false,如果调用函数，请设置成true-->
+    </bean>
+
+    <!--带OUT参数返回的。除了拥有JdbcCursorItemReader的属性，还有一些特有属性：parameters和refCursorPosition-->
+    <bean id="storedProcedureOutItemReader" scope="step" class="org.springframework.batch.item.database.StoredProcedureItemReader" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="procedureName" value="query_credit"/><!--调用存储过程的名称-->
+        <property name="refCursorPosition" value="0"/><!--使用OUT类型参数时候，指定OUT类型参数在参数列表的位置，下标从0开始-->
+        <!--Oracle，PostgreSQL通过OUT类型参数，获取引用类型的游标-->
+        <property name="parameters"><!--调用存储过程的参数类型-->
+            <list>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter">
+                    <constructor-arg index="0" value="products"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.CURSOR"/>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+        <property name="rowMapper">
+            <bean class="org.springframework.jdbc.core.BeanPropertyRowMapper">
+                <property name="mappedClass" value="org.haijun.study.model.bo.CreditBill"/>
+            </bean>
+        </property>
+    </bean>
+
+
+    <!-- 从db分页读数据 -->
+    <bean id="jdbcItemPageReader" scope="step" class="org.springframework.batch.item.database.JdbcPagingItemReader">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queryProvider" ref="refQueryProvider" /><!--分页查询SQL语句生成器，负责根据分页信息生成每次需要执行的SQL语句-->
+        <property name="parameterValues"><!--SQL 语句中的参数，类型为Map<String,Object>-->
+            <map>
+                <entry key="begin" value="#{jobParameters['id_begin']}"/>
+                <entry key="end" value="#{jobParameters['id_end']}"/>
+            </map>
+        </property>
+        <property name="fetchSize" value="-1" /><!--ResultSet每次取的条数。-1不设置-->
+        <property name="pageSize" value="2"/><!--每页大小，默认10条-->
+        <property name="rowMapper" ref="custCreditRowMapper"/><!--将收集的结果转换为指定的Pojo类，需要实现RowMapper接口，可使用系统默认的-->
+    </bean>
+    <bean id="refQueryProvider" class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--<property name="databaseType" value="" />--> <!--指定数据库的类型，不指定，则通过dataSource获取数据库信息-->
+        <property name="selectClause" value="select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS"/><!--查询的Select部分-->
+        <property name="fromClause" value="from t_credit"/><!--定义查询语句的form部分-->
+        <property name="whereClause" value="where ID between :begin and :end"/><!--where部分-->
+        <property name="sortKey" value="ID"/><!--排序字段-->
+        <!--<property name="sortKeys" value=""/>--><!--多个排序字段-->
+        <!--<property name="groupClause" value="group ID" />--><!--排序字段-->
+    </bean>
+
+</beans>
