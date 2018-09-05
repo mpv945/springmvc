@@ -59,6 +59,7 @@
     <import resource="job/job-jpa.xml"/>
     <import resource="job/job-mybatis.xml"/>
     <import resource="job/job-jms.xml"/>
+    <import resource="job/job-custom-itemreader.xml" />
 
 
     <!-- 使用annotation定义事务 -->

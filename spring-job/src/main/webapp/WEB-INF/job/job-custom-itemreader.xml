@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    
+    <batch:job id="customItemReadJob">
+        <batch:step id="customItemReadStep">
+            <batch:tasklet transaction-manager="transactionManager">
+                <!--reader="customItemRead" 通过bean配置-->
+                <batch:chunk  processor="creditBillProcessor" writer="creditItemWriter"
+                    commit-interval="2">
+                    <batch:reader><bean class="org.haijun.study.item.customItemRead.CustomCreditBillItemReader" /></batch:reader>
+                </batch:chunk>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+    
+    <batch:job id="restartableCustomItemReadJob">
+        <batch:step id="restartableCustomItemReadStep">
+            <tasklet transaction-manager="transactionManager">
+                <!--reader="restartableCustomItemRead"-->
+                <chunk  processor="creditBillProcessor" writer="creditItemWriter"
+                    commit-interval="2">
+                    <batch:reader><bean class="org.haijun.study.item.customItemRead.RestartableCustomCreditBillItemReader" /></batch:reader>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--可复用的适配读取-->
+    <batch:job id="reuseServiceReadJob">
+        <batch:step id="reuseServiceReadStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="reuseServiceRead" processor="creditBillProcessor" writer="creditItemWriter"
+                       commit-interval="2">
+                </chunk>
+                <!--对于监听器异常，为了保证健壮，应使用重试或者跳过抓捕一般异常，让程序继续-->
+                <batch:listeners><!--对于继承父类的，考虑是否需要合并父类的监听，需要应加Merge=true-->
+                    <!--如果监听抛出异常，会导致Job状态为FAILED-->
+                    <batch:listener ref="errorItemReadListener"/>
+                </batch:listeners>
+
+            </tasklet>
+        </batch:step>
+    </batch:job>
+    <bean id="errorItemReadListener" class="org.haijun.study.listener.ErrorItemReadListener"></bean>
+    <!--抽象step-->
+    <batch:step id="abstractParentStep" abstract="true">
+        <tasklet>
+            <chunk commit-interval="2" >
+                <listeners>
+                    <listener ref="sysoutItemReadListener"></listener>
+                </listeners>
+            </chunk>
+        </tasklet>
+    </batch:step>
+    <bean id="sysoutItemReadListener" class="org.haijun.study.listener.SystemOutJobExecutionListener" />
+    <bean id="reuseServiceRead" class="org.springframework.batch.item.adapter.ItemReaderAdapter">
+        <property name="targetObject" ref="existServiceAdapter"/><!-- 需要调用的服务目标-->
+        <property name="targetMethod" value="nextCreditBill"/><!--调用目标的方法-->
+        <!--<property name="arguments" value="Object[]" />--><!--需要调用的操作参数-->
+    </bean>
+
+    <!--因为existService存在服务queryAllCreditBill方法返回是List类型，而目前reader是ItemReader返回类型，返回值不匹配，所以新增下面这个适配类来做转换-->
+    <bean id="existServiceAdapter" class="org.haijun.study.item.reuse.CreditBillServiceAdapter">
+        <property name="existService" ref="existService" />
+    </bean>
+
+    <!--已有的服务，能够查询所有的信用卡账单信息-->
+    <bean id="existService" class="org.haijun.study.item.reuse.ExistService" ></bean>
+
+   <!-- <bean id="customItemRead" class="org.haijun.study.item.customItemRead.CustomCreditBillItemReader">
+	</bean>-->
+
+<!--    <bean id="restartableCustomItemRead" class="org.haijun.study.item.customItemRead.RestartableCustomCreditBillItemReader" />-->
+
+	<bean id="creditBillProcessor" scope="step" class="org.haijun.study.processor.CreditBillProcessor">
+    </bean>
+    
+    <bean id="creditItemWriter" class="org.haijun.study.item.DummyCreditItemWriter"/>
+            
+</beans>
