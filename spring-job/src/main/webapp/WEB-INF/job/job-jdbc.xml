@@ -159,4 +159,27 @@
         <!--<property name="groupClause" value="group ID" />--><!--排序字段-->
     </bean>
 
+
+    <!--jdbc 写入-->
+    <bean id="jdbcItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="insert into t_destcredit (ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS) values (:id,:accountID,:name,:amount,:date,:address)"/>
+        <property name="assertUpdates" value="true" /><!--当每有修改，删除一条记录的时候，是否抱出异常-->
+        <!--接口系统默认实现BeanPropertyItemSqlParameterSourceProvider 从给定的Item中根据参数名称获取Item对应的属性值作为参数-->
+        <property name="itemSqlParameterSourceProvider"><!--ItemSqlParameterSourceProvider接口 ：sql语句中有命名参数的赋值-->
+            <bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+        </property>
+        <!--<property name="jdbcTemplate" ref="" />--><!--jdbcTemplate 操作，提供执行sql的能力，默认NamedParameterJdbcOperations-->
+    </bean>
+
+    <!--为SQL带有？号的参数提供赋值-->
+    <bean id="jdbcSetterItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="insert into t_destcredit (ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS) values (?,?,?,?,?,?)"/>
+        <!--默认系统实现有ColumnMapItemPreparedStatementSetter，Item类型为Map<String,Object>,以下为自定义-->
+        <property name="itemPreparedStatementSetter"><!--ItemPreparedStatementSetter接口为SQL带有？号的参数提供赋值-->
+            <bean class="org.haijun.study.item.write.DestCreditBillItemPreparedStatementSetter"/>
+        </property>
+    </bean>
+
 </beans>

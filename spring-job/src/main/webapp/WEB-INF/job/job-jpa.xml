@@ -97,24 +97,27 @@
         <property name="pageSize" value="2"/><!--默认10条-->
     </bean>
 
+    <!-- jpa写数据库，对应的chunk处理的Item数据为Jpa规范的Bena，会自动基于对象插入 -->
+    <bean id="jpaItemWriter" class="org.springframework.batch.item.database.JpaItemWriter">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
 
-
-<!--    &lt;!&ndash; 事务 &ndash;&gt;
-    <tx:advice id="txAdvice" transaction-manager="transactionManager">
-        <tx:attributes>
-            <tx:method name="*" />
-            <tx:method name="get*" read-only="true" />
-            <tx:method name="find*" read-only="true" />
-            <tx:method name="select*" read-only="true" />
-            <tx:method name="delete*" propagation="REQUIRED" />
-            <tx:method name="update*" propagation="REQUIRED" />
-            <tx:method name="add*" propagation="REQUIRED" />
-            <tx:method name="insert*" propagation="REQUIRED" />
-        </tx:attributes>
-    </tx:advice>
-    &lt;!&ndash; 事务入口 &ndash;&gt;
-    <aop:config>
-        <aop:pointcut id="allServiceMethod" expression="execution(* your service implements package.*.*(..))" />
-        <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice" />
-    </aop:config>-->
+    <!--    &lt;!&ndash; 事务 &ndash;&gt;
+        <tx:advice id="txAdvice" transaction-manager="transactionManager">
+            <tx:attributes>
+                <tx:method name="*" />
+                <tx:method name="get*" read-only="true" />
+                <tx:method name="find*" read-only="true" />
+                <tx:method name="select*" read-only="true" />
+                <tx:method name="delete*" propagation="REQUIRED" />
+                <tx:method name="update*" propagation="REQUIRED" />
+                <tx:method name="add*" propagation="REQUIRED" />
+                <tx:method name="insert*" propagation="REQUIRED" />
+            </tx:attributes>
+        </tx:advice>
+        &lt;!&ndash; 事务入口 &ndash;&gt;
+        <aop:config>
+            <aop:pointcut id="allServiceMethod" expression="execution(* your service implements package.*.*(..))" />
+            <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice" />
+        </aop:config>-->
 </beans>

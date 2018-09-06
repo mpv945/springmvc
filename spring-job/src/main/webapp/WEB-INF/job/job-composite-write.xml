@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--组合写入，可以同时写入到jms，文件。数据库-->
+    <batch:job id="compositeWriteJob">
+        <batch:step id="compositeWriteStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" writer="compositeWriter" processor="creditBillProcessor" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+    <bean id="compositeWriter" class="org.springframework.batch.item.support.CompositeItemWriter">
+        <property name="delegates"><!--被代理的ItemWriter的组合，对于每一个Item对象会循环写入到被代理的ItemWriter中-->
+            <list>
+                <ref bean="flatFileItemWriter1" />
+                <ref bean="flatFileItemWriter2" />
+            </list>
+        </property>
+        <property name="ignoreItemStream" value="false"/><!--是否忽略被代理的ItemWriter实现的ItemStream（是否支持重启保持失败点）接口的能力，默认false-->
+    </bean>
+
+    <bean id="flatFileItemWriter1" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:target/ch07/composite/outputFile1.csv"/>
+        <property name="lineAggregator" ref="lineAggregator"/>
+    </bean>
+
+    <bean id="flatFileItemWriter2" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:target/ch07/composite/outputFile2.csv"/>
+        <property name="lineAggregator" ref="lineAggregator"/>
+    </bean>
+
+    <!--根据不同结果使用不同的写入实现-->
+    <batch:job id="classifierCompositeWriteJob">
+        <batch:step id="classifierCompositeWriteStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" writer="classifierCompositeWriter"
+                       processor="creditBillProcessor" commit-interval="2">
+                    <streams>
+                        <stream ref="flatFileItemWriterLarge" />
+                        <stream ref="flatFileItemWriterSmall" />
+                    </streams>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="classifierCompositeWriter" class="org.springframework.batch.item.support.ClassifierCompositeItemWriter">
+        <property name="classifier" ref="backToBackClassifier"></property><!--根据Classifier路由不同的Itenm到特定的ItemWriter处理器-->
+    </bean>
+
+    <bean id="backToBackClassifier" class="org.springframework.classify.BackToBackPatternClassifier" >
+        <property name="routerDelegate" ref="creditBillRouterClassifier" /><!--分类路由代理-->
+        <property name="matcherMap"><!--根据routerDelegate返回值，匹配映射-->
+            <map>
+                <entry key="large" value-ref="flatFileItemWriterLarge" />
+                <entry key="small" value-ref="flatFileItemWriterSmall" />
+            </map>
+        </property>
+    </bean>
+
+    <!--自定义分类器-->
+    <bean id="creditBillRouterClassifier" class="org.haijun.study.item.write.classifiercomposite.CreditBillRouterClassifier">
+    </bean>
+
+    <bean id="flatFileItemWriterLarge" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:target/ch07/composite/classify/outputFile_Large.csv"/>
+        <property name="lineAggregator" ref="lineAggregator"/>
+    </bean>
+
+    <bean id="flatFileItemWriterSmall" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:target/ch07/composite/classify/outputFile_Small.csv"/>
+        <property name="lineAggregator" ref="lineAggregator"/>
+    </bean>
+</beans>

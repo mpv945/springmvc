@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--自定义Item处理器-->
+    <bean id="partTranslateItemProcessor" class="org.haijun.study.item.processor.PartTranslateItemProcessor"></bean>
+
+    <!--对于读写连个阶段数据不一致，可以通过该处理器实现-->
+    <bean id="translateItemProcessor" class="org.haijun.study.item.processor.TranslateItemProcessor"></bean>
+
+    <!--过滤处理-->
+    <bean id="filterItemProcessor" class="org.haijun.study.item.processor.FilterItemProcessor"></bean>
+
+    <!--配置在chunk字标签，可以各种统计的监听器-->
+    <bean id="countStepExecutionListener" class="org.haijun.study.item.processor.CountStepExecutionListener"></bean>
+
+    <!--自定义的数据验证处理-->
+    <bean id="creditBillValidator" class="org.haijun.study.item.processor.CreditBillValidator"></bean>
+
+    <batch:job id="validateJob">
+        <batch:step id="validateStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" writer="flatFileItemWriter"
+                       processor="validatorProcessor" commit-interval="2" skip-limit="5">
+                    <skippable-exception-classes>
+                        <include class="org.springframework.batch.item.validator.ValidationException"/>
+                    </skippable-exception-classes>
+                    <listeners>
+                        <listener ref="filterCountStepExecutionListener" />
+                        <listener ref="skipCountStepExecutionListener" />
+                    </listeners>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--支持过滤和跳过功能-->
+    <bean id="validatorProcessor" scope="step" class="org.springframework.batch.item.validator.ValidatingItemProcessor">
+        <property name="filter" value="#{jobParameters['filter']}" /><!--是否使用过滤功能，默认false，当为true表示校验不通过，直接返回null跳过，false表示使用skippable-exception-classes-->
+        <property name="validator">
+            <bean class="org.haijun.study.item.processor.CreditBillValidator" />
+        </property>
+    </bean>
+
+    <!--组合处理器，把多个处理器组成在一起共同处理-->
+    <bean id="compositeItemProcessor" class="org.springframework.batch.item.support.CompositeItemProcessor">
+        <property name="delegates">
+            <list>
+                <ref bean="partTranslateItemProcessor" />
+                <ref bean="validatorProcessor" />
+            </list>
+        </property>
+    </bean>
+
+    <!--复用存在的处理器-->
+    <bean id="reuseServiceProcessor"
+               class="org.springframework.batch.item.adapter.ItemProcessorAdapter">
+        <property name="targetObject" ref="existService"/>
+        <property name="targetMethod" value="validate"/>
+    </bean>
+
+    <bean id="existService" class="org.haijun.study.item.processor.ExistService"/>
+
+</beans>

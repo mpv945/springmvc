@@ -22,6 +22,7 @@ public class CreditBill implements Serializable {
         this.date = date;
         this.address = address;
     }
+    public CreditBill(){}
 
     public String getAccountID() {
         return accountID;

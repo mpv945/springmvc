@@ -8,6 +8,9 @@
     <result column="age" jdbcType="INTEGER" property="age" />
   </resultMap>
 
+  <insert id="insertDestCredits" parameterType=" org.haijun.study.item.write.DestinationCreditBill">
+ 	insert into t_destcredit values(#id#, #accountID#, #name#, #amount#, #date#, #address#)
+  </insert>
   <!-- 根据ID所在区间查询信用卡账单对象 -->
   <select id="getCreditsById" parameterType="java.util.HashMap" resultMap="result">
   	select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS from t_credit where ID between #begin# and #end#

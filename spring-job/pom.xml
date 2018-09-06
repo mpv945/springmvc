@@ -102,6 +102,13 @@
             <version>${spring.batch.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
         <!--xml转java-->
         <dependency>
             <groupId>org.springframework</groupId>

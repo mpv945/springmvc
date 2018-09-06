@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <batch:job id="xmlFileReadAndWriterJob">
+        <batch:step id="xmlFileReadAndWriterStep">
+            <tasklet>
+                <chunk reader="xmlReader" writer="xmlWriter" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!-- XML文件读取 -->
+    <bean id="xmlReader" scope="step" class="org.springframework.batch.item.xml.StaxEventItemReader">
+        <property name="fragmentRootElementName" value="credit"/><!--需要转换为java对象的根节点名字-->
+        <!--<property name="fragmentRootElementNames" value="sdfds" />--><!--需要转换为java对象的根节点的命名空间-->
+        <property name="resource" value="classpath:data/flat/xml/credit-card-bill-201303.xml"/><!--需要读取的资源文件-->
+        <!--<property name="maxItemCount" value="111111" />--><!--能读取的最大条目数，默认值Integer.MAX_VALUE-->
+        <property name="strict" value="true" /><!--默认为true，如果为false，文件资源不存在会异常-->
+        <property name="unmarshaller" ref="creditMarshaller"/><!--Spring OXM实现类，负责将xml内容转换为java对象-->
+    </bean>
+    <!--xml转换为java处理（序列化组件）-->
+    <bean id="creditMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <util:map id="aliases">
+                <entry key="credit" value="org.haijun.study.model.bo.CreditBill" /><!-- 指定转换的java对象，value-ref=""-->
+            </util:map>
+        </property>
+    </bean>
+
+    <bean id="creditBill" scope="prototype" class="org.haijun.study.model.bo.CreditBill"/>
+
+    <!-- XML文件写入 -->
+    <bean id="xmlWriter" class="org.springframework.batch.item.xml.StaxEventItemWriter" scope="step">
+        <property name="rootTagName" value="juxtapose"/>
+        <property name="marshaller" ref="creditMarshaller"/>
+        <property name="resource" value="file:target/credit-card-bill.xml"/>
+    </bean>
+
+
+    <!--多文件读取，-->
+    <batch:job id="fileSetsJob">
+        <batch:step id="fileSetsStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="multiResourceReader" writer="csvItemWriter" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--MultiResourceItemReader 自身实现不是线程安全，不能在多线程并发使用该组件，如果要使用，应该使用分区功能-->
+    <bean id="multiResourceReader" class="org.springframework.batch.item.file.MultiResourceItemReader">
+        <property name="resources" value="classpath:data/flat/files/credit-card-bill-*.csv"/><!--可以定义多个或者通配符-->
+        <property name="strict" value="true" /><!--是否允许文件为空-->
+        <!--<property name="comparator" value=""--><!--资源文件比较器，对文件排序处理-->
+        <property name="saveState" value="true"/> <!--默认为true；保存状态标识，读取资源时候是否保存当前读取的文件及当前文件是否读取条目记录的状态-->
+        <property name="delegate" ref="flatFileItemReader"/><!--指定读取策略，将resources中定义的文件代理给当前指定的ItemReader进行处理，参数类型ResourceAwareItemReaderItemStream-->
+    </bean>
+
+    <bean id="flatFileItemReader" scope="step" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="lineMapper" ref="lineMapper" />
+        <property name="strict" value="true"/>
+    </bean>
+
+    <bean id="lineMapper" class="org.springframework.batch.item.file.mapping.DefaultLineMapper" >
+        <property name="lineTokenizer" ref="delimitedLineTokenizer" />
+        <property name="fieldSetMapper" ref="creditBillFieldSetMapper"/>
+    </bean>
+
+    <bean id="delimitedLineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <property name="delimiter" value=","/>
+        <property name="names" value="accountID,name,amount,date,address" />
+    </bean>
+
+    <bean id="creditBillFieldSetMapper" class="org.haijun.study.handler.CreditBillFieldSetMapper"></bean>
+
+    <!--写入组件ItemWriter也有ItemStream接口支持，
+    1.可以通过实现open方法打开需要读取资源的Steam，根据持久在executionContext中的数据重新定位需要写入记录的位置
+    2.update操作将需要持久化的数据存放在执行上下文executionContext；3.colse 操作关闭读取的资源-->
+    <!--ItemWriter 工作方式：FlatFileItemWriter调用LineAggregator把java对象转文本记录的一行，LineAggregator在开始会引用
+    FieldExtractor类把java对象属性抽取转成Object[],最后写入到Resourse指定的资源中，FlatFileHeaderCallback写入之前调用，
+    可以用来写头部信息，FlatFileFooterCallback 是写文件尾的回调类，写完记录就会调用，通常在colse调用-->
+    <bean id="csvItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+        <property name="resource" value="file:target/outputFile.csv"/><!--可以是文件，也可以是其他资源-->
+        <property name="lineAggregator"><!--将Item对象转换为一条文件记录，引用FieldExtractor来完成部分工作-->
+            <!--LineAggregator 接口负责扩展对象转行文件记录接口（方法aggregate() 对象转字符串），默认实现有下几种
+                ExtractorLineAggregator LineAggregator接口抽象实现，抽象方法doAggregate[对象数组]，子类知需要实现对象数组转字符串接口就好
+                DelimitedLineAggregator 基于分隔符的行聚合器，将Item对象转换为分隔符的一行文件记录，默认分隔符“，”
+                FormatterLineAggregator 格式化行的行聚合器，将Item对象转换为分割符的一行文本记录
+                PassThroughLineAggregator 直接使用Item的toString操作转换成String文件字符串
+                RecursiveCollectionLineAggregator 递归集合转换器，将Collection对象的每条记录转换成一行，采用默认换行符号-->
+            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value=","></property>
+                <property name="fieldExtractor">
+                    <!--定义属性字段抽取器，接口FieldExtractor（核心接口方法extract方法将对象转Objec[]） 默认系统实现有：
+                    BeanWrapperFieldExtractor 根据names字段名映射Bena的属性进行字段转换
+                    PassThroughFieldExtractor 根据Item对象类型判断，不同类型通过不同适配转成Object[]
+                    -->
+                    <bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <property name="names" value="accountID,name,amount,date,address"></property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+        <property name="appendAllowed" value="false" /><!--写入的文件如果存在，是否采用追加写的方式，
+                                    如果设置为true，属性shoudDeleteExists自动被设置为false；默认为false；-->
+        <property name="forceSync" value="false" /><!--是否强制同步写入，默认false-->
+        <property name="encoding" value="UTF-8"/><!--写文件的编码类型，默认从环境变量file.encoding获取，每页默认使用UTF-8或者指定-->
+        <!--<property name="headerCallback" ref=""/>--><!--在open操作中回调该接口-->
+        <!--<property name="footerCallback" ref="" />--><!--在close操作回调该接口-->
+        <property name="lineSeparator" value="\n" /><!--行分隔符，默认从系统属性line.separator中获取-->
+        <property name="saveState" value="true" /><!--是否保存写的状态，默认true-->
+        <property name="shouldDeleteIfEmpty" value="false" /><!--在每页记录写入的情况下，是否删除指定的资源文件-->
+        <property name="shouldDeleteIfExists" value="true" /><!--文件已存在情况下是否先删除此文件-->
+        <property name="transactional" value="true" /><!--写操作是否在事务中-->
+    </bean>
+
+    <!--自定义写入行聚合器-->
+    <bean id="flatFileItemWriter"
+               class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:target/ch07/flat/custom-aggregator/outputFile.csv"/>
+        <property name="lineAggregator" ref="customLineAggregator"/>
+        <!--下面定义两个回调-->
+        <property name="headerCallback" ref="headerCallback"/>
+        <property name="footerCallback" ref="footerCallback"/>
+    </bean>
+
+    <bean id="customLineAggregator" class="org.haijun.study.item.write.CustomLineAggregator">
+        <property name="names" value="accountID,name,amount,date,address"/>
+        <property name="fieldExtractor">
+            <bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                <property name="names"
+                               value="accountID,name,amount,date,address">
+                </property>
+            </bean>
+        </property>
+
+    </bean>
+
+    <bean id="headerCallback"
+               class="org.haijun.study.item.write.DefaultFlatFileHeaderCallback" />
+    <bean id="footerCallback"
+               class="org.haijun.study.item.write.DefaultFlatFileFooterCallback" />
+
+    <!-- XML文件写入 -->
+    <bean id="xmlWriter1" class="org.springframework.batch.item.xml.StaxEventItemWriter">
+        <property name="encoding" value="UTF-8" /><!--默认写XML文件编码为UTF-8-->
+        <property name="footerCallback" ref="xmlfooterCallback" /><!--写文件尾的回调类，在close操作回调该接口。-->
+        <property name="headerCallback" ref="xmlheaderCallback" /><!--写文件头的回调类，在open操作中调用，可以在次接口中完成文件头部写入-->
+        <property name="marshaller" ref="creditMarshaller"/><!--Spring OXM实现类，负责将java对象转XML内容-->
+        <property name="resource" value="file:target/ch07/xml/credit-card-bill.xml"/><!-- 需要写入的资源文件-->
+        <property name="overwriteOutput" value="true" /><!--默认true，如果文件存在是否覆盖原有的文件-->
+        <property name="rootElementAttributes" value="Map<String,String>" /><!--根元素的属性，如果key的名字以"xmlns"为前缀表示命名空间-->
+        <property name="rootTagName" value="juxtapose"/><!--根元素的名字，默认是root-->
+        <property name="version" value="1.0" /><!--指定xml版本号，默认1.0-->
+        <property name="saveState" value="true" /><!--是否保存写的状态，默认true-->
+        <property name="transactional" value="true"/><!--写是否在事务当中，默认true-->
+        <property name="forceSync" value="false" /><!--默认false，是否强制同步写入-->
+        <property name="shouldDeleteIfEmpty" value="true" /><!--默认true，表示文件已经存在情况下是否先删除此文件-->
+    </bean>
+
+    <bean id="xmlheaderCallback"
+               class="org.haijun.study.item.write.xml.HeaderStaxWriterCallback"/>
+    <bean id="xmlfooterCallback"
+               class="org.haijun.study.item.write.xml.FooterStaxWriterCallback"/>
+
+    <!--多文件写入，通过设定每个文件可以写入的最大条目，超过后会自动写入到下一个文件，文件名最后增加序列号，默认1开始-->
+    <bean id="multiItemWriter" class="org.springframework.batch.item.file.MultiResourceItemWriter" >
+        <property name="resource" value="file:target/credit-card-bill.xml" /><!--需要写入资源的原始文件名，父目录必须存在-->
+        <property name="itemCountLimitPerResource" value="2" /><!--每个文件可以写入的最大条数-->
+        <property name="delegate" ref="xmlWriter" /><!--ItemWriter的代理，将resource中定义的文件代理给当前ItemWriter进行处理-->
+        <property name="resourceSuffixCreator" ref="resourceSuffixCreator" /><!--文件后缀生成器，默认SimpleResourceSuffixCreator-->
+        <property name="saveState" value="true"/><!--保存状态标识，读取资源时候是否保存当前读取的文件以及当前文件读取到条目记录的状态-->
+
+    </bean>
+
+    <!--自己扩展的多文件写入，对系统默认实现MultiResourceItemWriter类进行复制重构-->
+    <bean id="extMultiItemWriter" class="org.haijun.study.item.write.ExtMultiResourceItemWriter" >
+        <property name="resource" value="file:target/ch07/filesets/credit-card-bill.xml" />
+        <property name="itemCountLimitPerResource" value="2" />
+        <property name="delegate" ref="xmlWriter" />
+    </bean>
+
+
+    <bean id="resourceSuffixCreator" scope="prototype" class="org.springframework.batch.item.file.SimpleResourceSuffixCreator"></bean>
+
+    <bean id="creditBill" scope="prototype" class="org.haijun.study.model.bo.CreditBill"></bean>
+</beans>

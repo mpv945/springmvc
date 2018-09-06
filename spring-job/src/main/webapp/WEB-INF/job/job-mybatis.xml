@@ -15,7 +15,7 @@
         </batch:step>
     </batch:job>
 
-    <!-- mybatis分页读取数据库 需要引入mybatis和mybatis-spring -->
+    <!-- mybatis正常读取数据库 需要引入mybatis和mybatis-spring -->
     <bean id="mybatisPagingItemReader" scope="step" class="org.mybatis.spring.batch.MyBatisCursorItemReader">
         <!-- <bean:property name="queryId" value="getAllCredits" /> -->
         <property name="queryId" value="deleteByPrimaryKey" /><!--命名SQL定义的id-->
@@ -26,6 +26,25 @@
                 <entry key="end" value="#{jobParameters['id_end']}" />
             </map>
         </property>
+    </bean>
+    <!--分页读取-->
+    <bean id="mybatisPagingItemReader" class="org.mybatis.spring.batch.MyBatisPagingItemReader">
+        <property name="queryId" value="deleteByPrimaryKey" /><!--命名SQL定义的id-->
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+        <property name="parameterValues"><!--定义sql参数，类型Map<String,Object>-->
+            <map>
+                <entry key="begin" value="#{jobParameters['id_begin']}" />
+                <entry key="end" value="#{jobParameters['id_end']}" />
+            </map>
+        </property>
+        <property name="pageSize" value="12" /><!-- 每页条数-->
+    </bean>
+
+    <!--mybatis 写入-->
+    <bean class="org.mybatis.spring.batch.MyBatisBatchItemWriter" id="batchItemWriter">
+        <property name="statementId" value="insertDestCredits" /><!-- 命名sql定义的ID, 插入，更新，删除参数类型就用处理Item类型数据，具体参考insertDestCredits-->
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" /><!--指定命名sql的配置文件和数据源-->
+        <property name="assertUpdates" value="true" /><!--是否断言执行的sql对数据库有记录更新，如果没有更新会抱出EmptyResultDataAccessException-->
     </bean>
 
 

@@ -88,4 +88,13 @@
         <!--<property name="queryProvider" ref="" />--><!--生成HQL的查询类，HibernateQueryProvider-->
     </bean>
 
+    <!--Hibernate写入，只要处理的Item为EntryBean就能新增保存，基于对象操作-->
+    <bean id="hibernateItemWriter" class="org.springframework.batch.item.database.HibernateItemWriter">
+        <property name="sessionFactory" ref="sessionFactoryNew" />
+        <property name="clearSession" value="true" /> <!--在写结束阶段是否清除session会在flush（刷新)-->
+    </bean>
+    <bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+        <property name="sessionFactory" ref="sessionFactoryNew" />
+    </bean>
+
 </beans>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    
+    <!--<context:property-placeholder
+        location="classpath:data/batch-mail.properties"
+        ignore-unresolvable="true"/>-->
+    
+    <batch:job id="javaMailJob">
+        <batch:step id="javaMailStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" writer="mailItemWriter"
+                    processor="mailItemProcessor" commit-interval="2"><!--带附件的 processor=javaMailItemProcessor，writer=mimeMessageItemWriter-->
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+    
+    <!-- 简单邮件发送-->
+    <bean id="mailItemWriter" class="org.springframework.batch.item.mail.SimpleMailMessageItemWriter">
+		<property name="mailSender" ref="javaMailSender" />
+        <!--<property name="mailErrorHandler" ref="" />--> <!--邮件发送失败情况下的消息处理类-->
+	</bean>
+    <!--带附件发送的邮件-->
+    <bean id="mimeMessageItemWriter" class="org.springframework.batch.item.mail.javamail.MimeMessageItemWriter">
+        <property name="javaMailSender" ref="javaMailSender"/>
+    </bean>
+	
+    <bean id="javaMailSender"
+        class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail.smtp.host}" /><!--发送邮件的主机服务器地址 163为例：smtp.163.com-->
+        <property name="username" value="${mail.smtp.username}" /><!--发件人的信息，账号-->
+        <property name="password" value="${mail.smtp.password}" />账<!--号密码-->
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">${mail.smtp.auth}</prop> <!--是否采用安全策略，true表示需要输入用户名口令信息-->
+                <prop key="mail.smtp.timeout">${mail.smtp.timeout}</prop><!--定义超时时间-->
+            </props>
+        </property>
+    </bean>
+    
+    <bean id="flatFileItemReader" scope="step"
+        class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource"
+            value="classpath:ch07/data/flat/credit-card-bill-201310.csv"/>
+        <property name="lineMapper" ref="lineMapper" />
+    </bean>
+    
+	<bean id="lineMapper"
+	    class="org.springframework.batch.item.file.mapping.DefaultLineMapper" >
+	    <property name="lineTokenizer" ref="delimitedLineTokenizer" />
+	    <property name="fieldSetMapper" ref="creditBillFieldSetMapper"/>
+	</bean>
+            
+    <bean id="delimitedLineTokenizer"
+        class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <property name="delimiter" value=","/>
+        <property name="names" value="accountID,name,amount,date,address" />
+    </bean>
+
+    <bean id="creditBillFieldSetMapper" class="org.haijun.study.item.write.CreditBillFieldSetMapper">
+    </bean>
+    
+    <bean id="creditBill" scope="prototype" class="org.haijun.study.model.bo.CreditBill">
+    </bean>
+
+    <bean id="mailItemProcessor" class="org.haijun.study.item.mail.MailItemProcessor"></bean>
+    <!--带附件的-->
+    <bean id="javaMailItemProcessor" class="org.haijun.study.item.mail.JavaMailItemProcessor">
+        <property name="mailSender" ref="javaMailSender"></property>
+    </bean>
+</beans>

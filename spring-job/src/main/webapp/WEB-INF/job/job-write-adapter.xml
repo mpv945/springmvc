@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--通过适配服用存在的服务-->
+    <batch:job id="reuseServiceJob">
+        <batch:step id="reuseServiceStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" writer="reuseServiceWriter"
+                       processor="creditBillProcessor" commit-interval="2">
+                    <batch:listeners><!--可以定义ItemReader，Writer，Processor的监听器-->
+                        <batch:listener></batch:listener>
+                    </batch:listeners>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--适配器模式。-->
+    <bean id="reuseServiceWriter" class="org.springframework.batch.item.adapter.ItemWriterAdapter">
+        <property name="targetObject" ref="existServiceWrite"/>
+        <property name="targetMethod" value="insert"/>
+    </bean>
+
+    <bean id="existServiceWrite" class="org.haijun.study.item.write.ExistService"/>
+
+    <!--ItemWriterAdapter只支持参数类型为具体的Item对象-->
+    <batch:job id="reuseServicePropertyExtractJob">
+        <batch:step id="reuseServicePropertyExtractStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" writer="reuseServicePropertyExtractWriter"
+                       processor="creditBillProcessor" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+    <!--可以从存在的服务Item抽取指定参数字段进行适配整合-->
+    <bean id="reuseServicePropertyExtractWriter" class="org.springframework.batch.item.adapter.PropertyExtractingDelegatingItemWriter">
+        <property name="targetObject" ref="existService"/>
+        <property name="targetMethod" value="insert"/>
+        <property name="fieldsUsedAsTargetMethodArguments"><!--指定Item中的属性名列表，根据这些指定的属性名从Item中抽取属性值，这些属性值被调用目标方法的参数值-->
+            <list>
+                <value>accountID</value>
+                <value>name</value>
+                <value>amount</value>
+                <value>date</value>
+                <value>address</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--支持自定义重启的ItemWriter实现-->
+    <bean id="restartableCustomItemWriter" class="org.haijun.study.item.write.RestartableCustomCreditBillItemWriter">
+    </bean>
+</beans>

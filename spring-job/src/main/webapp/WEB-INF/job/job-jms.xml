@@ -82,6 +82,30 @@
         <property name="itemType" value="org.haijun.study.model.bo.CreditBill"/><!--Item对象类型-->
         <property name="jmsTemplate" ref="jmsTemplate"/><!--消息发送模板-->
     </bean>
+
+    <!--写入JMS消息-->
+    <batch:job id="jmsWriteJob">
+        <batch:step id="jmsWriteStep">
+            <tasklet transaction-manager="transactionManager">
+                <chunk reader="flatFileItemReader" processor="creditBillProcessor"
+                       writer="jmsItemWriter" commit-interval="2">
+                    <!--测试jms是否发生成功，通过监听器在step执行完通过jmsTemplate读取队列消息，-->
+                    <listeners>
+                        <listener ref="jmsDetectItemWriteListener"/>
+                    </listeners>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="jmsItemWriter" class="org.springframework.batch.item.jms.JmsItemWriter">
+        <property name="jmsTemplate" ref="jmsTemplate" />
+    </bean>
+    <bean id="jmsDetectItemWriteListener" class="org.haijun.study.item.write.JMSDetectItemWriteListener">
+        <property name="jmsTemplate" ref="jmsTemplate" />
+    </bean>
+
+
     <!--队列的名称-->
     <amq:queue id="userDestination" physicalName="destination.creditBill" />
 
