@@ -64,6 +64,8 @@
     <import resource="job/job-java-mail.xml" />
     <import resource="job/job-write-adapter.xml"/>
     <import resource="job/job-processor.xml" />
+    <import resource="job/flow/job-flow.xml"/>
+    <import resource="job/flow/job-conditional.xml"/>
 
 
     <!-- 使用annotation定义事务 -->

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--抽象-->
+    <batch:step id="abstractDecompressStep" abstract="true">
+        <listeners>
+            <listener ref="shareDataStepExecutionListener"></listener>
+        </listeners>
+    </batch:step>
+
+    <!--共享数据监听-->
+    <bean id="shareDataStepExecutionListener"
+        class="org.haijun.study.flow.listener.ShareDataStepExecutionListener">
+    </bean>
+
+    <!--对账服务接口实现-->
+    <bean id="creditService" class="org.haijun.study.flow.CreditServiceImpl">
+    </bean>
+    <!--解压缩任务-->
+    <bean id="decompressTasklet" scope="step"
+        class="org.haijun.study.flow.tasklet.DecompressTasklet">
+        <property name="creditService" ref="creditService" /><!--对账服务-->
+        <property name="inputFile" value="#{jobParameters['inputFile']}" /><!--对账压缩文件-->
+        <property name="outputDirectory" value="#{jobParameters['workDirectory']}" /><!--工作目录-->
+    </bean>
+
+    <!--验证任务-->
+    <bean id="verifyTasklet" scope="step" class="org.haijun.study.flow.tasklet.VerifyTasklet">
+        <property name="creditService" ref="creditService" />
+        <property name="outputDirectory" value="#{jobParameters['workDirectory']}" />
+        <property name="readFileName" value="#{jobParameters['readFileName']}" />
+    </bean>
+
+    <!--清空任务：把解压缩和工作目录清空-->
+    <bean id="cleanTasklet" scope="step" class="org.haijun.study.flow.tasklet.CleanTasklet">
+        <property name="creditService" ref="creditService" />
+        <property name="outputDirectory" value="#{jobParameters['workDirectory']}" />
+    </bean>
+
+    <!--监听试验证状态，根据验证状态退出验证step-->
+    <bean id="verifyStepExecutionListener" class="org.haijun.study.flow.listener.VerifyStepExecutionListener">
+    </bean>
+        
+</beans>

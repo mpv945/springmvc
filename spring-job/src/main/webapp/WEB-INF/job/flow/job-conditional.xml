@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--<import resource="classpath:ch09/job-context.xml" />-->
+    <import resource="./base/job-tasklet.xml" />
+    <import resource="./base/job-chunk-flat.xml" />
+
+    <!--条件flow-->
+    <batch:job id="conditionalJob" >
+        <batch:step id="decompressStep" parent="abstractDecompressStep" next="verifyStep" >
+            <tasklet ref="decompressTasklet" />
+        </batch:step>
+        <batch:step id="verifyStep" >
+            <tasklet ref="verifyTasklet" />
+            <!--
+            on 定义作业步的ExitStatus（退出状态）和on属性指定的值匹配的时候，则执行to指定的作业步
+            on 属性的值可以是任意的字符串，同时支持通配符"*"和"?"
+                    *标识任何值都满足（字符长度0到无限）
+                    ?表示只匹配一个任意字符串；c?b 可以匹配cab，但是不能匹配ca2b
+            -->
+
+           <!-- ExitStatus 和 BatchStatus
+            BatchStatus 通常由批处理框架来使用，用来记录Job或者Step的执行状态，在重启job和step起到关键作业；
+                    可以通过JobExecution.getStatus() 获取Job的批处理状态，持久化在job_execution 表的status字段，Step的批处理状态类似
+                    批处理8种状态：
+                        COMPLETED, 表示完成状态，所有的step都标记为COMPLETED后，job会处于该状态
+                        STARTING,  表示作业正在启动状态，还没启动完毕
+                        STARTED,   表示作业已启动成功
+                        STOPPING,  表示作业正在停止中
+                        STOPPED,   表示作业停止完成
+                        FAILED,    表示作业执行失败
+                        ABANDONED, 表示当前下次重启job时候需要废弃掉的Step，即不会被再次执行
+                        UNKNOWN;   表示未知的状态，该状态下重启Job会抛出异常
+            BatchStatus 表示Step或者Job执行后的状态，存放在job或者step执行上下文（execution）中，在执行job或者step期间通过job或者step执行上下文持久在数据库（可自定义）
+                        UNKNOWN 表示未知的状态
+                        EXECUTING 执行中
+                        COMPLETED 执行完成
+                        NOOP
+                        FAILED 执行失败
+                        STOPPED 停止完成-->
+
+            <batch:next on="*" to="readWriteStep" /><!--on的值最后由verifyStepExecutionListener返回-->
+        	<batch:next on="SKIPTOCLEAN" to="cleanStep" />
+        	<batch:listeners>
+                <batch:listener ref="verifyStepExecutionListener" />
+            </batch:listeners>
+        </batch:step>
+        <batch:step id="readWriteStep" parent="parentReadWriteStep" next="cleanStep" />
+
+        <batch:step id="cleanStep">
+            <tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+
+    <!--decision 条件-->
+    <batch:job id="conditionalDeciderJob" >
+        <batch:step id="decompressStep1" parent="abstractDecompressStep" next="decision" >
+            <tasklet ref="decompressTasklet" />
+        </batch:step>
+        <!--decision 处理-->
+        <batch:decision id="decision" decider="fileExistsDecider"><!--指定条件决定器-->
+            <batch:next on="FILE EXISTS" to="verifyStep1" />
+            <batch:next on="NO FILE" to="cleanStep1" />
+        </batch:decision>
+
+        <batch:step id="verifyStep1" >
+            <batch:tasklet ref="verifyTasklet" />
+            <batch:next on="*" to="readWriteStep1" />
+            <batch:next on="SKIPTOCLEAN" to="cleanStep1" />
+        </batch:step>
+
+        <batch:step id="readWriteStep1" parent="parentReadWriteStep" next="cleanStep" />
+
+        <batch:step id="cleanStep1">
+            <tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+    <!--条件决定器的实现，文件存在与否-->
+    <bean id="fileExistsDecider" class="org.haijun.study.flow.decider.FileExistsDecider">
+        <property name="creditService" ref="creditService" />
+    </bean>
+
+    <!--条件 stop/fail/end/next 四种判断-->
+    <batch:job id="conditionalStopJob" >
+        <batch:step id="decompressStep2" parent="abstractDecompressStep" next="verifyStep2" >
+            <batch:tasklet ref="decompressTasklet" />
+        </batch:step>
+        <batch:step id="verifyStep2" >
+            <batch:tasklet ref="verifyTasklet" />
+            <batch:stop on="COMPLETED" restart="readWriteStep2"/>
+            <batch:fail on="FAILED" exit-code="EARLY TERMINATION"/>
+            <batch:end on="FAILED" exit-code="endExitCode"/>
+            <batch:next on="SKIPTOCLEAN" to="cleanStep" />
+            <batch:next on="*" to="readWriteStep" />
+            <batch:listeners>
+                <batch:listener ref="verifyStepExecutionListener" />
+            </batch:listeners>
+        </batch:step>
+        <batch:step id="readWriteStep2" parent="parentReadWriteStep" next="cleanStep2" />
+        <batch:step id="cleanStep2">
+            <tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+    
+</beans>

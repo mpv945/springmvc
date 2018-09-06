@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="./base/job-chunk-flat.xml" />
+    <import resource="./base/job-tasklet.xml" />
+
+    <!--顺序flow（作业流）-->
+    <batch:job id="sequentialJob" >
+        <!--第一步解压缩-->
+        <batch:step id="decompressStep" parent="abstractDecompressStep" next="verifyStep" ><!--解压缩做完，指定第二步验证-->
+            <tasklet ref="decompressTasklet" />
+        </batch:step>
+
+        <batch:step id="verifyStep" next="readWriteStep"><!--验证完，执行文件读写step-->
+            <tasklet ref="verifyTasklet" />
+        </batch:step>
+        <!--完成对信用卡账单文件的读，处理，写等功能-->
+        <batch:step id="readWriteStep" parent="parentReadWriteStep" next="cleanStep" /> <!--文件读写step执行完。最后清理step-->
+        <!--清理-->
+        <batch:step id="cleanStep">
+            <tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+
+    <!--并行的flow-->
+    <batch:job id="splitJob" >
+        <!--id 唯一标识，task-executor 任务执行处理器，定义后表示采用多线程任务，需要考虑多线程安全，没有定义将使用同步线程执行器SyncTaskExecutor；next 执行完将执行下个step-->
+        <batch:split id="split" task-executor="taskExecutor" next="cleanStep">
+            <!--split 可以定义多个并行的flow，并列的flow可以并行处理的任务-->
+            <batch:flow>
+                <batch:step id="decompressStep1" parent="abstractDecompressStep" next="verifyStep1" >
+                    <tasklet ref="decompressTasklet" />
+                </batch:step>
+                <batch:step id="verifyStep1" next="readWrite_10Step">
+                    <tasklet ref="verifyTasklet" />
+                </batch:step>
+                <batch:step id="readWrite_10Step" parent="parentReadWriteStep"/>
+            </batch:flow>
+            <batch:flow>
+                <batch:step id="readWrite_11Step" parent="parentReadWriteStep">
+                    <batch:listeners>
+                        <batch:listener ref="splitStepExecutionListener"></batch:listener>
+                    </batch:listeners>
+                </batch:step>
+            </batch:flow>
+            <batch:next on="sd" to="cleanStep1" /><!--根据上面返回的step ExitStatus。执行下个step-->
+            <!--根据退出状态决定是否结束当前任务。完成当前Step后，完成当前Job，不能重启，退出状态可改，不指定exit-code。默认状态为COMPLETED-->
+            <batch:end on="end" exit-code="COMPLETED" />
+            <!--根据退出状态决定是否退出当前任务，完成当前step后，停止当前job，能重启，退出状态不可改，状态为STOPPED-->
+            <batch:stop on="stop" restart="指定重启那个step"/>
+            <!--根据退出状态决定是否失败当前任务，完成当前step后，Job失败，能重启，退出状态可改，状态为FAILED-->
+            <batch:fail on="fail" exit-code="FAILED" />
+        </batch:split>
+        <batch:step id="cleanStep1">
+            <batch:tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5"/>
+        <property name="maxPoolSize" value="15"/>
+    </bean>
+
+    <bean id="splitStepExecutionListener" scope="step"
+               class="org.haijun.study.flow.listener.SplitStepExecutionListener">
+        <property name="readFile" value="classpath:ch09/data/credit-card-bill-201311.csv" />
+        <property name="writeFile" value="file:target/ch09/split/outputFile_11.csv" />
+    </bean>
+</beans>

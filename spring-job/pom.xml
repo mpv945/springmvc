@@ -103,10 +103,18 @@
             <scope>test</scope>
         </dependency>
 
+        <!--支持发送带附件的邮件-->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.4.7</version>
+        </dependency>
+
+        <!--支持各种打包解压-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.18</version>
         </dependency>
 
         <!--xml转java-->

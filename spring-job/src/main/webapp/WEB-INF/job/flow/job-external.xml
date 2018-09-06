@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--定义外部的flow-->、
+
+    <!--1. 作业引用外部的flow（通过外部flow可以进行step的组装，提供较好的服务复用功能） -->
+    <batch:job id="externalFlowJob" >
+        <!--id 唯一标识，parent指定外部定义的flow Id；next 表示当前flow中所有的step执行完后，接下来执行的step-->
+        <batch:flow id="externalFlowJob.flow1" parent="flow1" next="cleanStep"/>
+        <batch:step id="cleanStep">
+            <tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+
+    <!--2. 通过step元素使用外部定义的flow ，通过flow将很多step作为子集嵌套到一个上层step中，简称FlowStep-->
+    <batch:job id="externalFlowJob1" >
+        <!--将外部flow中定义的多个step在job执行期间作为step的一个子活动，当外部flow定义的所有step执行完毕后，FlowStep会执行完
+        先执行flow1三个step，然后完成step id="externalFlowJob.flow11，最后完成cleanStep1-->
+        <batch:step id="externalFlowJob.flow11" next="cleanStep1">
+            <batch:flow parent="flow1" />
+        </batch:step>
+        <batch:step id="cleanStep1">
+            <tasklet ref="cleanTasklet1" />
+        </batch:step>
+    </batch:job>
+
+    <!--flow 定义：定义flow的id为flow1，内部定义了三个作业步-->
+    <batch:flow id="flow1">
+        <batch:step id="decompressStep" parent="abstractDecompressStep" next="verifyStep" >
+            <tasklet ref="decompressTasklet" />
+        </batch:step>
+        <batch:step id="verifyStep" next="readWriteStep">
+            <batch:tasklet ref="verifyTasklet" />
+        </batch:step>
+        <batch:step id="readWriteStep" parent="parentReadWriteStep"/>
+    </batch:flow>
+
+    <!--JobStep ：step元素中使用外部定义的Job，Job作为一个单独的step在JOb运行期间出现。
+    作业实例会有两个，baseJob 对应实例有三个执行器，externalJobJobStep 有自己定义的两个执行器-->
+    <batch:job id="externalJobJobStep" >
+        <batch:step id="externalJobJob.flow1" next="cleanStep3">
+            <batch:job ref="baseJob" />
+        </batch:step>
+        <batch:step id="cleanStep3">
+            <tasklet ref="cleanTasklet" />
+        </batch:step>
+    </batch:job>
+
+    <batch:job id="baseJob">
+        <batch:step id="decompressStep3" parent="abstractDecompressStep" next="verifyStep3" >
+            <batch:tasklet ref="decompressTasklet" />
+        </batch:step>
+        <batch:step id="verifyStep3" next="readWriteStep3">
+            <batch:tasklet ref="verifyTasklet" />
+        </batch:step>
+        <batch:step id="readWriteStep3" parent="parentReadWriteStep"/>
+    </batch:job>
+</beans>
