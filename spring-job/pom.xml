@@ -29,9 +29,15 @@
 
     <dependencies>
         <!--批处理任务  https://github.com/shailesh1001/springBatch4/tree/master/SpringBatchDatabaseToCsv/src/main
+        https://blog.csdn.net/u014087707/article/details/79284769
+        http://www.leftso.com/blog/461.html
+        http://www.spring4all.com/article/861
+        https://gitee.com/marvelcode/marvelcode-batch
+        https://www.iqiyi.com/v_19rr1mz2m0.html#curid=1167754900_2a3bf1ac3ba436eaf59546f30d58cc0d
         书上例子 https://github.com/jxtaliu/SpringBatchSample/tree/master/spring-batch-example/src
         https://github.com/SharryShuai/learning-springbatch
         https://blog.csdn.net/smartdt/article/details/78962814
+        https://blog.csdn.net/william_jm/article/details/78964538
         https://github.com/getgitashok/SpringBatch-CSV-PostgreSQL/blob/master/pom.xml
         https://github.com/kwon37xi/springboot2-batch-example
         https://github.com/itmrchen/SpringBatch-DataMigration-->
