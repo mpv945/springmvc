@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/integration/jms http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+       http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--远程任务，job配置和普通没啥区别-->
+    <batch:job id="remoteChunkJob">
+        <batch:step id="stepRemoteChunk">
+            <tasklet>
+                <chunk reader="jdbcItemPageReader" writer="jdbcItemWriter" commit-interval="10" />
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    通过chunkWriter（时一个StepExecution监听器）负责将本地step中的读取数据通过messagingGateway网关发送给远程step
+    <bean id="chunkWriter" scope="step"
+               class="org.springframework.batch.integration.chunk.ChunkMessageChannelItemWriter" >
+        <property name="messagingOperations" ref="messagingGateway" />
+        <property name="replyChannel" ref="replies" />
+        <property name="maxWaitTimeouts" value="10" />
+    </bean>
+
+    在创建chunkHandler过程中，默认注册了chunkProcessor，chunkWriter完成了工作的传递
+    <bean id="chunkHandler"
+               class="org.springframework.batch.integration.chunk.RemoteChunkHandlerFactoryBean">
+        <property name="chunkWriter" ref="chunkWriter" />
+        <property name="step" ref="stepRemoteChunk" />定义远程作业步为stepRemoteChunk
+    </bean>
+    另外一种方式创建chunkHandler
+    <bean id="chunkHandler1"
+               class="org.springframework.batch.integration.chunk.ChunkProcessorChunkHandler">
+        <property name="chunkProcessor">
+            <bean class="org.springframework.batch.core.step.item.SimpleChunkProcessor">
+                <property name="itemWriter" ref="jdbcItemWriter"/>
+                <property name="itemProcessor">
+                    <bean class="org.springframework.batch.item.support.PassThroughItemProcessor"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    定义网关消息，负责向requests队列发生消息，从replies队列读取消息
+    <bean id="messagingGateway" class="org.springframework.integration.core.MessagingTemplate">
+        <property name="defaultChannel" ref="requests" />
+        <property name="receiveTimeout" value="1000" />
+    </bean>
+    定义请求队列requests的adapter
+    <int-jms:outbound-channel-adapter connection-factory="connectionFactory" channel="requests"
+                                      destination-name="requests" />
+    定义使用的channel
+    <int:channel id="requests" />
+    <int:channel id="incoming" />
+
+    定义消息转换器
+    <int:transformer input-channel="incoming" output-channel="replies"
+                     ref="headerExtractor" method="extract" />
+    定义相应的channel
+    <int:channel id="replies" scope="thread">
+        <int:queue />
+        <int:interceptors>
+            <bean id="pollerInterceptor"
+                       class="org.springframework.batch.integration.chunk.MessageSourcePollerInterceptor">
+                <property name="messageSource">
+                    <bean class="org.springframework.integration.jms.JmsDestinationPollingSource">
+                        <constructor-arg>
+                            <bean class="org.springframework.jms.core.JmsTemplate">
+                                <property name="connectionFactory" ref="connectionFactory" />
+                                <property name="defaultDestinationName" value="replies" />
+                                <property name="receiveTimeout" value="100" />
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </property>
+                <property name="channel" ref="incoming"/>
+            </bean>
+        </int:interceptors>
+    </int:channel>
+
+    定义JMS消息模板
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="receiveTimeout" value="100" />
+        <property name="sessionTransacted" value="true" />
+    </bean>
+
+    定义使用AMQ服务器
+    <amq:broker useJmx="false" persistent="false" schedulerSupport="false">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="tcp://localhost:61616"/>
+        </amq:transportConnectors>
+    </amq:broker>
+    <amq:connectionFactory id="connectionFactory" brokerURL="tcp://localhost:61616"/>
+
+    配置请求队列的监听器和处理逻辑
+    <jms:listener-container connection-factory="connectionFactory"
+                            transaction-manager="transactionManager"
+                            acknowledge="transacted" concurrency="1">
+        监听队列为requests，监听到消息后处理逻辑为chunkHandler的chunkHandler操作，处理后的消息发送到replies
+        <jms:listener destination="requests" response-destination="replies"
+                      ref="chunkHandler" method="handleChunk" />
+    </jms:listener-container>
+
+    <!-- 从db分页读数据 -->
+    <bean id="jdbcItemPageReader" scope="step"
+               class="org.springframework.batch.item.database.JdbcPagingItemReader">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queryProvider" ref="refQueryProvider" />
+        <property name="pageSize" value="2"/>
+        <property name="rowMapper" ref="custCreditRowMapper"/>
+    </bean>
+
+    <bean id="refQueryProvider" scope="step"
+               class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="selectClause" value="select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS"/>
+        <property name="fromClause" value="from t_credit"/>
+        <property name="whereClause" value="where ID between 1 and 15"/>
+        <property name="sortKey" value="ID"/>
+    </bean>
+
+    <bean id="custCreditRowMapper"
+               class="org.haijun.study.concurrent.partition.db.CreditBillRowMapper"/>
+
+    <bean id="jdbcItemWriter"
+               class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="insert into t_destcredit (ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS) values (:id,:accountID,:name,:amount,:date,:address)"/>
+        <property name="itemSqlParameterSourceProvider">
+            <bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                <entry key="thread">
+                    <bean class="org.springframework.context.support.SimpleThreadScope" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="headerExtractor"
+               class="org.springframework.batch.integration.chunk.JmsRedeliveredExtractor"/>
+
+</beans>

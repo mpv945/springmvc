@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--<import resource="../../job/job-context.xml"/>-->
+    <!--重试定义-->
+    通过属性控制重试
+    <batch:job id="retryJob" restartable="true"><!--restartable 是否支持重启-->
+        <batch:step id="retryStep">
+            <tasklet start-limit="2" allow-start-if-complete="false">start-limit能启动的次数限制，默认int最大值，
+                                                allow-start-if-complete表示COMPLETED状态的Step能否还能重新启动，默认false
+                <chunk reader="reader" processor="alwaysExceptionItemProcessor" writer="writer"
+                       commit-interval="1" retry-limit="3">retry-limit最大重试次数
+                    <retry-listeners>异常监听器
+                        <listener ref="sysoutRetryListener"></listener>
+                    </retry-listeners>
+                    <retryable-exception-classes>定义允许重试的异常
+                        <include class="java.lang.RuntimeException" />
+                        <exclude class="java.io.FileNotFoundException" />
+                    </retryable-exception-classes>
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    对于非chunk，而是自定义实现的tasklet，可以使用自定义的重试模板，目前面向chunk的重试也是基于重试模板实现的
+
+    <batch:job id="retryTaskletJob">
+        <batch:step id="retryTaskletStep">
+            <tasklet ref="retryTasklet">
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="retryTasklet" class="org.haijun.study.robust.retry.template.CreditBillTasklet" />
+
+    <!--根据异常制定重试机制-->
+    <batch:job id="retryPolicyJob">
+        <batch:step id="retryPolicyStep">
+            <batch:tasklet>
+                <batch:chunk reader="reader" processor="alwaysExceptionItemProcessor" writer="writer"
+                       commit-interval="1" ><!--由于重试包发生变化 ，这个配置依赖老的batch重试包报错，换成bean配置retry-policy="exceptionClassifierRetryPolicy"-->
+
+                    <batch:retry-policy>
+                        <bean class="org.springframework.retry.policy.ExceptionClassifierRetryPolicy"></bean> </batch:retry-policy>
+                </batch:chunk>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--通过重试策略设定重试机制-->
+    <batch:job id="retryCacheCapacityJob">
+        <batch:step id="retryCacheCapacityStep">
+            <batch:tasklet>
+                <batch:chunk reader="reader" processor="radomExceptionItemProcessor"  writer="writer"
+                       commit-interval="1" cache-capacity="1" > <!-- retry-policy="alwaysRetryPolicy"-->
+                    <batch:retry-policy><bean class="org.springframework.retry.policy.AlwaysRetryPolicy"/> </batch:retry-policy>
+                </batch:chunk>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    RetryPolicy 重试策略接口，canRetry判断是否应该重试；open重试开始时执行；close 在重试结束时执行；registerThrowable操作注册和重试上下文
+            AlwaysRetryPolicy 发生任何异常都会导致重试操作
+            NeverRetryPolicy 发生任何异常都不会发生重试操作
+            CompositeRetryPolicy 组合重试策略
+            ExceptionClassifierRetryPolicy 为不同异常定义不同的重试策略
+            SimpleRetryPolicy 根据设置的次数决定是否能进行重试
+            TimeoutRetryPolicy 在给定的时间内可以进行重试，超过时间将不会进行重试
+    <bean id="alwaysRetryPolicy" class="org.springframework.retry.policy.AlwaysRetryPolicy" />
+    <bean id="exceptionClassifierRetryPolicy" class="org.springframework.retry.policy.ExceptionClassifierRetryPolicy">
+        <property name="policyMap">
+            <map>
+                <entry key="org.haijun.study.robust.retry.MockARuntimeException">
+                    <bean class="org.springframework.retry.policy.SimpleRetryPolicy">
+                        <property name="maxAttempts" value="3" /><!--设定最大重试次数-->
+                    </bean>
+                </entry>
+                <entry key="org.haijun.study.robust.retry.MockBRuntimeException">
+                    <bean class="org.springframework.retry.policy.SimpleRetryPolicy">
+                        <property name="maxAttempts" value="5" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <!--重试监听器-->
+    <bean id="sysoutRetryListener"
+               class="org.haijun.study.robust.retry.SystemOutRetryListener" />
+
+    <bean id="reader" class="org.haijun.study.robust.retry.AutoReader" >
+        <property name="maxCount" value="100" />
+    </bean>
+
+    <bean id="writer" class="org.haijun.study.robust.retry.ConsoleWriter" />
+    <bean id="radomExceptionItemProcessor"
+               class="org.haijun.study.robust.retry.RadomExceptionItemProcessor" />
+    <bean id="alwaysExceptionItemProcessor"
+               class="org.haijun.study.robust.retry.AlwaysExceptionItemProcessor" />
+</beans>

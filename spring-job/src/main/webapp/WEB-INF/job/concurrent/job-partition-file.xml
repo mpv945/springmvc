@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:batch="http://www.springframework.org/schema/batch"
+	   xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--<import resource="classpath:ch11/job-context.xml"/>
+    <import resource="classpath:ch11/job-context-db.xml"/>-->
+
+	分区主要接口
+		Partitioner 接口 Map<String, ExecutionContext> partition(int gridSize)方法实现，根据gridSize大小进行执行上下文的划分
+		StepExecutionSplitter 接口定义了如何根据给定的分区规划进行创建作业步分区的执行器，默认实现SimpleStepExecutionSplitter
+		PartitionHandler 接口定义了分区处理的逻辑，根据StepExecutionSplitter进行分区，并执行，最后将执行结果进行收集
+	
+    <batch:job id="partitionJob">
+		<batch:step id="partitionStep">
+			step 用于指定分区step的名字
+			partitioner 用于指定当前使用的分区逻辑
+			aggregator 用于指定需要使用的聚合器，该聚合器作用是将各个分区的执行器执行结果汇总到主执行器，默认使用实现DefaultStepExecutionAggregator
+			属性里的handler 指定分区执行器，需要实现PartitionHandler
+			字元素batch:handler 用于定义默认的实现 TaskExecutorPartitionHandler
+			task-executor 声明使用的线程池
+			grid-size 声明分区的HashMap的初始值大小
+			<batch:partition step="partitionReadWriteStep" partitioner="filePartitioner"><!--aggregator="" handler=""-->
+				<batch:handler grid-size="2" task-executor="taskExecutor"/>
+			</batch:partition>
+		</batch:step>
+	</batch:job>
+	定义一个能读写的分区step
+	<batch:step id="partitionReadWriteStep">
+		<batch:tasklet>
+			<batch:chunk reader="flatFileItemReader" writer="jdbcItemWriter"
+			    processor="creditBillProcessor" commit-interval="2" />
+			 <batch:listeners>
+				 监听器用来验证分区任务使用不同的线程处理
+                  <batch:listener ref="partitionItemReadListener"></batch:listener>
+             </batch:listeners>
+		</batch:tasklet>
+	</batch:step>
+	定义文件分区
+	<bean id="filePartitioner" 
+	    class="org.springframework.batch.core.partition.support.MultiResourcePartitioner">
+		<property name="keyName" value="fileName"/>指定作业步上下文中属性的名字，作用在不同的作业上下文可以获取设置的对应属性值，
+				对于MultiResourcePartitioner对于值是文件的全路径名字，可以读写时候通过#{stepExecutionContext[fileName]}获取资源的全路径
+		<property name="resources" value="classpath:/ch11/data/*.csv"/>
+	</bean>
+
+	<!--读取文件组件-->
+	<bean id="flatFileItemReader" scope="step"
+        class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource" 
+            value="#{stepExecutionContext[fileName]}"/>
+        <property name="lineMapper" ref="lineMapper" />
+    </bean>
+    
+	<bean id="lineMapper" 
+	    class="org.springframework.batch.item.file.mapping.DefaultLineMapper" >
+	    <property name="lineTokenizer" ref="delimitedLineTokenizer" />
+	    <property name="fieldSetMapper" ref="creditBillFieldSetMapper"/>
+	</bean>
+	
+	<bean id="delimitedLineTokenizer" 
+        class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <property name="delimiter" value=","/>
+        <property name="names" value="id,accountID,name,amount,date,address" />
+    </bean>
+
+    <bean id="creditBillFieldSetMapper"
+        class="org.haijun.study.concurrent.partition.CreditBillFieldSetMapper">
+    </bean>
+    
+    <bean id="jdbcItemWriter" 
+        class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="insert into t_destcredit (ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS) values (:id,:accountID,:name,:amount,:date,:address)"/>
+        <property name="itemSqlParameterSourceProvider">
+            <bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+        </property>
+    </bean>
+    
+    <bean id="creditBillProcessor" scope="step"
+        class="org.haijun.study.concurrent.partition.CreditBillProcessor">
+    </bean>
+
+    <bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5"/>
+		<property name="maxPoolSize" value="15"/>
+	</bean>
+	
+    <bean id="partitionItemReadListener"
+		class="org.haijun.study.concurrent.partition.db.PartitionStepExecutionListener">
+	</bean>
+	
+</beans>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    框架提供扩展能力的四种模式：
+    1 .多线程作业，通常一个step由一个线程执行，现在通过扩展可以一个step被多个线程同时执行
+    2.并行作业，可以通过batch:split元素加flow来定义并行的作业
+
+    简单配置多线程，大部分reader，writer，processor都是不安全的，因为为了支持重启，这些操作都是有状态的，多线程对于无状态的操作都是线程安全的
+    <batch:job id="multiThreadJob">
+        <batch:step id="multiThreadStep">
+            <tasklet task-executor="taskExecutor" throttle-limit="6"> 指定以后表示使用多线程任务，throttle-limit表示最大使用线程池的数据，默认6
+                <chunk reader="reader" writer="writer" commit-interval="2"/>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="taskExecutor"
+               class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5"/>初始化大小
+        <property name="maxPoolSize" value="15"/>最大线程池大小
+    </bean>
+
+    这个配置是线程不安全的 ，reader="jdbcItemReader"使用的JdbcCursorItemReader是有状态的操作，本身没有线程安全处理
+    <batch:job id="dbErrorJob">
+        <batch:step id="dbErrorStep">
+            <tasklet task-executor="taskExecutor" throttle-limit="6">
+                <chunk reader="jdbcItemReader" processor="creditBillProcessor"
+                       writer="jdbcSetterItemWriter" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    通过对读取的read方法添加Synchronized关键字，阻塞读的线程，保证线程安全，这样处理和写相对就是安全的，牺牲了读取的性能，如果性能要求高请考虑分区
+    为了线程安全，下面这两个个都要设置成false
+    <!--<property name="verifyCursorPosition" value="false"></property>
+    <property name="saveState" value="false"></property>-->
+    <batch:job id="dbSynchronizedJob">
+        <batch:step id="dbSynchronizedStep">
+            <tasklet task-executor="taskExecutor" throttle-limit="6">
+                <chunk reader="creditBillItemReader" processor="creditBillProcessor"
+                       writer="jdbcSetterItemWriter" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    定义可以重启的线程安全的Job
+    在上面线程安全job处理上，读取增加查询条件flag=false，然后在processor="creditBillRestartProcessor"处理时对读取的数据增加了flag的更新
+    <batch:job id="dbRestartSynchronizedJob">
+        <batch:step id="dbRestartSynchronizedStep">
+            <tasklet task-executor="taskExecutor" throttle-limit="6">
+                <chunk reader="creditBillRestartItemReader" processor="creditBillRestartProcessor"
+                       writer="jdbcSetterItemWriter" commit-interval="2">
+                </chunk>
+            </tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="jdbcSetterItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="insert into t_destcredit (ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS) values (?,?,?,?,?,?)"/>
+        <property name="itemPreparedStatementSetter">
+            <bean class="org.haijun.study.concurrent.multithread.DestCreditBillItemPreparedStatementSetter"/>
+        </property>
+    </bean>
+
+    <bean id="creditBillItemReader"
+               class="org.haijun.study.concurrent.multithread.SynchronizedItemReader">
+        <property name="delegate" ref="jdbcItemReader" />
+    </bean>
+
+    <bean id="creditBillRestartItemReader"
+               class="org.haijun.study.concurrent.multithread.SynchronizedItemReader">
+        <property name="delegate" ref="jdbcRestartItemReader" />
+    </bean>
+
+    <!-- 读取db -->
+    <bean id="jdbcItemReader" scope="step"
+               class="org.springframework.batch.item.database.JdbcCursorItemReader" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS from t_credit"/>
+        为了线程安全，下面这个都要设置成false
+        <property name="verifyCursorPosition" value="false"></property>
+        <property name="saveState" value="false"></property>
+        <property name="rowMapper">
+            <bean class="org.springframework.jdbc.core.BeanPropertyRowMapper">
+                <property name="mappedClass" value="org.haijun.study.concurrent.multithread.CreditBill"/>
+            </bean>
+        </property>
+    </bean>
+
+    支持重启的线程安全读取db
+    <bean id="jdbcRestartItemReader" scope="step"
+               class="org.springframework.batch.item.database.JdbcCursorItemReader" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="select ID,ACCOUNTID,NAME,AMOUNT,DATE,ADDRESS from t_credit where flag=false"/>
+        <property name="verifyCursorPosition" value="false"></property>
+        <property name="saveState" value="false"></property>
+        <property name="rowMapper">
+            <bean class="org.springframework.jdbc.core.BeanPropertyRowMapper">
+                <property name="mappedClass" value="org.haijun.study.concurrent.multithread.CreditBill"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- End 读取db -->
+
+    <bean id="creditBillProcessor" scope="step"
+               class="org.haijun.study.concurrent.multithread.CreditBillProcessor">
+    </bean>
+
+    <bean id="creditBillRestartProcessor" scope="step"
+               class="org.haijun.study.concurrent.multithread.CreditBillProcessor">
+        <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+    </bean>
+
+
+
+    <bean id="reader" class="org.haijun.study.concurrent.multithread.AutoReader" />
+    <bean id="writer" class="org.haijun.study.concurrent.multithread.ConsoleWriter" />
+</beans>
