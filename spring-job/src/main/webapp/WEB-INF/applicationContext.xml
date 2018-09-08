@@ -52,7 +52,7 @@
     <import resource="job/job-context.xml"/>
     <!--导入job实例配置-->
     <!--<import resource="job/job-sample1.xml" />-->
-    <import resource="job/job-fileReader.xml" />
+    <!--<import resource="job/job-fileReader.xml" />
     <import resource="job/job-flatAndxmlItem.xml" />
     <import resource="job/job-jdbc.xml" />
     <import resource="job/job-hibernate.xml"/>
@@ -65,7 +65,7 @@
     <import resource="job/job-write-adapter.xml"/>
     <import resource="job/job-processor.xml" />
     <import resource="job/flow/job-flow.xml"/>
-    <import resource="job/flow/job-conditional.xml"/>
+    <import resource="job/flow/job-conditional.xml"/>-->
 
 
     <!-- 使用annotation定义事务 -->
