@@ -24,7 +24,7 @@ public class CreditBillTasklet implements Tasklet {
 	@Override
 	public RepeatStatus execute(StepContribution contribution,
 			ChunkContext chunkContext) throws Exception {
-		RetryCallback<String,Exception> retryCallback = new DefaultRetryCallback();//重试回调定义，当发生指定（Exception）的错误时候会被执行回调
+		RetryCallback<String> retryCallback = new DefaultRetryCallback();//重试回调定义，当发生指定（Exception）的错误时候会被执行回调
 		RetryListener[] listeners = new RetryListener[]{new CountRetryListener()};//定义重试拦截器
 		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();// 定义重试策略
 		retryPolicy.setMaxAttempts(3);//重试策略最大次数为3

@@ -3,12 +3,11 @@
  */
 package org.haijun.study.concurrent.partition.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import org.haijun.study.concurrent.partition.CreditBill;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.juxtapose.example.ch11.partition.CreditBill;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 /**

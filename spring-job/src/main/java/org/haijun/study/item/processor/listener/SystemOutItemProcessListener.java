@@ -3,9 +3,8 @@
  */
 package org.haijun.study.item.processor.listener;
 
+import org.haijun.study.model.bo.CreditBill;
 import org.springframework.batch.core.ItemProcessListener;
-
-import com.juxtapose.example.ch08.CreditBill;
 
 /**
  * @author bruce.liu(mailto:jxta.liu@gmail.com)

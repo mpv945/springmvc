@@ -5,7 +5,10 @@ package org.haijun.study.robust.retry.template;
 
 import org.springframework.classify.Classifier;
 import org.springframework.classify.ClassifierSupport;
-import org.springframework.retry.*;
+import org.springframework.retry.RecoveryCallback;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryPolicy;
+import org.springframework.retry.RetryState;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
@@ -23,7 +26,7 @@ public class RetryTemplateExample { //  implements RetryOperations
 	 *  根据次数重试
 	 */
 	public static void retrySimpleRetry(){
-		RetryCallback<String,Exception> retryCallback = new DefaultRetryCallback();
+		RetryCallback<String> retryCallback = new DefaultRetryCallback();
 		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
 		retryPolicy.setMaxAttempts(3);
 		retry(retryCallback, retryPolicy, null, null);
@@ -33,7 +36,7 @@ public class RetryTemplateExample { //  implements RetryOperations
 	 * 根据次数重试并且自动恢复
 	 */
 	public static void retrySimpleRetryAndRecovery(){
-		RetryCallback<String,Exception> retryCallback = new DefaultRetryCallback();
+		RetryCallback<String> retryCallback = new DefaultRetryCallback();
 		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
 		retryPolicy.setMaxAttempts(5);
 		RecoveryCallback<String> recoveryCallback = new DefaultRecoveryCallback<String>();
@@ -44,7 +47,7 @@ public class RetryTemplateExample { //  implements RetryOperations
 	 * 根据时间范围内重试
 	 */
 	public static void retryTimeout(){
-		RetryCallback<String,Exception> retryCallback = new DefaultRetryCallback();
+		RetryCallback<String> retryCallback = new DefaultRetryCallback();
 		TimeoutRetryPolicy retryPolicy = new TimeoutRetryPolicy();
 		retryPolicy.setTimeout(3000L);
 		retry(retryCallback, retryPolicy, null, null);
@@ -57,7 +60,7 @@ public class RetryTemplateExample { //  implements RetryOperations
 	 * 总执行次数在3次左右
 	 */
 	public static void retryTimeoutAndRecoveryAndBackOff(){
-		RetryCallback<String,Exception> retryCallback = new DefaultRetryCallback();
+		RetryCallback<String> retryCallback = new DefaultRetryCallback();
 		TimeoutRetryPolicy retryPolicy = new TimeoutRetryPolicy();
 		retryPolicy.setTimeout(3000L);
 		BackOffPolicy backOffPolicy = new DefaultBackoffPolicy();
@@ -72,7 +75,7 @@ public class RetryTemplateExample { //  implements RetryOperations
 	 * @param recoveryCallback
 	 * @param backOffPolicy
 	 */
-	public static void retry(RetryCallback<String,Exception> retryCallback, RetryPolicy retryPolicy, RecoveryCallback<String>
+	public static void retry(RetryCallback<String> retryCallback, RetryPolicy retryPolicy, RecoveryCallback<String>
 			recoveryCallback, BackOffPolicy backOffPolicy){
 		boolean retryStateFlg = true;// 是否需要带状态重试
 		RetryTemplate template = new RetryTemplate();

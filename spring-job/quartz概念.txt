@@ -1,0 +1,20 @@
+Job :定义任务执行的接口，运行任务必须要实现该接口的void execute(JobExecutionContext context),context包含调度上下文的各种信息，Job运行信息保存在JobDataMap
+JobDetail：Job的细节描述，每次执行Job，JobDetail构造函数，接收Job的具体实现，对该job实现类以及相关静态信息，例如Job名称，概述，关联监听信息等。
+Trigger: 是一个类，描述Job执行的时间触发规则。主要有SimpleTrigger（触发一次或者固定间隔周期性执行）和CronTrigger（支持cron表达式）这两个子类。
+Calendar：日历时间点的集合，一个Trigger可以和多个Calendar关联。以便包含或排除某些时间点。org.quartz.impl.calender下很多实现，例如AnnualCalender 对年定义，还有Monthly月，Weekly周
+Scheduler：调度程序，代表一个独立的Job运行容器，Trigger和JobDetail可以注册到Scheduler，这两者拥有各自的组以及名称，组和名称是Scheduler查找定位容器种某一
+            对象的依据，组和名称的组合必须要唯一，Trigger和JobDetail可以有相同的，因为他们处在不同集合中。Scheduler将Trigger绑定某一JobDetail，
+            当Trigger就会触发找到绑定的JobDetail，JobDetail就会启动job的execute方法。一个job可以对应多个Trigger，一个Trigger只能对应一个Job
+            SchedulerFactoryBean创建一个Scheduler实例。Scheduler通过#getContext() 获取当前SchedulerContext上下文（Map数据），Job和Trigger都能访问
+ThreadPool ：Scheduler使用一个线程池作为任务运行的基础设施，任务通过共享线程池的线程来提高运行效率
+
+Job有个StatefulJob子接口，代表有状态的任务，目的是让Quartz知道任务类型，以不同方案执行，无状态拥有自己的JobDataMap复制，对于JobDataMap更改不会影响下次运行
+    而有状态的任务会共享同一个JobDataMap，更改会影响后面的任务JobDataMap，因为这个原因，无状态可以并发，有状态当次没执行完，下一个任务执行会阻塞，一般尽量考虑无状态
+
+如果Quartz使用了数据持久化任务调度信息，则无状态的JobDataMap只会在Scheduler注册任务时候保存一次。而有状态的JobDataMap则在每次Job执行任务后都会保存
+
+Trigger自身也可以拥有一个JobDataMap，通过JobExecutionContext#getTrigger#getJobDataMap(),不管有状态还是无状态，对Trigger的JobDataMap修改都不会影响下次任务
+
+Quartz拥有完整的监听体系，大部分组件拥有的事件，例如任务执行前，后事件，触发器触发前，后事件，调度器开始和关闭事件
+
+一个Scheduler可以拥有多个Trigger和多个JobDetail，可以将他们分到不同组中，如果不显示指定所属组，那么会添加到默认组，默认组为Scheduler.DEFAULT_GROUP

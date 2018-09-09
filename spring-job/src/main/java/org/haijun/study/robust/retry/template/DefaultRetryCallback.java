@@ -11,7 +11,7 @@ import org.springframework.retry.RetryContext;
  * @author bruce.liu(mailto:jxta.liu@gmail.com)
  * 2013-10-21下午11:00:27
  */
-public class DefaultRetryCallback implements RetryCallback<String, Exception> {
+public class DefaultRetryCallback implements RetryCallback<String> {
 	private long sleepTime = 0L;
 	
 	public DefaultRetryCallback(){}
