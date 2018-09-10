@@ -49,12 +49,12 @@ public class SimpleTriggerRunner {
     /**
      * cron表达式的触发器
      */
-    public static void cronScheduleTest(){
+    public static void cronScheduleTest() {
         try {
             //从调度程序工厂获取一个调度程序的实例
             /*JobDetailFactoryBean 设置这个属性表示异常退出。重启
             <property name="requestsRecovery" value="true" />*/
-            Scheduler scheduler  = StdSchedulerFactory.getDefaultScheduler();
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
 
             //显示调度程序的名称（这里会展示我们在quartz.properties文件中的名称）
             System.out.println("scheduleName = " + scheduler.getSchedulerName());
@@ -69,7 +69,7 @@ public class SimpleTriggerRunner {
 
             JobDetail jobDetail = newJob(SimpleJob.class)// 指定jobDetail 绑定的Job实现对象
                     .withDescription("工作的描述")
-                    .withIdentity("jobName2","group1")//jobDetail 工作名称和组名称
+                    .withIdentity("jobName2", "group1")//jobDetail 工作名称和组名称
                     .build();
 
             // 设置监听器
@@ -79,7 +79,6 @@ public class SimpleTriggerRunner {
             // 添加监听器
             SchedulerListener schedulerListener = new MySchedulerListener();
             scheduler.getListenerManager().addSchedulerListener(schedulerListener);
-
 
 
             CronTrigger trigger = newTrigger()
@@ -155,7 +154,7 @@ public class SimpleTriggerRunner {
             SchedulerMetaData metaData = scheduler.getMetaData();
             System.out.println("~~~~~~~~~~  执行了 " + metaData.getNumberOfJobsExecuted() + " 个 jobs.");
 
-        } catch (SchedulerException | ParseException | InterruptedException e ) {
+        } catch (SchedulerException | ParseException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -163,30 +162,30 @@ public class SimpleTriggerRunner {
     /**
      * cron表达式的触发器(不能跳过开始时间) 它的作用是在于补充Trigger的时间。可以排除或加入某一些特定的时间点。
      * Quartz体贴地为我们提供以下几种Calendar，注意，所有的Calendar既可以是排除，也可以是包含
-     *      HolidayCalendar。指定特定的日期，比如20140613。精度到天。
-     *      DailyCalendar。指定每天的时间段（rangeStartingTime, rangeEndingTime)，格式是HH:MM[:SS[:mmm]]。也就是最大精度可以到毫秒。
-     *      WeeklyCalendar。指定每星期的星期几，可选值比如为java.util.Calendar.SUNDAY。精度是天。
-     *      MonthlyCalendar。指定每月的几号。可选值为1-31。精度是天
-     *      AnnualCalendar。 指定每年的哪一天。使用方式如上例。精度是天。
-     *      CronCalendar。指定Cron表达式。精度取决于Cron表达式，也就是最大精度可以到秒。
-     *      具体参考https://blog.csdn.net/yangshangwei/article/details/78174050
+     * HolidayCalendar。指定特定的日期，比如20140613。精度到天。
+     * DailyCalendar。指定每天的时间段（rangeStartingTime, rangeEndingTime)，格式是HH:MM[:SS[:mmm]]。也就是最大精度可以到毫秒。
+     * WeeklyCalendar。指定每星期的星期几，可选值比如为java.util.Calendar.SUNDAY。精度是天。
+     * MonthlyCalendar。指定每月的几号。可选值为1-31。精度是天
+     * AnnualCalendar。 指定每年的哪一天。使用方式如上例。精度是天。
+     * CronCalendar。指定Cron表达式。精度取决于Cron表达式，也就是最大精度可以到秒。
+     * 具体参考https://blog.csdn.net/yangshangwei/article/details/78174050
      */
-    public static BaseCalendar annualCalendarTest(){
+    public static BaseCalendar annualCalendarTest() {
 
         // 声明一个节假日 holidays，标明要排除的日期
         // 法定节日是以每年为周期的，所以使用AnnualCalendar而不是HolidayCalendar
         AnnualCalendar holidays = new AnnualCalendar();//法定节日是以年为周期，所以使用年时间
 
         Calendar wuyi = new GregorianCalendar();// 定义五一劳动节
-        wuyi.add(Calendar.MONTH ,5);
-        wuyi.add(Calendar.DATE , 1);
+        wuyi.add(Calendar.MONTH, 5);
+        wuyi.add(Calendar.DATE, 1);
 
         // 下一个15秒
         Date startTime = nextGivenSecondDate(null, 15);
 
         Calendar guoqing = new GregorianCalendar();// 定义十一国庆节
-        guoqing.add(Calendar.MONTH ,10);
-        guoqing.add(Calendar.DATE , 1);
+        guoqing.add(Calendar.MONTH, 10);
+        guoqing.add(Calendar.DATE, 1);
 
         Calendar myCoustm = new GregorianCalendar();// 定义自定义过滤的时间
         myCoustm.setTime(newDate().inMonthOnDay(9, 25).build());
@@ -194,15 +193,15 @@ public class SimpleTriggerRunner {
         ArrayList<Calendar> calendars = new ArrayList<>();
         calendars.add(wuyi);
         calendars.add(guoqing);
-        calendars.add(new GregorianCalendar(2018,9,9));
-        holidays.setDayExcluded(myCoustm,true);//单个设置排除
+        calendars.add(new GregorianCalendar(2018, 9, 9));
+        holidays.setDayExcluded(myCoustm, true);//单个设置排除
         //holidays.setDaysExcluded(calendars);//排除这两个日期
 
         return holidays;
     }
 
     // Trigger实现类(更多参考https://blog.csdn.net/yangshangwei/article/details/78172788)
-    public void testTrigger(){
+    public void testTrigger() {
         // Quartz有以下几种Trigger实现:
         // 1  .  SimpleTrigger  指定从某一个时间开始，以一定的时间间隔（单位是毫秒）执行的任务。它适合的任务类似于：9:00 开始，每隔1小时，执行一次。
         simpleSchedule()
@@ -219,23 +218,24 @@ public class SimpleTriggerRunner {
         dailyTimeIntervalSchedule()
                 .startingDailyAt(TimeOfDay.hourAndMinuteOfDay(9, 0)) //第天9：00开始 //startingDailyAt(TimeOfDay.hourAndMinuteOfDay(9, 0)) //第天9：00开始
                 .endingDailyAt(TimeOfDay.hourAndMinuteOfDay(16, 0)) //16：00 结束 //.endingDailyAfterCount(10) //每天执行10次，这个方法实际上根据 startTimeOfDay+interval*count 算出 endTimeOfDay
-                .onDaysOfTheWeek(MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY) //周一至周五执行 //onDaysOfTheWeek(MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY) //周一至周五执行
+                .onDaysOfTheWeek(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY) //周一至周五执行 //onDaysOfTheWeek(MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY) //周一至周五执行
                 .withIntervalInHours(1) //每间隔1小时执行一次 //withIntervalInHours(1) //每间隔1小时执行一次
                 .withRepeatCount(100) //最多重复100次（实际执行100+1次）
                 .build();
         // 4 .  CronTrigger 适合于更复杂的任务，它支持类型于Linux Cron的语法（并且更强大）。基本上它覆盖了以上三个Trigger的绝大部分能力（但不是全部）—— 当然，也更难理解。
         cronSchedule("0 30 9 ? * MON") // 每周一，9:30执行一次
                 .build();
-        weeklyOnDayAndHourAndMinute(MONDAY,9, 30) //等同于 0 30 9 ? * MON
+        weeklyOnDayAndHourAndMinute(MONDAY, 9, 30) //等同于 0 30 9 ? * MON
                 .build();
     }
+
     /**
      * 简单触发器运行
      */
-    public static void simpleScheduleTest(){
+    public static void simpleScheduleTest() {
         try {
             //从调度程序工厂获取一个调度程序的实例
-            Scheduler scheduler  = StdSchedulerFactory.getDefaultScheduler();
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
 
             //显示调度程序的名称（这里会展示我们在quartz.properties文件中的名称）
             System.out.println("scheduleName = " + scheduler.getSchedulerName());
@@ -252,7 +252,7 @@ public class SimpleTriggerRunner {
              *  这种机制也为后面使用Spring集成提供了便利
              */
             JobDetail jobDetail = newJob(SimpleJob.class).// 指定jobDetail 绑定的Job实现对象
-                    withIdentity("jobName1","group1")//jobDetail 名称和组名称
+                    withIdentity("jobName1", "group1")//jobDetail 名称和组名称
                     .usingJobData("name", "quartz") //定义属性
                     .build();
 
@@ -262,8 +262,8 @@ public class SimpleTriggerRunner {
                     .startNow()
                     .modifiedByCalendar("holidays")//更新Calendar
                     .withSchedule(simpleSchedule()//使用SimpleTrigger
-                                    .withIntervalInSeconds(2)//每隔2秒执行一次
-                                    .withRepeatCount(20)//运行次数。
+                            .withIntervalInSeconds(2)//每隔2秒执行一次
+                            .withRepeatCount(20)//运行次数。
                             //.repeatForever() //指定触发器将无限期重复,一直执行，奔腾到老不停歇
                             // misfire没有任何事情，都能保证100%运行OK。quartz提出了misfire的理论，让任务在错过之后，还能正常的运行。
                             .withMisfireHandlingInstructionFireNow()//（失效之后再恢复并马上执行,例如10点任务在10点15分执行了misfire，以后每次10点触发就会偏移15分钟）
@@ -288,41 +288,114 @@ public class SimpleTriggerRunner {
     }
 
     // 时间段的指定
-    public static BaseCalendar dailyCalendarTest(){
+    public static BaseCalendar dailyCalendarTest() {
         DailyCalendar dailyCalendar = new DailyCalendar("12:17:30", "12:18:20");
         dailyCalendar.setInvertTimeRange(true); // 时间反转，为true表示只有这次时间段才会被执行，为false表示排除这时间段
-        return  dailyCalendar;
+        return dailyCalendar;
     }
 
     // 重启Job
-    public void restartJob(){
+    public void restartJob() {
         //从调度程序工厂获取一个调度程序的实例
         try {
-            Scheduler scheduler  = StdSchedulerFactory.getDefaultScheduler();
-            List<String> triggerGroupNames =  scheduler.getTriggerGroupNames();//获取调度器中所有的触发器组
-            for(String item : triggerGroupNames){
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+            List<String> triggerGroupNames = scheduler.getTriggerGroupNames();//获取调度器中所有的触发器组
+            for (String item : triggerGroupNames) {
                 Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(item));
-                for(TriggerKey key : triggerKeys){
+                for (TriggerKey key : triggerKeys) {
                     //Trigger trigger = scheduler.getTrigger(key);
                     scheduler.resetTriggerFromErrorState(key);
-                    scheduler.rescheduleJob(key,newTrigger().withIdentity("sdfsd","dfs").build());
+                    scheduler.rescheduleJob(key, newTrigger().withIdentity("sdfsd", "dfs").build());
                 }
             }
             //暂停
             //schduler.pauseTrigger(TriggerKey triggerKey)
             scheduler.pauseJob(JobKey.jobKey("job1"));//停止触发器
-            Thread.sleep(1000*60*2);
+            Thread.sleep(1000 * 60 * 2);
             //恢复
             //scheduler.resumeJob(JobKey jobKey)则可恢复一个具体的job,
             scheduler.resumeTrigger(TriggerKey.triggerKey("cronTriggerJob1"));
-            Thread.sleep(1000*60*2);
+            Thread.sleep(1000 * 60 * 2);
             //删除
             //没有deleteTrigger的方法
             scheduler.deleteJob(JobKey.jobKey("job1"));
-            Thread.sleep(1000*60*2);
+            Thread.sleep(1000 * 60 * 2);
             //删除后再次尝试重启（会失效）
             scheduler.resumeTrigger(TriggerKey.triggerKey("cronTriggerJob1"));
         } catch (SchedulerException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 删除Job
+     *
+     * @param serviceName
+     * @param eventTypeId
+     */
+    public void deleteTask(String serviceName, Long eventTypeId) throws SchedulerException {
+        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+        String eventTypeIdStr = String.valueOf(eventTypeId);
+        final JobKey jobKey = JobKey.jobKey(eventTypeIdStr, serviceName);
+        final TriggerKey triggerKey = TriggerKey.triggerKey(eventTypeIdStr, serviceName);
+
+        try {
+            if (scheduler.checkExists(jobKey)) {
+                scheduler.pauseTrigger(triggerKey);// 停止触发器
+                scheduler.pauseJob(jobKey);// 停止任务
+                // // 移除触发器
+                //scheduler.unscheduleJob(triggerKey);//就是将triggerKey从triggersByKey,triggersByGroup,triggers,timeTriggers中移除
+                scheduler.deleteJob(jobKey);//// 删除任务
+            }
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modifyJobTime(TriggerKey triggerKey, String cron) throws SchedulerException {
+        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+        CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
+        String oldTime = trigger.getCronExpression();
+        if (!oldTime.equalsIgnoreCase(cron)) {
+            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();// 触发器
+            triggerBuilder.withIdentity(triggerKey);// 触发器名,触发器组
+            triggerBuilder.startNow();// 立即执行
+            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));// 触发器时间设定
+            trigger = (CronTrigger) triggerBuilder.build();// 创建Trigger对象
+            scheduler.rescheduleJob(triggerKey, trigger);// 修改一个任务的触发时间(按新的trigger重新设置job执行)
+
+        }
+    }
+
+    public void addTask(String serviceName, Long eventTypeId,String schedulerValue) throws SchedulerException {
+        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+        //log.info("add task serviceName:{},eventType:{},schedulerValue:{}", serviceName, eventTypeId, schedulerValue);
+        if (!CronExpression.isValidExpression(schedulerValue)) {
+            //throw new AlertException("expression is invalid");
+        }
+
+
+        final JobKey jobKey = JobKey.jobKey(String.valueOf(eventTypeId), serviceName);
+        final TriggerKey triggerKey = TriggerKey.triggerKey(String.valueOf(eventTypeId), serviceName);
+
+        //JobDetail job = JobBuilder.newJob(EventDataProcessJob.class)
+        JobDetail job = JobBuilder.newJob(SimpleJob.class)
+                .withIdentity(jobKey)
+                .build();
+
+        CronTrigger cronTrigger = TriggerBuilder.newTrigger()
+                .forJob(job)
+                .withIdentity(triggerKey)
+                .withSchedule(CronScheduleBuilder.cronSchedule(schedulerValue).withMisfireHandlingInstructionDoNothing())
+                .build();
+        // Tell quartz to schedule the job using our trigger
+        try {
+            if (scheduler.checkExists(jobKey)) {
+                //log.info("jobKey:[{}] is exists", jobKey);
+                scheduler.deleteJob(jobKey);
+            }
+            scheduler.scheduleJob(job, cronTrigger);
+        } catch (SchedulerException e) {
             e.printStackTrace();
         }
     }
