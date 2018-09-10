@@ -17,7 +17,7 @@ public class TestHandlerTaskLet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         System.out.println("TestHandlerTaskLet 执行");
-        //return RepeatStatus.FINISHED; // 返回true和false 来表示成功或者失败
-        return RepeatStatus.CONTINUABLE;
+        return RepeatStatus.FINISHED; // // FINISHED就是用来标识一个step的结束的
+        //return RepeatStatus.CONTINUABLE;//CONTINUABLE的作用就是标识一个step循环执行。
     }
 }

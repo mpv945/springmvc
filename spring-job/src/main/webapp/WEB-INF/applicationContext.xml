@@ -49,7 +49,8 @@
 
 
     <!--导入job的共同配置-->
-    <import resource="job/job-context.xml"/>
+    <!--<import resource="job/job-context.xml"/>-->
+    <import resource="classpath:job/job-context.xml"/>
     <!--导入job实例配置-->
     <!--<import resource="job/job-sample1.xml" />-->
     <!--<import resource="job/job-fileReader.xml" />
@@ -66,6 +67,9 @@
     <import resource="job/job-processor.xml" />
     <import resource="job/flow/job-flow.xml"/>
     <import resource="job/flow/job-conditional.xml"/>-->
+
+    <import resource="quartz/quartz-comm.xml" />
+    <import resource="classpath:batch/batch-job-testHandler.xml"/>
 
 
     <!-- 使用annotation定义事务 -->
@@ -96,12 +100,12 @@
      初始化脚本，主要用来创建spring-batch运行时的数据，应用生成环境时应该去掉此配置，手工创建下对应的表
      spring-batch本身job运行需要的表的创建脚本，spring-batch.jar中默认提供了各种数据库的DDL语句
       -->
-    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
+<!--    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
         <jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-mysql.sql" />
         <jdbc:script location="${batch.schema.script}" />
-        <!--数据库引擎的区别https://www.cnblogs.com/zhengah/p/4664297.html-->
+        &lt;!&ndash;数据库引擎的区别https://www.cnblogs.com/zhengah/p/4664297.html&ndash;&gt;
         <jdbc:script location="classpath:dbTables/tables_mysql_innodb.sql" />
-    </jdbc:initialize-database>
+    </jdbc:initialize-database>-->
 
     <!-- 引入batch目录下所有xml文件-->
     <!--<import resource="classpath:batch/*.xml"/>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--如果启动java.lang.NoSuchMethodError .......应该是spring support版本太高-->
+    <!--总管理类如果将lazy-init='false'那么容器启动就会执行调度程序,作业调度器 SchedulerFactoryBean 管理和配置触发器-->
+    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="false">
+        <!--作业调度器,list下可加入其他的调度器 -->
+        <property name="triggers">
+            <list>
+                <ref bean="testHandlerJobDetail" />
+                <ref bean="calendarIntervalTrigger"/>
+            </list>
+        </property>
+        <!-- 通过applicationContextSchedulerContextKey属性配置spring上下文 -->
+        <!--定义之后，产生的效果是：
+        this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);-->
+        <!--//获取Spring中的上下文
+        ApplicationContext appCtx = (ApplicationContext)JobExecutionContext.getScheduler().getContext().get("applicationContext");
+        jobService= (JobService)JobExecutionContext.getScheduler().getContext().getBean("jobService");-->
+        <property name="applicationContextSchedulerContextKey" value="applicationContext" />
+        <!--通过重写，就可以在Job里直接@Autowired注入spring 的bean对象-->
+        <!--<property name="jobFactory" ref="myJobFactory2"/>--><!--新版本有 SpringBeanJobFactory，估计解决bean注入的问题？-->
+        <!-- 设置自动启动 -->
+        <property name="autoStartup" value="true" />
+        <!--防止内存溢出-->
+        <property name="waitForJobsToCompleteOnShutdown" value="true" />
+        <!--必须的，QuartzScheduler 延时启动，应用启动完后 QuartzScheduler 再启动 -->
+        <property name="startupDelay" value="10" />
+        <!--可选，QuartzScheduler 启动时更新己存在的Job，这样就不用每次修改targetObject后删除qrtz_job_details表对应记录了 -->
+        <property name="overwriteExistingJobs" value="true" />
+        <!--<property name="configLocation" value="classpath:quartz-xinzhi.properties" />
+        <property name="dataSource" ref="dataSource" />-->
+    </bean>
+
+    <bean class="org.haijun.study.quartz.MyJobFactory" id="myJobFactory2"/>
+    <import resource="quartz-task.xml"/>
+</beans>

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author bruce.liu(mailto:jxta.liu@gmail.com)
  * 2013-3-20下午09:18:12
  */
-@Controller
+//@Controller
 public class JobLauncherController {
 	
 	private static final String JOB_NAME = "jobName";

@@ -10,14 +10,14 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
-    <servlet>
+<!--    <servlet>
         <servlet-name>batchapp</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>batchapp</servlet-name>
         <url-pattern>/</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
     <!--使用OpenEntityManagerInViewFilter来将一个JPAsession与一次完整的请求过程对应的线程相绑定-->
 <!--    <filter>
         <filter-name>springOpenEntityManagerInViewFilter</filter-name>

@@ -116,7 +116,11 @@ public class SimpleTriggerRunner {
                      *  0 15 10 L * ? 每月最后一天的10点15分运行                   0 15 10 ? * 6L 每月最后一个星期五的10点15分运行
                      *  0 15 10 ? * 6L 2018-2020 表示2018到2020每月最后星期五运行  0 15 10 ? * 6#3 每月第三个星期五的10点15分运行
                      */
-                    .withSchedule(cronSchedule("0/10 * * * * ?"))// cronSchedule 静态方法根据表达式字符串生成cron实例.每10秒触发一次
+                    .withSchedule(cronSchedule("0/10 * * * * ?")// cronSchedule 静态方法根据表达式字符串生成cron实例.每10秒触发一次
+                            .withMisfireHandlingInstructionIgnoreMisfires()//所有misfire的任务会马上执行
+                            .withMisfireHandlingInstructionDoNothing()//所有的misfire不管，执行下一个周期的任务
+                            .withMisfireHandlingInstructionFireAndProceed()//会合并部分的misfire,正常执行下一个周期的任务
+                    )
                     //.startAt(new Date())//不设置，默认为当前时间
                     //.endAt()//触发器结束时间，和开始时间可以组成执行范围
                     .modifiedByCalendar("cronCalendar")// 更新Calendar
@@ -197,7 +201,7 @@ public class SimpleTriggerRunner {
         return holidays;
     }
 
-    // Trigger实现类
+    // Trigger实现类(更多参考https://blog.csdn.net/yangshangwei/article/details/78172788)
     public void testTrigger(){
         // Quartz有以下几种Trigger实现:
         // 1  .  SimpleTrigger  指定从某一个时间开始，以一定的时间间隔（单位是毫秒）执行的任务。它适合的任务类似于：9:00 开始，每隔1小时，执行一次。
@@ -261,6 +265,10 @@ public class SimpleTriggerRunner {
                                     .withIntervalInSeconds(2)//每隔2秒执行一次
                                     .withRepeatCount(20)//运行次数。
                             //.repeatForever() //指定触发器将无限期重复,一直执行，奔腾到老不停歇
+                            // misfire没有任何事情，都能保证100%运行OK。quartz提出了misfire的理论，让任务在错过之后，还能正常的运行。
+                            .withMisfireHandlingInstructionFireNow()//（失效之后再恢复并马上执行,例如10点任务在10点15分执行了misfire，以后每次10点触发就会偏移15分钟）
+                            .withMisfireHandlingInstructionNextWithRemainingCount()//（失效之后不处理,错过之后，不用管,等下次触发器时间）
+                            .withMisfireHandlingInstructionNowWithExistingCount()//(效之后，再启动之后马上执行，但是起始次数清零，总次数=7+当前misfire执行次数-1
                     )
                     .build();
             //TriggerUtils 提供对Trigger计算能力
@@ -300,7 +308,21 @@ public class SimpleTriggerRunner {
                     scheduler.rescheduleJob(key,newTrigger().withIdentity("sdfsd","dfs").build());
                 }
             }
-        } catch (SchedulerException e) {
+            //暂停
+            //schduler.pauseTrigger(TriggerKey triggerKey)
+            scheduler.pauseJob(JobKey.jobKey("job1"));//停止触发器
+            Thread.sleep(1000*60*2);
+            //恢复
+            //scheduler.resumeJob(JobKey jobKey)则可恢复一个具体的job,
+            scheduler.resumeTrigger(TriggerKey.triggerKey("cronTriggerJob1"));
+            Thread.sleep(1000*60*2);
+            //删除
+            //没有deleteTrigger的方法
+            scheduler.deleteJob(JobKey.jobKey("job1"));
+            Thread.sleep(1000*60*2);
+            //删除后再次尝试重启（会失效）
+            scheduler.resumeTrigger(TriggerKey.triggerKey("cronTriggerJob1"));
+        } catch (SchedulerException | InterruptedException e) {
             e.printStackTrace();
         }
     }

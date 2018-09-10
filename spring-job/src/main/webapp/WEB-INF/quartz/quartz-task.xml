@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 声明一种cron模式的调度器  -->
+    <bean id="testHandlerJobDetail" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <!--定义Job的描述，绑定实现Job接口的实现-->
+            <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                <!--实现Job接口-->
+                <property name="jobClass" value="org.haijun.study.quartz.TestQuartzJob" />
+                <!--允许持久化 ，必须标识job是持久的,删除触发器的时候不被删除-->
+                <property name="durability" value="true" />
+                <!--requestsRecovery属性为true，则当Quartz服务被中止后，再次启动任务时会尝试恢复执行之前未完成的所有任务 -->
+                <property name="requestsRecovery" value="true" />
+                <!--类型为Map，为任务所对应的JobDataMap提供值。之所以需要提供这个属性，是因为除非你手工注册一 个编辑器，
+                你不能直接配置JobDataMap类型的值，所以Spring通过jobDataAsMap设置JobDataMap的值-->
+                <property name="jobDataAsMap">
+                    <map>
+                        <!--实际调用的任务实现类，必须实现org.quartz.Job接口 -->
+                        <entry key="jobRepository" value="jobRepository"/>
+                        <entry key="jobLauncher" value="jobLauncher"/>
+                        <entry key="batchJob" value="testHandlerJob"/>
+                    </map>
+                </property>
+            </bean>
+        </property>
+        <property name="cronExpression">
+            <value>0 */1  *  * * ?</value>
+        </property>
+    </bean>
+    <!-- CA签名文件发影像系统  -->
+<!--    <bean id="testHandlerQuartz" class="org.haijun.study.quartz.TestHandlerQuartz">
+        <property name="jobRepository" ref="jobRepository"/>
+        <property name="jobLauncher" ref="jobLauncher"/>
+        <property name="Job" ref="testHandlerJob"/>
+    </bean>-->
+
+    <!-- 定义调用对象和调用对象的方法(DCSPassengerDownTimer可以不实现Job接口，通过代理执行类的方法) -->
+    <bean id="dcsPassengerDownJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 调用的类 -->
+        <property name="targetObject" ref="dcsPassengerDownTimer"></property>
+        <!-- 调用类中的方法 -->
+        <property name="targetMethod" value="work"></property>
+    </bean>
+    <bean class="org.haijun.study.quartz.DCSPassengerDownTimer" id="dcsPassengerDownTimer"/>
+    <!-- 定义触发时间 -->
+    <bean id="dcsPassengerDownTime" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="dcsPassengerDownJob"></property>
+        <!-- 延迟30秒后，每隔35分钟执行一次 -->
+        <property name="startDelay" value="60000"></property>
+        <property name="repeatInterval" value="2100000"></property>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobRepository" value="jobRepository"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>
