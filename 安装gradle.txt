@@ -1,6 +1,7 @@
 Microsoft Windows用户
         下载 gradle-4.10.1-bin.zip 双击ZIP存档以显示内容。将内容文件夹gradle-4.10.1拖到新创建的C:\Gradle文件夹中。
-        在System Variables选择下Path，然后单击Edit。添加条目C:\Gradle\gradle-4.10.1\bin。单击“确定”保存。
+        在System Variables选择下Path，然后单击Edit。新建环境变量名GRADLE_HOME,变量值为Gradle的路径
+            添加条目%GRADLE_HOME%\bin  单击“确定”保存。 打卡cmd,运行: gradle -v
      Linux和MacOS用户  配置PATH环境变量以包含bin解压缩分发的目录，例如：
         export PATH=$PATH:/opt/gradle/gradle-4.10.1/bin
 
