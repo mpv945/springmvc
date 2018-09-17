@@ -1,6 +1,7 @@
 package org.haijun.study.batch;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.*;
@@ -15,8 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.Job;
 
 import javax.transaction.Transaction;
 import java.net.MalformedURLException;

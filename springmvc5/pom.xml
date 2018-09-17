@@ -24,6 +24,7 @@
         <hibernate.validator>5.4.1.Final</hibernate.validator>
         <hibernate.version>5.2.11.Final</hibernate.version>
         <log4j2.version>2.11.0</log4j2.version>
+        <querydsl.version>4.2.1</querydsl.version>
     </properties>
 
     <dependencies>
@@ -285,6 +286,20 @@
             <version>3.6.0</version>
         </dependency>
 
+        <!--querydsl生成-->
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+            <scope>provided</scope>
+        </dependency>
+       <!-- querydsl 支持jpa，还可以生成其他-->
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <version>${querydsl.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -323,8 +338,25 @@
             </resource>
         </resources>
 
-        <!--加载插件-->
+        <!--加载插件  执行编译命令：具体参考http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html-->
         <plugins>
+            <plugin>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+                <version>1.1.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/generated-sources/java</outputDirectory>
+                            <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!--运行插件-->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
