@@ -25,7 +25,7 @@
     </File>
     <!--fileName：日志存储路径
     filePattern：历史日志封存路径。其中%d{yyyyMMddHH}表示了封存历史日志的时间单位（目前单位为小时，
-    yyyy表示年，MM表示月，dd表示天，HH表示小时，mmS表示分钟，ss表示秒，SS表示毫秒）。注意后缀，log4j2自动识别zip等后缀，表示历史日志需要压缩。-->
+    yyyy表示年，MM表示月，dd表示天，HH表示小时，mm表示分钟，ss表示秒，SSS表示毫秒）。注意后缀，log4j2自动识别zip等后缀，表示历史日志需要压缩。-->
     <RollingRandomAccessFile name="FastSynchro" fileName="${LOG_HOME}/${PROJECT_NAME}.log" filePattern="${LOG_HOME}/backup/${PROJECT_NAME}.log.%d{yyyyMMddHH}.zip">
       <Filters>
         <!--level，表示最低接受的日志级别，博客配置的为INFO，即我们期望打印INFO级别以上的日志。

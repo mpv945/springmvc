@@ -273,6 +273,7 @@ public class ThymeleafConfig implements WebMvcConfigurer { // implements WebMvcC
     @Override
     public Validator getValidator() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        //validator.setProviderClass(HibernateValidator.class);
         validator.setValidationMessageSource(messageSource());
         return validator;
     }
