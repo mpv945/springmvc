@@ -29,5 +29,22 @@ PasswordValidator validator = new PasswordValidator(
   resolver, new LengthRule(8, 16), new WhitespaceRule());
 
 spirng 登陆和注册密码策略
+@EnableWebSecurity
+//@Order(ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
+@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+https://www.baeldung.com/spring-security-csrf
+https://snyk.io/blog/spring-boot-security-best-practices
+
+freemarker 生成前端 https://blog.csdn.net/tczhoulan/article/details/79312184
+
 https://www.baeldung.com/spring-security-registration-verification-email
 https://www.baeldung.com/spring-security-registration-password-encoding-bcrypt
+
+xss 解决方案https://juejin.im/entry/5af526be6fb9a07ab774410a
+https://zdran.com/20180511.html
+
+支持https  #签发ECC证书请使用以下命令acme.sh --issue --dns dns_cx -d example.com -d *. example.com --keylength ec-256
+Nginx 使用 Let's Encrypt 配置 HTTPS 和 HTTP/2 https://www.restran.net/2017/01/24/nginx-letsencrypt-https/
+https://segmentfault.com/a/1190000017194280
+https://zhih.me/acme-sh-guide/
+https://www.rainng.com/acmesh-le/

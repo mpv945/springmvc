@@ -31,6 +31,7 @@ public class ValidatorMockMvcTest {
                                 .param("terms", "on")
                 )
                 .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(2))// 错误的个数
                 .andExpect(model().attributeHasFieldErrors("user", "password", "confirmPassword"))
                 .andExpect(status().isOk());
     }
