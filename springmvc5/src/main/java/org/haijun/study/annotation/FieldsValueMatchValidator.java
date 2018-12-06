@@ -34,12 +34,19 @@ public class FieldsValueMatchValidator implements ConstraintValidator<FieldsValu
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
+        boolean isValid = false;
         Object fieldValue = new BeanWrapperImpl(value).getPropertyValue(field);
         Object fieldMatchValue = new BeanWrapperImpl(value).getPropertyValue(fieldMatch);
         if (fieldValue != null) {
-            return fieldValue.equals(fieldMatchValue);
+            isValid = fieldValue.equals(fieldMatchValue);
         } else {
-            return fieldMatchValue == null;
+            isValid = fieldMatchValue == null;
         }
+        //将错误信息绑定到verifyField上，否则错误信息是对应整个模型类的，无法在密码验证的位置显示
+        String messageTemplate = context.getDefaultConstraintMessageTemplate();
+        context.buildConstraintViolationWithTemplate(messageTemplate).addPropertyNode(fieldMatch)
+                .addConstraintViolation();
+
+        return isValid;
     }
 }

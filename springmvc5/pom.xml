@@ -188,6 +188,18 @@
             <artifactId>hibernate-validator</artifactId>
             <version>${hibernate.validator}</version>
         </dependency>
+        <!--支持自定义密码接口-->
+        <dependency>
+            <groupId>org.passay</groupId>
+            <artifactId>passay</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        <!--加密端点，做历史记录密码排除-->
+        <dependency>
+            <groupId>org.cryptacular</groupId>
+            <artifactId>cryptacular</artifactId>
+            <version>1.2.2</version>
+        </dependency>
 
         <!--aop 切面编程支持-->
         <dependency>
